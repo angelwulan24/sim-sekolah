@@ -106,6 +106,48 @@ class StudentArea extends CI_Controller {
 		echo json_encode($snapToken);
 	}
 
+	public function finish_payment(){
+		$order_id = $this->input->post('order_id');
+		if(!$order_id){
+			echo json_encode(['error' => 'Order ID is required']);
+			return;
+		}
+
+		$this->load->library('MidtransGateway');
+		$status = $this->midtransgateway->status($order_id);
+
+		if(isset($status['transaction_status'])){
+			$trans_status = $status['transaction_status'];
+			$fraud_status = isset($status['fraud_status']) ? $status['fraud_status'] : '';
+			$gross_amount = $status['gross_amount'];
+
+			if ($trans_status == 'capture') {
+				if ($fraud_status == 'challenge') {
+					// Challenge
+					echo json_encode(['status' => 'pending', 'message' => 'Payment challenged']);
+				} else {
+					$this->_payment_success($order_id, $gross_amount);
+					echo json_encode(['status' => 'success', 'message' => 'Payment verified']);
+				}
+			} else if ($trans_status == 'settlement') {
+				$this->_payment_success($order_id, $gross_amount);
+				echo json_encode(['status' => 'success', 'message' => 'Payment verified']);
+			} else if ($trans_status == 'pending') {
+				echo json_encode(['status' => 'pending', 'message' => 'Payment pending']);
+			} else if ($trans_status == 'deny') {
+				echo json_encode(['status' => 'failed', 'message' => 'Payment denied']);
+			} else if ($trans_status == 'expire') {
+				echo json_encode(['status' => 'failed', 'message' => 'Payment expired']);
+			} else if ($trans_status == 'cancel') {
+				echo json_encode(['status' => 'failed', 'message' => 'Payment canceled']);
+			} else {
+				echo json_encode(['status' => 'unknown', 'message' => 'Unknown status']);
+			}
+		} else {
+			echo json_encode(['error' => 'Failed to check status']);
+		}
+	}
+
 	public function notification(){
 		$json_result = file_get_contents('php://input');
 		$result = json_decode($json_result);

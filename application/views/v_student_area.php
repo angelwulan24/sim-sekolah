@@ -132,8 +132,29 @@
                 if(response.token){
                     snap.pay(response.token, {
                         onSuccess: function(result){
-                            alert('Pembayaran Berhasil!');
-                            location.reload();
+                            // Call finish_payment endpoint
+                            $.ajax({
+                                url: '<?= base_url() ?>StudentArea/finish_payment',
+                                type: 'POST',
+                                data: {
+                                    order_id: result.order_id,
+                                    type: 'manual' 
+                                },
+                                dataType: 'json',
+                                success: function(validation){
+                                    if(validation.status == 'success'){
+                                        alert('Pembayaran Berhasil dan Terverifikasi!');
+                                        location.reload();
+                                    } else {
+                                        alert('Pembayaran berhasil di Midtrans, tetapi gagal verifikasi di sistem: ' + validation.message);
+                                        location.reload();
+                                    }
+                                },
+                                error: function(){
+                                    alert('Pembayaran berhasil, tetapi gagal menghubungi server untuk verifikasi.');
+                                    location.reload();
+                                }
+                            });
                         },
                         onPending: function(result){
                             alert('Pembayaran Sedang Diproses. Silahkan selesaikan pembayaran.');
