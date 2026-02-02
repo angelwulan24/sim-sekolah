@@ -1,5 +1,5 @@
 # sim-sekolah
-Sistem Informasi Manajemen Keuangan Sekolah
+Sistem Informasi Manajemen Keuangan Sekolah Angelina Wulandari
 
 <p>Sistem informasi manajemen keuangan sekolah ini merupakan sistem yang dipakai untuk mengontrol keuangan sekolah dengan custom sesuia dengan permintaan sekolah sebelumnya
 <h6>Data Master</h6>
