@@ -12,6 +12,9 @@ class Auth extends CI_Controller {
 	public function index(){
 
 			if ($this->session->userdata('id')){
+			if($this->session->userdata('role') == 3){
+				redirect('StudentArea','refresh');
+			}
 			redirect('Beranda','refresh');
 		}
 
@@ -43,7 +46,11 @@ class Auth extends CI_Controller {
 					);
 				$this->session->set_userdata( $data );
 					$this->M_General->cek_laporan();
-				redirect('Beranda','refresh');
+				if($user['role'] == 3){
+					redirect('StudentArea','refresh');
+				} else {
+					redirect('Beranda','refresh');
+				}
 				}
 				else{
 					$this->session->set_flashdata('message','<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>  Password Salah</div>');

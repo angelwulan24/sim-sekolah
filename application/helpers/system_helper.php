@@ -6,7 +6,14 @@
 
         if (empty($CI->session->userdata('id'))){
             redirect('Auth/logout','refresh');
-        }   
+        } 
+        
+        // Restrict Student Access
+        $role = $CI->session->userdata('role');
+        $class = $CI->router->fetch_class();
+        if ($role == 3 && $class != 'StudentArea' && $class != 'Auth') {
+            redirect('StudentArea', 'refresh');
+        }
     }
 
     function activate_menu($controller){

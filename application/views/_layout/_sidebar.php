@@ -1,6 +1,7 @@
 <?php $aktif = $this->uri->segment(1); ?>
 <ul class="sidebar-menu" data-widget="tree">
     <li class="header">MENU UTAMA</li>
+    <?php if($this->session->userdata('role') != 3) { ?>
     <li class = "<?php echo activate_menu('Beranda')?>"><a href="<?= base_url()?>Beranda"><i class="fa fa-dashboard"></i> <span>Beranda</span><span class="pull-right-container"></span></a></li>
     <li class="treeview <?php if ($aktif == 'Guru' || $aktif == 'Siswa' || $aktif == 'Kelas' || $aktif == 'Transaksi' || $aktif == 'Tanggal') echo 'active' ?>">
         <a href="#"><i class="fa fa-database"></i> <span>Data Master</span>
@@ -37,4 +38,7 @@
         </ul>
     </li>
     <li class = "<?php echo activate_menu('Laporan')?>"><a href="<?= base_url()?>Laporan"><i class="fa fa-line-chart"></i> <span>Laporan</span><span class="pull-right-container"></span></a></li>
+    <?php } else { ?>
+        <li class = "<?php echo activate_menu('StudentArea')?>"><a href="<?= base_url()?>StudentArea"><i class="fa fa-money"></i> <span>Tagihan Saya</span><span class="pull-right-container"></span></a></li>
+    <?php } ?>
 </ul>
