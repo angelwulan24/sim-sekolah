@@ -104,12 +104,56 @@
     </div>
 </div>
 
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="YOUR_CLIENT_KEY"></script>
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="<?= $midtrans_client_key ?>"></script>
 <script>
     $('.pay-button').click(function(){
         var bulan = $(this).data('bulan');
         var nominal = $(this).data('nominal');
-        alert('Fitur pembayaran untuk ' + bulan + ' akan diimplementasikan segera (Midtrans Integration).');
-        // Here you would call an endpoint to get Snap Token
+        var button = $(this);
+        
+        button.text('Loading...').attr('disabled', true);
+        
+        $.ajax({
+            url: '<?= base_url() ?>StudentArea/get_token',
+            type: 'POST',
+            data: {
+                bulan: bulan,
+                nominal: nominal
+            },
+            dataType: 'json',
+            success: function(response){
+                button.text('Bayar').attr('disabled', false);
+                
+                if(response.error){
+                    alert(response.error);
+                    return;
+                }
+                
+                if(response.token){
+                    snap.pay(response.token, {
+                        onSuccess: function(result){
+                            alert('Pembayaran Berhasil!');
+                            location.reload();
+                        },
+                        onPending: function(result){
+                            alert('Pembayaran Sedang Diproses. Silahkan selesaikan pembayaran.');
+                            location.reload(); 
+                        },
+                        onError: function(result){
+                            alert('Pembayaran Gagal!');
+                        },
+                        onClose: function(){
+                            // alert('Anda menutup popup tanpa menyelesaikan pembayaran');
+                        }
+                    });
+                } else {
+                    alert('Gagal mendapatkan token pembayaran.');
+                }
+            },
+            error: function(){
+                button.text('Bayar').attr('disabled', false);
+                alert('Terjadi kesalahan sistem.');
+            }
+        });
     });
 </script>

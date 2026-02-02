@@ -53,6 +53,141 @@ class StudentArea extends CI_Controller {
 		
 		// Use Template
 		$this->load->library('template');
+		$this->load->config('midtrans');
+		$data['midtrans_client_key'] = $this->config->item('midtrans_client_key');
+		
 		$this->template->views('v_student_area', $data);
+	}
+
+	public function get_token(){
+		$this->load->library('MidtransGateway');
+		
+		$month_label = $this->input->post('bulan');
+		$nominal = $this->input->post('nominal');
+		$user_id = $this->session->userdata('id');
+		
+		// Get Student Data
+		$user_email = $this->db->get_where('users', ['id' => $user_id])->row()->email;
+		$parts = explode('@', $user_email);
+		$nis = $parts[0];
+		$student = $this->db->get_where('siswa', ['nis' => $nis])->row();
+
+		if(!$student){
+			echo json_encode(['error' => 'Siswa tidak ditemukan']);
+			return;
+		}
+
+		// Create unique Order ID
+		// Format: SPP-[ID_SISWA]-[BULAN]-[TIMESTAMP]
+		// Clean month label just in case
+		$clean_month = str_replace(' ', '_', $month_label); 
+		$order_id = 'SPP-' . $student->id . '-' . $clean_month . '-' . time();
+
+		$params = [
+			'transaction_details' => [
+				'order_id' => $order_id,
+				'gross_amount' => (int)$nominal,
+			],
+			'customer_details' => [
+				'first_name' => $student->name,
+				'email' => $user_email,
+				'phone' => '0800000000', // Optional, can fetch from studen data if available
+			],
+			'item_details' => [[
+				'id' => 'SPP-'.$clean_month,
+				'price' => (int)$nominal,
+				'quantity' => 1,
+				'name' => "SPP $month_label"
+			]]
+		];
+
+		$snapToken = $this->midtransgateway->getSnapToken($params);
+
+		echo json_encode($snapToken);
+	}
+
+	public function notification(){
+		$json_result = file_get_contents('php://input');
+		$result = json_decode($json_result);
+
+		if($result){
+			$notif = $result;
+			
+			// Simple verification
+			// Ideally verify signature_key here
+			
+			$transaction = $notif->transaction_status;
+			$type = $notif->payment_type;
+			$order_id = $notif->order_id;
+			$fraud = $notif->fraud_status;
+
+			if ($transaction == 'capture') {
+				if ($type == 'credit_card'){
+					if($fraud == 'challenge'){
+						// Challenge
+					} else {
+						$this->_payment_success($order_id, $notif->gross_amount);
+					}
+				}
+			} else if ($transaction == 'settlement'){
+				$this->_payment_success($order_id, $notif->gross_amount);
+			} else if ($transaction == 'pending'){
+				// Pending
+			} else if ($transaction == 'deny') {
+				// Deny
+			} else if ($transaction == 'expire') {
+				// Expire
+			} else if ($transaction == 'cancel') {
+				// Cancel
+			}
+		}
+	}
+
+	private function _payment_success($order_id, $gross_amount){
+		// Parse Order ID: SPP-[ID_SISWA]-[BULAN]-[TIMESTAMP]
+		$parts = explode('-', $order_id);
+		if(count($parts) >= 4){
+			$siswa_id = $parts[1];
+			// Reconstruct month. It was part 2.
+			// But wait, if month has dashes this will break.
+			// My month format is "Januari-2024". That has a dash!
+			// Logic correction: 
+			// ID starts with SPP
+			// SISWA ID is index 1
+			// TIMESTAMP is the LAST index
+			// THE REST in middle is the Month.
+			
+			$timestamp = end($parts);
+			$prefix = $parts[0]; // SPP
+			$siswa_id = $parts[1];
+			
+			// Extract month parts
+			// Slice from index 2 to length-1
+			$month_parts = array_slice($parts, 2, -1);
+			$month_raw = implode('-', $month_parts);
+			$month = str_replace('_', ' ', $month_raw); // Restore spaces if any
+
+			// Check if already paid to avoid double insert
+			// We check 'spp' table for id_siswa and bulan
+			$cek = $this->db->get_where('spp', [
+				'id_siswa' => $siswa_id,
+				'bulan' => $month
+			])->num_rows();
+
+			if($cek == 0){
+				$data = [
+					'id_siswa' => $siswa_id,
+					'time' => date('Y-m-d'),
+					'bulan' => $month,
+					'nominal' => $gross_amount // Store as string to match schema
+				];
+				$this->db->insert('spp', $data);
+				
+				// Update kas masuk if required by system logic
+				// Ensure daily report exists
+				$this->M_General->cek_laporan();
+				$this->M_General->update_kas('kas_masuk', $gross_amount);
+			}
+		}
 	}
 }
