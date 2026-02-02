@@ -45,7 +45,7 @@
             </aside>
             <div class="content-wrapper">
                 <section class="content-header">
-                    <h1> <i class="<?php echo $icon;?>"></i> Data <?php echo $judul; ?></h1>
+                    <h1> <i class="fa fa-dashboard"></i> Data Siswa</h1>
                     <?php echo $this->breadcrumb->output(); ?>
                 </section>
                 <section class="content">
