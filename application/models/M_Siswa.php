@@ -5,7 +5,7 @@ class M_Siswa extends CI_Model {
 
 	function getAllData($kls = '')
 	{
-		$this->datatables->select('id,name,nis,status,sex,wali');
+		$this->datatables->select('id,name,nis,status,sex,wali,telpon');
 		$this->datatables->from('siswa');
 
 		if ($kls !== null && $kls !== '') {

@@ -73,9 +73,9 @@ if (!empty($isi['pendaftaran'])) {
                 </tbody>
 <?php }
 
- if (!empty($isi['snack'])) {
+ if (!empty($isi['buku'])) {
  ?>
-				<thead><tr><th colspan="4" style="size: 16px; background-color: #ffff00;">UANG SNACK</th></tr></thead>
+				<thead><tr><th colspan="4" style="size: 16px; background-color: #ffff00;">UANG BUKU/SNACK</th></tr></thead>
                 <tbody>
                     <tr>
                       <th>Nama Siswa</th>
@@ -84,7 +84,7 @@ if (!empty($isi['pendaftaran'])) {
                     </tr>
 			<?php 
 			$total = 0;
-			foreach ($isi['snack'] as $k) { ?>
+			foreach ($isi['buku'] as $k) { ?>
                     <tr>
                       <td><?=$k->name?></td>
                       <td><?=$k->jumlah?></td>
@@ -102,9 +102,9 @@ if (!empty($isi['pendaftaran'])) {
                 </tbody>
 <?php }
 
- if (!empty($isi['catering'])) {
+ if (!empty($isi['baju'])) {
  ?>
-				<thead><tr><th colspan="4" style="size: 16px; background-color: #ffff00;">UANG CATERING</th></tr></thead>
+				<thead><tr><th colspan="4" style="size: 16px; background-color: #ffff00;">UANG BAJU/CATERING</th></tr></thead>
                 <tbody>
                     <tr>
                       <th>Nama Siswa</th>
@@ -113,7 +113,7 @@ if (!empty($isi['pendaftaran'])) {
                     </tr>
             <?php 
 			$total = 0;
-			foreach ($isi['catering'] as $k) { ?>
+			foreach ($isi['baju'] as $k) { ?>
                     <tr>
                       <td><?=$k->name?></td>
                       <td><?=$k->jumlah?></td>

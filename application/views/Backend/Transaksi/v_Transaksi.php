@@ -1,9 +1,9 @@
 <div class="col-xs-12">
     <div class="box box-primary">
         <div class="box-header">
-           <!--  <div class="pull-right">
+            <div class="pull-right">
                 <a href="#" onclick="Tambah()" class="btn btn-primary">Tambah Data </a>
-            </div> -->
+            </div>
         </div>
         <div class="box-body">
             <div class="table-responsive">      
@@ -14,7 +14,7 @@
                       <th>Kode Transaksi</th>
                       <th>Nama Transaksi</th>
                       <th>Nominal</th>
-                      <th width="100">Aksi</th>
+                      <th width="200">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -246,6 +246,34 @@
         $('#status').attr('disabled',false);
         $('#nama').attr('disabled',false);
         $('.modal-title').text('Tambah Data');
+    }
+
+    function Hapus(id){
+        Swal({
+            title: 'Ingin menghapus data?',
+            text: "Data yang dihapus tidak dapat dikembalikan!",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Hapus!'
+        }).then((result) => {
+            if (result.value) {
+                $.ajax({
+                    url: "<?=base_url($this->uri->segment(1).'/Hapus')?>",
+                    type:"POST",
+                    data: {id:id},
+                    dataType:"JSON",
+                    success:function(data){
+                        reload();
+                        sweet('Terhapus!','Data berhasil dihapus.','success');
+                    },
+                    error: function (jqXHR, textStatus, errorThrown){
+                        sweet('Oops...','Data gagal dihapus','error');
+                    }
+                });
+            }
+        });
     }
 
     function Ubah(id){

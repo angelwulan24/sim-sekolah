@@ -1,7 +1,7 @@
 <div class="col-xs-12">
 	<div class="box box-primary">
         <div class="box-header">
-            <a href="#" onclick="Detail()" class="btn btn-info btn-sm">Detail </a>
+
             <div class="pull-right">
             	<a href="#" onclick="Tambah()" class="btn btn-primary btn-sm">Tambah Data </a>
             </div>

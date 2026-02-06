@@ -6,35 +6,34 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
 
 ?>
 
-<div class="col-xs-12"> 
+<div class="col-xs-12">
     <div class="box box-primary">
         <div class="box-header">
-            <input type="hidden" id ="id" value="<?=$id?>">
-            <strong> Nama Siswa : <?=$na['name']?></strong> 
-            <div class="pull-right">
+            <!-- <input type="hidden" id="id" value="<?=$id?>"> -->
+           <strong> Nama Siswa : <?=$na['name']?> </strong> 
+           <div class="pull-right">
                 <a href="#" onclick="Tambah()" class="btn btn-info btn-sm">Ubah </a>
-            </div> 
+        </div>
         </div>
         <div class="box-body">
             <div class="table-responsive">      
-                <table id="list-detail" class="table tabel table-bordered table-hover">
+                <table id="list-detail" class="table table-bordered table-hover">
                     <thead>
                         <tr>
                       <th style="width: 10px;">No</th>
                       <th>Waktu Pembayaran</th>
-                      <th>Tanggal Catering</th>
+                      <th>Tanggal Buku</th>
                       <th>Nominal</th>
                         </tr>
                     </thead>
                     <tbody>
-                      
+
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
-
 
 <!-- Modal Tambah -->
 <div class="modal fade" id="modal-form">
@@ -63,11 +62,12 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
     </div>
 </div>
 
+
 <script type="text/javascript">
 
     var label;
     var table;
-    var siswa = $('#id').val();
+    var siswa =  "<?=$id?>";
     $(document).ready(function(){
         $.fn.dataTableExt.oApi.fnPagingInfo = function(oSettings){
             return {
@@ -79,7 +79,17 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
                 "iPage": Math.ceil(oSettings._iDisplayStart / oSettings._iDisplayLength),
                 "iTotalPages": Math.ceil(oSettings.fnRecordsDisplay() / oSettings._iDisplayLength)
             };
+        };
+
+        // Safely destroy existing DataTable
+        try {
+            if (table && $.fn.DataTable.isDataTable('#list-detail')) {
+                table.destroy();
+            }
+        } catch(e) {
+            console.log('No existing DataTable to destroy');
         }
+
        table =  $("#list-detail").DataTable({
             initComplete: function() {
                 var api = this.api();
@@ -113,13 +123,15 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
             },
             columns: [
                 {
-                    "data": "id"
+                    "data": "id",
+                    "orderable": false,
+                    "searchable": false
                 },
                 {"data": "tanggal"},
                 {"data": "waktu"},
-                {"data": "nominal",render: $.fn.dataTable.render.number('.',',','')},
+                {"data": "nominal",render: $.fn.dataTable.render.number('.',',','')}
             ],
-            order: [[2, 'desc']],
+            order: [[0, 'asc']],
             rowId: function(a){
                 return a;
             },
@@ -132,7 +144,7 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
             }
         });
 
-        $('#form').validate({
+       $('#form').validate({
             errorElement: 'div',
             errorClass: 'help-block',
             focusInvalid: false,
@@ -193,7 +205,9 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
     });
 
     function reload(){
-        table.ajax.reload(null,false);
+        if (table && $.fn.DataTable.isDataTable('#list-detail')) {
+            table.ajax.reload(null,false);
+        }
     }
     function sweet(judul,text,tipe){
         Swal({
@@ -201,6 +215,11 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
             text: text,
             type: tipe
         });
+    }
+
+    function Detail(){
+
+         document.location.href= "<?= base_url($this->uri->segment(1).'/Detail')?>";
     }
 
     function Tambah(){
@@ -211,4 +230,5 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
         $('#modal-form').modal('show');
         $('.modal-title').text('Tambah Data');
     }
+
 </script>

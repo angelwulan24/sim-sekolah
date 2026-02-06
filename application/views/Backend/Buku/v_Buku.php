@@ -210,7 +210,7 @@
 		 				$('#simpan').attr('disabled',false);
        
     						reload();
-    						sweet('Sukses','Pembayaran Uang Snack Berhasil','success');
+    						sweet('Sukses','Pembayaran Uang Buku Berhasil','success');
 
 					}
 				});
@@ -259,11 +259,11 @@
         $('.form-group').removeClass('has-error');
         $('.help-block').empty();
         $('#modal-form').modal('show');
-        $('.modal-title').text('Form Pembayaran Uang Snack'); 
+        $('.modal-title').text('Form Pembayaran Uang Buku'); 
 
         $.ajax({
 
-            url: "<?=base_url($this->uri->segment(1).'/GetSnack')?>",
+            url: "<?=base_url($this->uri->segment(1).'/GetBuku')?>",
             type:"GET",
             dataType:"JSON",
             success:function(data){

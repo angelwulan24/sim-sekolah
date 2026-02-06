@@ -93,4 +93,9 @@ class Transaksi extends CI_Controller {
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
+	function Hapus(){
+        $this->M_General->delete($this->table,'id',$this->input->post('id'));
+        $data['status'] = TRUE;
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+	}
 }

@@ -19,23 +19,35 @@ class Cetak extends CI_Controller{
       $uji = 0;
       $pend = 0;
       $gaj = 0;
-      foreach ($data['catering'] as $k) {
-        $cat +=$k->total;
+      if(!empty($data['baju'])){
+        foreach ($data['baju'] as $k) {
+            $cat +=$k->total;
+        }
       }
-      foreach ($data['snack'] as $k) {
-        $snak +=$k->total;
+      if(!empty($data['buku'])){
+        foreach ($data['buku'] as $k) {
+            $snak +=$k->total;
+        }
       }
-      foreach ($data['spp'] as $k) {
-        $sp +=$k->nominal;
+      if(!empty($data['spp'])){
+        foreach ($data['spp'] as $k) {
+            $sp +=$k->nominal;
+        }
       }
-      foreach ($data['ujian'] as $k) {
-        $uji +=$k->nominal;
+      if(!empty($data['ujian'])){
+        foreach ($data['ujian'] as $k) {
+            $uji +=$k->nominal;
+        }
       }
-      foreach ($data['pendaftaran'] as $k) {
-        $pend +=$k->nominal;
+      if(!empty($data['pendaftaran'])){
+        foreach ($data['pendaftaran'] as $k) {
+            $pend +=$k->nominal;
+        }
       }
-      foreach ($data['gaji'] as $k) {
-        $gaj +=$k->gaji;
+      if(!empty($data['gaji'])){
+        foreach ($data['gaji'] as $k) {
+            $gaj +=$k->gaji;
+        }
       }
 
       $pdf = new FPDF('p','mm','A4');
@@ -44,7 +56,7 @@ class Cetak extends CI_Controller{
        
        $pdf->Cell(3,5,'',0,1);
        // $pdf->Image(base_url().'/assets/dist/img/j.png', 177, 10,29);
-       $pdf->Image(base_url().'/assets/dist/img/ikhlas.png', 2, 10,33);
+       $pdf->Image(base_url().'/assets/dist/img/MI.png', 10, 10,33);
        $pdf->Cell(3,-5,'',0,1);
        $pdf->SetFont('TIMES','B',14);
        $pdf->Cell(189, 5, 'KEMENTRIAN AGAMA REPUBLIK INDONESIA', 0, 1, 'C');
@@ -93,11 +105,13 @@ class Cetak extends CI_Controller{
 
 $t=6;
 $pem = 0;
+if(!empty($data['pemasukan'])){
 foreach($data['pemasukan'] as $r){
        $pem+=$r->nominal;
        $pdf->Cell(7, 5,$t++, 1, 0,'C');
        $pdf->Cell(132, 5, $r->keterangan, 1, 0);
        $pdf->Cell(53, 5,rupiah($r->nominal), 1, 1,'R');
+}
 }
   $sum = $pem+$cat+$snak+$sp+$uji+$pend;
        $pdf->SetFont('TIMES','B',11);
@@ -119,11 +133,13 @@ foreach($data['pemasukan'] as $r){
        $pdf->Cell(53, 5,rupiah($gaj), 1, 1,'R');
 $t=2;
 $pen = 0;
+if(!empty($data['pengeluaran'])){
 foreach($data['pengeluaran'] as $r){
        $pen+=$r->nominal;
        $pdf->Cell(7, 5,$t++, 1, 0,'C');
        $pdf->Cell(132, 5, $r->keterangan, 1, 0);
        $pdf->Cell(53, 5,rupiah($r->nominal), 1, 1,'R');
+}
 }
        $sum1 = $gaj+$pen;
        $pdf->SetFont('TIMES','B',11);
@@ -219,8 +235,6 @@ foreach($data['pengeluaran'] as $r){
        $pdf->Cell(35, 9, 'Drs. Soetarmo, M.Pd.', 0, 0);
        $pdf->Output();  
 
-        $data['status'] = TRUE;
 
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 }

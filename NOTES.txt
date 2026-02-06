@@ -1,0 +1,65 @@
+dari system yang udah jadi, ada beberapa fitur yang harus dikembangkan:
+1. fitur hak akses, system belum bisa di akses oleh orang tua murid dan juga kepala sekolah, hanya bisa oleh admin saja
+2. karna belum bisa login orangtua/murid, maka belum bisa melakukan pembayaran online
+3. integrasi dengan wa atau system pengingat nya
+4. tambahin foto untuk siswa dan guru
+5. tambahin no telp di table data siswa untuk fitur pengingat dan pembayaran berhasil
+6. tambahin menu/table tunggakan
+7. cetak bukti pembayaran siswa di admin dan siswa
+8. edit semua table pembayaran jadi kaya myunpam
+9. belum bisa tambah atau ubah jenis transaksi,cuma bisa ubah nominal nya aja
+10. tambah button edit(done) dan share ke wa untuk menu tanggal merah +++ tambahin menu ini ke dashboard siswa
+11. setelah menambahkan data siswa di menu pendaftaran, pop up jadi bug
+12. desain pdf cetak bukti pembayarannya diubah jadi lebih professional
+13. tombol cetak di menu laporpan ngga berfungsi
+14. fitur kenaikkan kelas
+15. uang sncak dan uang catering muncul pesan error table
+16. tombol cetak laporan keseluruhan belum berfungsi
+17. ubah pdf (cetak) di menu laporan - Detail
+18.alur di menu data kelas untuk data siswanya bingung
+
+bingung:
+1. gimana cara upload image user
+
+
+minta data ke sekolah
+1. data siswa
+2. data guru
+3. data kelas
+4. jenis jenis bayaran selalu (spp, pendaftaran, baju, buku, dll)
+5. pembayaran gaji guru (akumulasi dari apa? jam mengajar kah? apakah sama semua atau beda beda)
+6. data data untuk pembuatan akun midtrans
+
+
+
+SISTEM YT
+1. SIM MADRASAH (sim-sekolah)
+https://www.youtube.com/watch?v=EgPI3_zb6IE&t=307s
+* pw : 662022
+* admin@gmail.com
+* admin
+
+2. SIPPM (sippm-lite)
+* pt@gmail.com
+* pt@gmail.com
+
+3. SPP-Digital-master
+* angelina@gmail.com
+* Angelina
+
+4. SPPS-APP
+https://www.youtube.com/watch?v=_EGVKdtG3jw&t=659s
+* pw : spps3636
+* 
+
+
+
+###########NOTE######
+1. hash untuk kata sandi system pake https://bcrypt-generator.com/
+2. simulasi pembayaran online pake simulator midtrans https://simulator.sandbox.midtrans.com/
+3. hosting di link https://hostdata.id/portal/index.php?rp=/store/host
+4. kalo mau edit tampilan di file V_nama file
+5. cara push:
+    > ctrl + shift + g
+    > klik tambah (+) untuk masing-masing file yang diubah (yang mau di push)
+    > click dropdown commit (commit & push untuk push ke github)

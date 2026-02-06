@@ -209,7 +209,7 @@
 						$('#simpan').text('Bayar');
 		 				$('#simpan').attr('disabled',false);
     						reload();
-    						sweet('Sukses','Pembayaran Uang Catering Berhasil','success');
+    						sweet('Sukses','Pembayaran Uang Baju Berhasil','success');
 
 					}
 				});
@@ -258,11 +258,11 @@
         $('.form-group').removeClass('has-error');
         $('.help-block').empty();
         $('#modal-form').modal('show');
-        $('.modal-title').text('Form Pembayaran Uang Catering'); 
+        $('.modal-title').text('Form Pembayaran Uang Baju'); 
 
         $.ajax({
 
-            url: "<?=base_url($this->uri->segment(1).'/GetCatering')?>",
+            url: "<?=base_url($this->uri->segment(1).'/GetBaju')?>",
             type:"GET",
             dataType:"JSON",
             success:function(data){

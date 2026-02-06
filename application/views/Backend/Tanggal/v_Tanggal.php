@@ -259,4 +259,43 @@
                 }
             });
         }
+        function KirimWa(id){
+            Swal({
+                title: 'Kirim Notifikasi Libur ke Semua Siswa?',
+                text: "Pesan akan dikirim ke WhatsApp orang tua/siswa",
+                type: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#00a65a',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Kirim!'
+            }).then((result) => {
+                if(result.value) {
+                    Swal({
+                        title: 'Mengirim Pesan...',
+                        text: 'Mohon tunggu, proses sedang berjalan.',
+                        onOpen: () => {
+                            Swal.showLoading()
+                        },
+                        allowOutsideClick: false
+                    });
+
+                    $.ajax({
+                        url : "<?=base_url($this->uri->segment(1).'/KirimWa')?>/"+id,
+                        type: "POST",
+                        dataType: "JSON",
+                        success: function(data){
+                            if(data.status) {
+                                sweet('Terikirim !', data.message ,'success');
+                            } else {
+                                sweet('Gagal', data.message ,'error');
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown){
+                            sweet('Oops...','Gagal Mengirim Data','error');
+                            console.log(jqXHR, textStatus, errorThrown);
+                        }
+                    });
+                }
+            });
+        }
 </script>

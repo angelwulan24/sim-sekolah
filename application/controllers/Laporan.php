@@ -39,16 +39,10 @@ class Laporan extends CI_Controller {
 		 $akhir = $this->input->post('akhir');
 
 		 $this->db->where('tanggal >=',$awal);
-		 $this->db->where('tanggal>=',$akhir);
+		 $this->db->where('tanggal <=',$akhir); // Changed to <= for correct range
 		 $a = $this->db->get('laporan')->result();
 
-		 $print = $this->mod->Cetak_periode($a,$awal,$akhir);
-
-		 if($print)
-		 	$data['status'] = TRUE;
-		 $data['status'] = FALSE;
-
-		  $this->output->set_content_type('application/json')->set_output(json_encode($data));
+		 $this->mod->Cetak_periode($a,$awal,$akhir);
 	}
 
 		function Detail($id){
@@ -65,6 +59,16 @@ class Laporan extends CI_Controller {
 
 	$this->template->views('Backend/v_Detail',$data);
 
+	}
+
+
+	public function Cetak_detail($id){
+		$data = $this->M_General->get_laporan($id);
+        if (empty($data) || empty($data['tanggal'])) {
+            show_error('Data Laporan tidak ditemukan.', 404);
+            return;
+        }
+		$this->mod->Cetak_detail($data);
 	}
 
 }

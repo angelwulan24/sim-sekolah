@@ -1,11 +1,11 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Catering extends CI_Controller {
+class Buku extends CI_Controller {
 
-	private $parents = 'Catering';
-	private $icon	 = 'fa fa-square';
-	var $table 		 = 'catering';
+	private $parents = 'Buku';
+	private $icon	 = 'fa fa-money';
+	var $table 		 = 'buku';
 
 	function __construct(){
 		parent::__construct();
@@ -16,6 +16,7 @@ class Catering extends CI_Controller {
 		$this->load->library('form_validation');
 		$this->load->library('Datatables'); 
 		$this->load->helper('data');
+        $this->load->library('Wa_gateway');
 	}
 
 	public function index(){
@@ -41,9 +42,9 @@ class Catering extends CI_Controller {
 		echo $this->mod->Detail($id);
 	}
 
-	function getCatering(){
+	function getBuku(){
 		header('Content-Type:application/json');
-		$n = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 4")->row_array();
+		$n = $this->db->query("SELECT nominal FROM pembayaran WHERE nama = 'Uang Buku'")->row_array();
 		echo json_encode($n['nominal']);
 	}
 
@@ -52,18 +53,18 @@ class Catering extends CI_Controller {
 		$sis = get_siswa($id_sis);
 		$tang = $this->input->post('tanggal');
 
-		$quer = $this->db->query("SELECT id FROM catering WHERE id_siswa ='$id_sis' AND waktu ='$tang'")->num_rows();
+		$quer = $this->db->query("SELECT id FROM buku WHERE id_siswa ='$id_sis' AND waktu ='$tang'")->num_rows();
 
 		if ($quer > 0){
-			$this->db->query("UPDATE catering SET nominal = '0' WHERE id_siswa='$id_sis' AND waktu = '$tang'");
-			$n = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 4 ")->row_array();
+			$this->db->query("UPDATE buku SET nominal = '0' WHERE id_siswa='$id_sis' AND waktu = '$tang'");
+			$n = $this->db->query("SELECT nominal FROM pembayaran WHERE nama = 'Uang Buku' ")->row_array();
 			$this->M_General->update_kas('kas_keluar',$n['nominal']);
 			$data['status'] = TRUE;
 			    		$insert = array(
 	                    'nominal'	=> $n['nominal'],
 	                    'sekarang'	=> sekarang(),
 	                    'time'	   => waktu(),
-	                    'keterangan'	=>'Ubah Uang Catering dengan Nama '.$sis
+	                    'keterangan'	=>'Ubah Uang Buku dengan Nama '.$sis
 	                );
 
 	        $insert = $this->M_General->insert('lainnya',$insert);
@@ -77,8 +78,8 @@ class Catering extends CI_Controller {
 
 	function Detail($id){
 		$this->breadcrumb->append_crumb('SIM Sekolah ',base_url());
-		$this->breadcrumb->append_crumb($this->parents,base_url('Catering'));
-		$this->breadcrumb->append_crumb('Detail Pembayaran Uang Catering',$this->parents);
+		$this->breadcrumb->append_crumb($this->parents,base_url('Buku'));
+		$this->breadcrumb->append_crumb('Detail Pembayaran Uang Buku',$this->parents);
 
 		$data['title']	= 'Pembayaran Uang '.$this->parents.' | SIM Sekolah ';
 		$data['judul']	= 'Pembayaran Uang '.$this->parents;
@@ -103,7 +104,7 @@ class Catering extends CI_Controller {
 
 			$tgl2 = date('Y-m-d',strtotime('+'.$i.' days',strtotime($tgl)));
 			$bln = $this->db->query("SELECT id FROM tanggal WHERE tgl = '$tgl2'")->num_rows();
-			$udh = $this->db->query("SELECT id FROM catering WHERE waktu = '$tgl2' AND id_siswa = '$id' ")->num_rows();
+			$udh = $this->db->query("SELECT id FROM buku WHERE waktu = '$tgl2' AND id_siswa = '$id' ")->num_rows();
 			
 			if ($udh == '0'){
 				if ($bln == '0'){
@@ -123,8 +124,15 @@ class Catering extends CI_Controller {
 		}while($j<$hari);
 
 		$total = $this->input->post('seluruh');
-		$this->db->insert_batch('catering',$data);
+		$this->db->insert_batch('buku',$data);
 		$this->M_General->update_kas('kas_masuk',$total);
+
+        // Send WhatsApp Notification
+        $siswa = $this->db->get_where('siswa', ['id' => $id])->row_array();
+        if ($siswa && !empty($siswa['telpon'])) {
+            $message = "Terima kasih, pembayaran Uang Buku atas nama *{$siswa['name']}* sebesar *" . rupiah($total) . "* untuk $hari hari telah berhasil diterima. \n\nTerima Kasih.";
+            $this->wa_gateway->send($siswa['telpon'], $message);
+        }
 		
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}

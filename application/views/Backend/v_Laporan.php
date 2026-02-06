@@ -37,7 +37,7 @@
                 </button>
                 <h4 class="modal-title">Cetak Laporan</h4>
             </div>
-<?= form_open($this->uri->segment(1).'/Cetak','id = "form"')?>
+<?= form_open($this->uri->segment(1).'/Cetak','id = "form" target="_blank"')?>
             <div class="modal-body">
                 <div class="form-group">
                     <label class="control-label"> Tanggal Awal</label>
@@ -172,19 +172,6 @@
                     error.insertAfter(element.siblings('[class*="select2-container"]:eq(0)'));
                 }
                 else error.insertAfter(element.parent());
-            },
-            submitHandler: function (form) {
-                var isi = $('#form').serialize();
-                $.ajax({
-                    url: "<?=base_url('Cetak/Cetak_periode')?>",
-                    type:"POST",
-                    data: isi,
-                    dataType:"JSON",
-                    success:function(data){
-                        $('#modal-print').modal('hide');
-                        $('#form')[0].reset();
-                    }
-                });
             },
             invalidHandler: function (form) {}
         });

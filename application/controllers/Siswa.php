@@ -97,6 +97,7 @@ class Siswa extends CI_Controller {
                     'tanggal'	=> filter_string($this->input->post('tanggal',TRUE)),
                     'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
                     'status'	=> filter_string($this->input->post('status',TRUE)),
+                    'telpon'    => filter_string($this->input->post('telpon',TRUE)),
                     'wali'		=> filter_string($this->input->post('wali',TRUE))
                 );
 
@@ -114,6 +115,7 @@ class Siswa extends CI_Controller {
                     'tanggal'	=> filter_string($this->input->post('tanggal',TRUE)),
                     'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
                     'status'	=> filter_string($this->input->post('status',TRUE)),
+                    'telpon'    => filter_string($this->input->post('telpon',TRUE)),
                     'wali'		=> filter_string($this->input->post('wali',TRUE))
                 );
         $insert = $this->M_General->update($this->table,$insert,'id',$this->input->post('id'));

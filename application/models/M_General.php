@@ -119,15 +119,15 @@ class M_General extends CI_Model{
 
         $spp = $this->db->query("SELECT s.name, p.bulan,p.nominal FROM spp AS p, siswa AS s WHERE time = '$t' AND s.id = p.id_siswa ")->result();
         $ujian = $this->db->query("SELECT s.name, u.periode,u.nominal FROM ujian as u, siswa as s WHERE time = '$t' AND s.id=u.id_siswa")->result();
-        $snack = $this->db->query("SELECT s.name, Sum(n.nominal) AS total,Count(n.id_siswa) AS jumlah FROM snack as n, siswa as s WHERE time = '$t' AND s.id=n.id_siswa GROUP BY s.name")->result();
-        $catering = $this->db->query("SELECT s.name, Sum(n.nominal) AS total,Count(n.id_siswa) AS jumlah FROM catering as n, siswa as s WHERE time = '$t' AND s.id=n.id_siswa GROUP BY s.name")->result();
+        $snack = $this->db->query("SELECT s.name, Sum(n.nominal) AS total,Count(n.id_siswa) AS jumlah FROM buku as n, siswa as s WHERE time = '$t' AND s.id=n.id_siswa GROUP BY s.name")->result();
+        $catering = $this->db->query("SELECT s.name, Sum(n.nominal) AS total,Count(n.id_siswa) AS jumlah FROM baju as n, siswa as s WHERE time = '$t' AND s.id=n.id_siswa GROUP BY s.name")->result();
         $pemasukan = $this->db->query("SELECT nominal, keterangan FROM lainnya WHERE time = '$t'")->result();
         $pendaftaran = $this->db->query("SELECT siswa, nominal FROM pendaftaran WHERE time = '$t'")->result();
 
         $gaji     = $this->db->query("SELECT name, periode, (jam * nominal) as gaji FROM gaji,guru WHERE time = '$t' AND guru.id=id_guru ")->result();
         $pengeluaran = $this->db->query("SELECT nominal, keterangan FROM pengeluaran WHERE time = '$t'")->result();
 
-         return array('catering'=>$catering,'gaji'=>$gaji,'pemasukan'=>$pemasukan,'pendaftaran'=>$pendaftaran,'pengeluaran'=>$pengeluaran,'snack'=>$snack,'spp'=>$spp,'ujian'=>$ujian,'tanggal'=>$t);
+         return array('baju'=>$catering,'gaji'=>$gaji,'pemasukan'=>$pemasukan,'pendaftaran'=>$pendaftaran,'pengeluaran'=>$pengeluaran,'buku'=>$snack,'spp'=>$spp,'ujian'=>$ujian,'tanggal'=>$t);
 
     }
 }

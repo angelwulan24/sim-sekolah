@@ -15,6 +15,7 @@ class Tanggal extends CI_Controller {
 		$this->load->model('M_'.$this->parents,'mod');
 		$this->load->library('form_validation');
 		$this->load->library('Datatables'); 
+        $this->load->library('Wa_gateway');
 	}
 
 	public function index(){
@@ -72,4 +73,48 @@ class Tanggal extends CI_Controller {
 		$data['status'] = TRUE;
 		$this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
+
+    public function KirimWa($id) {
+        // Get Holiday Data
+        $tgl_libur = $this->db->get_where('tanggal', ['id' => $id])->row_array();
+        
+        if (!$tgl_libur) {
+            echo json_encode(['status' => false, 'message' => 'Data Tanggal tidak ditemukan']);
+            return;
+        }
+
+        // Get Active Students with Phone Numbers
+        $students = $this->db->select('name, telpon, wali')->from('siswa')
+                             ->where("telpon != ''")
+                             ->where("telpon IS NOT NULL")
+                             ->where("status", "Aktif") // Assuming 'status' column exists for active students
+                             ->get()->result_array();
+
+        $count = 0;
+        if (!empty($students)) {
+            $formatted_date = date('d-m-Y', strtotime($tgl_libur['tgl']));
+            $message_template = "Informasi Sekolah:\n\nKepada Yth. Wali Murid/Siswa *[NAMA]*,\n\nDiberitahukan bahwa pada terhitung tanggal *[TANGGAL]* adalah hari libur sekolah dengan keterangan: *[KETERANGAN]*.\n\nTerima kasih.\nAdmin Sekolah";
+
+            foreach ($students as $student) {
+                if (!empty($student['telpon'])) {
+                    $message = str_replace(
+                        ['[NAMA]', '[TANGGAL]', '[KETERANGAN]'], 
+                        [$student['name'], $formatted_date, $tgl_libur['keterangan']], 
+                        $message_template
+                    );
+                    
+                    // Send WA
+                    $this->wa_gateway->send($student['telpon'], $message);
+                    $count++;
+                    
+                    // Verification/Delay could be added here to prevent rate limiting
+                    // sleep(1); 
+                }
+            }
+            
+            echo json_encode(['status' => true, 'message' => "$count Pesan berhasil dikirim ke antrian."]);
+        } else {
+            echo json_encode(['status' => false, 'message' => 'Tidak ada data siswa dengan nomor telepon.']);
+        }
+    }
 }

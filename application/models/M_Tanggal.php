@@ -6,7 +6,7 @@ class M_Tanggal extends CI_Model {
 	function getAllData(){
 		$this->datatables->select("id,DATE_FORMAT(tgl,'%d-%m-%Y') as tgl,keterangan");
 		$this->datatables->from('tanggal');
-		$this->datatables->add_column('view','<center><a href="javascript:void(0)" onclick="Ubah($1)" class="btn btn-warning btn-xs"><i class="fa fa-pencil"></i> Ubah</a> <a href="javascript:void(0)" onclick="Hapus($1)" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> Hapus</a> </center> ','id');
+		$this->datatables->add_column('view','<center><a href="javascript:void(0)" onclick="Ubah($1)" class="btn btn-warning btn-xs"><i class="fa fa-pencil"></i> Ubah</a> <a href="javascript:void(0)" onclick="Hapus($1)" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> Hapus</a> <a href="javascript:void(0)" onclick="KirimWa($1)" class="btn btn-success btn-xs"><i class="fa fa-whatsapp"></i> Kirim ke WhatsApp</a></center> ','id');
 		return $this->datatables->generate();
 	}
 	

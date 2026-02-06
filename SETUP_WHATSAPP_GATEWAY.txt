@@ -1,0 +1,38 @@
+# SETUP WHATSAPP GATEWAY (Run as Separate Deployment)
+
+To use the WhatsApp features (Login & Notification), you need to run the `wa-gateway` service.
+The source code has been cloned to: `c:\xampp\htdocs\wa-gateway`
+
+## Prerequisites
+1.  **Node.js**: You must have Node.js installed.
+    -   Download specific version (LTS recommended): https://nodejs.org/
+    -   Verify installation: Open Command Prompt and type `node -v` and `npm -v`.
+
+## Installation & Running
+1.  Open Command Prompt (Terminal).
+2.  Navigate to the gateway directory:
+    ```bash
+    cd c:\xampp\htdocs\wa-gateway
+    ```
+3.  Install dependencies:
+    ```bash
+    npm install
+    ```
+4.  Start the service:
+    ```bash
+    npm start
+    ```
+    
+    The service should show "Running on port 5001" (or similar).
+
+## Connecting
+1.  Go to your SIM Sekolah Admin Panel.
+2.  Navigate to **WhatsApp Gateway** menu.
+3.  Click "Connect".
+    -   This will trigger the session start on the gateway.
+    -   The QR Code should appear (or instructions to scan).
+4.  Scan the QR with your phone's WhatsApp (Linked Devices).
+
+## Note
+-   Keep the Command Prompt open to keep the gateway running.
+-   If you want to run it in background, look into `pm2` or similar tools for Node.js.

@@ -35,7 +35,7 @@ class Pendaftaran extends CI_Controller {
 		$data['isi']	= $this->db->query("SELECT id,name,nis,alamat,sex,wali,bayar,tempat,tanggal FROM temp")->result();
 		$data['bayar']	= $this->db->query("SELECT nominal FROM pembayaran WHERE id = 5 ")->row_array();
 
-	$this->template->views('Backend/'.$this->parents.'/v_'.$this->parents,$data);
+		$this->template->views('Backend/'.$this->parents.'/v_'.$this->parents,$data);
 	}
 
 	function import(){

@@ -36,6 +36,7 @@
                       <th>NIS</th>
                       <th>Jenis Kelamin</th>
                       <th>Wali</th>
+                      <th>No. Telpon</th>
                       <th>Status</th>
                       <th width="100">Aksi</th>
 			            </tr>
@@ -114,6 +115,10 @@
                 <div class="form-group">
                     <label class="control-label"> Nama Wali</label>
                     <div><input type="text" required="" placeholder="Nama Wali" autocomplete="off" name="wali" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> No. Telpon</label>
+                    <div><input type="text" onkeypress="return Angka(this)" required="" placeholder="No. Telpon" autocomplete="off" name="telpon" class="form-control"></div>
                 </div>
                 <div class="form-group">
                     <label class="control-label"> Alamat</label>
@@ -211,6 +216,7 @@
                 {"data": "nis"},
                 {"data": "sex"},
                 {"data": "wali"},
+                {"data": "telpon"},
                 {"data": "status"},
                 {
                     "data": "view",
@@ -372,6 +378,7 @@
                 $('[name="nama"]').val(data.name);
                 $('[name="nis"]').val(data.nis);
                 $('[name="wali"]').val(data.wali);
+                $('[name="telpon"]').val(data.telpon);
                 $('[name="alamat"]').val(data.alamat);
                 $('[name="tempat"]').val(data.tempat);
                 $('[name="tanggal"]').val(data.tanggal);

@@ -7,6 +7,7 @@ class Auth extends CI_Controller {
 		parent::__construct();
 
 		$this->load->library('form_validation');
+        $this->load->library('Wa_gateway');
 	}
 
 	public function index(){
@@ -202,6 +203,9 @@ class Auth extends CI_Controller {
 		}
 
 	}
+
+
+
 
 	public function logout(){
 		$this->session->sess_destroy();
