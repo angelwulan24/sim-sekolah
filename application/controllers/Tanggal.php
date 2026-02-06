@@ -34,7 +34,11 @@ class Tanggal extends CI_Controller {
 		echo $this->mod->getAllData();
 	}
 
-
+	function edit($id){
+		header('Content-Type:application/json');
+		$data = $this->M_General->getByID($this->table, 'id', $id, 'DESC')->row();
+		echo json_encode($data);
+	}
 
 	function Simpan(){
         $insert = array(
@@ -47,21 +51,21 @@ class Tanggal extends CI_Controller {
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
 
-	function Ubah(){
-        $insert = array(
-                    'name'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
-                    'sex'		=> $this->input->post('gender',TRUE),
-                    'nis' 		=> $this->input->post('nis',TRUE),
-                    'tempat'	=> filter_string($this->input->post('tempat',TRUE)),
-                    'tanggal'	=> filter_string($this->input->post('tanggal',TRUE)),
-                    'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
-                    'status'	=> filter_string($this->input->post('status',TRUE)),
-                    'wali'		=> filter_string($this->input->post('wali',TRUE))
-                );
-        $insert = $this->M_General->update($this->table,$insert,'id',$this->input->post('id'));
-        $data['status'] = TRUE;
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
-	}
+	public function Ubah(){
+		$data = array(
+			'tgl'        => filter_string($this->input->post('tanggal', TRUE)),
+			'keterangan' => filter_string($this->input->post('keterangan', TRUE))
+		);
+
+		$this->M_General->update(
+			$this->table,
+			$data,
+			'id',
+			$this->input->post('id')
+		);
+
+		echo json_encode(['status' => TRUE]);
+	}	
 
 	public function Hapus($id){
 		$this->M_General->delete($this->table,'id',$id);

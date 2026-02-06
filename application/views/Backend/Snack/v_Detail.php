@@ -17,7 +17,7 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
         </div>
         <div class="box-body">
             <div class="table-responsive">      
-                <table id="list-data" class="table tabel table-bordered table-hover">
+                <table id="list-detail" class="table tabel table-bordered table-hover">
                     <thead>
                         <tr>
                       <th style="width: 10px;">No</th>
@@ -81,10 +81,19 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
             };
         };
 
-       table =  $("#list-data").DataTable({
+        // Safely destroy existing DataTable
+        try {
+            if (table && $.fn.DataTable.isDataTable('#list-detail')) {
+                table.destroy();
+            }
+        } catch(e) {
+            console.log('No existing DataTable to destroy');
+        }
+
+       table =  $("#list-detail").DataTable({
             initComplete: function() {
                 var api = this.api();
-                $('#list-data input')
+                $('#list-detail input')
                     .off('.DT')
                     .on('keyup.DT', function(e) {
                         api.search(this.value).draw();
@@ -196,7 +205,9 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
     });
 
     function reload(){
-        table.ajax.reload(null,false);
+        if (table && $.fn.DataTable.isDataTable('#list-detail')) {
+            table.ajax.reload(null,false);
+        }
     }
     function sweet(judul,text,tipe){
         Swal({

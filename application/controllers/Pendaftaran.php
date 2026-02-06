@@ -22,6 +22,10 @@ class Pendaftaran extends CI_Controller {
 
 		$this->load->helper('data');
 
+		// Clear old flashdata
+		$this->session->flashdata('success');
+		$this->session->flashdata('error');
+
 		$this->breadcrumb->append_crumb('SIM Sekolah ','Beranda');
 		$this->breadcrumb->append_crumb($this->parents,$this->parents);
 
@@ -105,6 +109,82 @@ class Pendaftaran extends CI_Controller {
 		redirect($this->uri->segment(1),'refresh');
 	}
 
+	function edit($id){
+		header('Content-Type:application/json');
+		$data = $this->M_General->getByID($this->table, 'id', $id, 'DESC')->row();
+		echo json_encode($data);
+	}
+
+	function cetak_bukti($id){
+		// Disable error reporting temporarily
+		error_reporting(0);
+		
+		require_once APPPATH.'/third_party/fpdf/fpdf.php';
+		
+		// Get data pendaftaran
+		$data = $this->db->get_where('temp', ['id' => $id])->row();
+		$bayar = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 5 ")->row_array();
+		
+		try {
+			$pdf = new FPDF();
+			$pdf->AddPage();
+			$pdf->SetFont('Arial','B',16);
+			$pdf->Cell(0,10,'BUKTI PEMBAYARAN PENDAFTARAN',0,1,'C');
+			
+			$pdf->SetFont('Arial','',12);
+			$pdf->Ln(10);
+			
+			$pdf->SetFont('Arial','B',11);
+			$pdf->Cell(50,8,'Nama Siswa');
+			$pdf->SetFont('Arial','',11);
+			$pdf->Cell(0,8,': '.$data->name,0,1);
+			
+			$pdf->SetFont('Arial','B',11);
+			$pdf->Cell(50,8,'NIS');
+			$pdf->SetFont('Arial','',11);
+			$pdf->Cell(0,8,': '.$data->nis,0,1);
+			
+			$pdf->SetFont('Arial','B',11);
+			$pdf->Cell(50,8,'Jenis Kelamin');
+			$pdf->SetFont('Arial','',11);
+			$pdf->Cell(0,8,': '.$data->sex,0,1);
+			
+			$pdf->SetFont('Arial','B',11);
+			$pdf->Cell(50,8,'Tempat, Tgl Lahir');
+			$pdf->SetFont('Arial','',11);
+			$pdf->Cell(0,8,': '.$data->tempat.', '.$data->tanggal,0,1);
+			
+			$pdf->SetFont('Arial','B',11);
+			$pdf->Cell(50,8,'Nama Wali');
+			$pdf->SetFont('Arial','',11);
+			$pdf->Cell(0,8,': '.$data->wali,0,1);
+			
+			$pdf->SetFont('Arial','B',11);
+			$pdf->Cell(50,8,'Alamat');
+			$pdf->SetFont('Arial','',11);
+			$pdf->Cell(0,8,': '.$data->alamat,0,1);
+			
+			$pdf->Ln(5);
+			$pdf->SetFont('Arial','B',11);
+			$pdf->Cell(50,8,'Nominal Pembayaran');
+			$pdf->SetFont('Arial','',11);
+			$pdf->Cell(0,8,': Rp. '.number_format($bayar['nominal'],0,',','.'),0,1);
+			
+			$pdf->SetFont('Arial','B',11);
+			$pdf->Cell(50,8,'Tanggal Pembayaran');
+			$pdf->SetFont('Arial','',11);
+			$pdf->Cell(0,8,': '.date('d-m-Y H:i:s'),0,1);
+			
+			$pdf->Ln(10);
+			$pdf->SetFont('Arial','',10);
+			$pdf->Cell(0,8,'Bukti pembayaran ini sah dan telah diproses oleh sistem.',0,1,'C');
+			
+			$pdf->Output('D','Bukti_Pembayaran_'.$data->nis.'.pdf');
+		} catch (Exception $e) {
+			echo "Error: " . $e->getMessage();
+		}
+	}
+
 	function Kelas(){
 		        $insert = array(
                     'name'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
@@ -144,7 +224,7 @@ class Pendaftaran extends CI_Controller {
                     'wali'		=> filter_string($this->input->post('wali',TRUE))
                 );
         $insert = $this->M_General->update($this->table,$insert,'id',$this->input->post('id'));
-        $data['status'] = TRUE;
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+        $this->session->set_flashdata('success','Berhasil mengubah Data!');
+        redirect($this->uri->segment(1),'refresh');
 	}
 }

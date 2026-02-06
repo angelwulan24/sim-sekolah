@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class M_Lainnya extends CI_Model {
 
 	function getAllData(){
-		$this->datatables->select("id,sekarang,DATE_FORMAT(s.tanggal,'%d-%m-%Y') AS Tgl, Sum(s.nominal) AS Total");
+		$this->datatables->select("id,sekarang,DATE_FORMAT(s.tanggal,'%d-%m-%Y') AS Tgl, Sum(s.nominal) AS Total, GROUP_CONCAT(s.keterangan SEPARATOR ', ') AS keterangan");
 		$this->datatables->from('lainnya as s');
 		$this->datatables->group_by("DATE_FORMAT(s.tanggal,'%Y-%m-%d')");
 		return $this->datatables->generate();

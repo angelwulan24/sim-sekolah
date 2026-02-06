@@ -83,7 +83,6 @@ class Snack extends CI_Controller {
 		$data['title']	= 'Pembayaran Uang '.$this->parents.' | SIM Sekolah ';
 		$data['judul']	= 'Pembayaran Uang '.$this->parents;
 		$data['icon']	= $this->icon;
-		$data['isi']	= $this->M_General->getByID('snack','id_siswa',$id,'DESC')->result();
 
 	$this->template->views('Backend/'.$this->parents.'/v_Detail',$data);
 

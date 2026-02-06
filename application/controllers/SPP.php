@@ -49,7 +49,44 @@ class SPP extends CI_Controller {
 		$data['title']	= 'Pembayaran Uang '.$this->parents.' | SIM Sekolah ';
 		$data['judul']	= 'Pembayaran Uang '.$this->parents;
 		$data['icon']	= $this->icon;
-		$data['isi']	= $this->M_General->getByID('spp','id_siswa',$id,'DESC')->result();
+		
+		// Get student class information
+		$siswa = $this->db->query("SELECT k.id, k.nama FROM siswa s JOIN kelas k ON s.kelas = k.id WHERE s.id = '$id'")->row();
+		
+		// Get nominal SPP
+		$nominal = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 1")->row_array();
+		
+		// Get current year
+		$tahun_sekarang = date('Y');
+		$selected_tahun = isset($_GET['tahun']) ? $_GET['tahun'] : $tahun_sekarang;
+		
+		// Determine how many years of history based on class
+		// Kelas 1 = 0 history, Kelas 2 = 1 history, Kelas 3 = 2 history, etc
+		$kelas_num = (int)preg_replace('/[^0-9]/', '', $siswa->nama);
+		$max_history = max(0, $kelas_num - 1);
+		
+		// Get all months with payment status
+		$bulan_array = array('Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember');
+		$isi = array();
+		
+		foreach($bulan_array as $bulan){
+			$bulan_label = $bulan . '-' . $selected_tahun;
+			$cek = $this->db->query("SELECT id, time FROM spp WHERE id_siswa = '$id' AND bulan = '$bulan_label'")->row();
+			
+			$obj = new stdClass();
+			$obj->bulan = $bulan_label;
+			$obj->nominal = $nominal['nominal'];
+			$obj->time = $cek ? $cek->time : null;
+			$obj->status = $cek ? 'Lunas' : 'Belum Lunas';
+			
+			$isi[] = $obj;
+		}
+		
+		$data['isi'] = $isi;
+		$data['selected_tahun'] = $selected_tahun;
+		$data['tahun_sekarang'] = $tahun_sekarang;
+		$data['max_history'] = $max_history;
+		$data['id_siswa'] = $id;
 
 	$this->template->views('Backend/'.$this->parents.'/v_Detail',$data);
 

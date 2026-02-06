@@ -53,6 +53,7 @@
                                     <a class="btn btn-success btn-xs" data-toggle="modal" data-target="#bayar-data<?php echo $r->id ?>" href=""><i class="fa fa-money"></i> Bayar</a>
                                 <?php } else { ?>
                                     <a class="btn btn-info btn-xs" data-toggle="modal" data-target="#kelas-data<?php echo $r->id ?>" href=""><i class="fa fa-building"></i> Kelas</a>
+                                    <a class="btn btn-primary btn-xs" href="<?=base_url('Pendaftaran/cetak_bukti/'.$r->id)?>"><i class="fa fa-print"></i> Cetak</a>
                                 <?php } ?>
                                 </center>
                            </td> 
@@ -147,6 +148,58 @@
 </div>
 
 <?php foreach ($isi as  $e) { ?>
+<div class="modal fade" id="ubah-data<?php echo $e->id ?>">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><i class="fa fa-pencil"></i> Ubah Data</h4>
+            </div>
+            <div class="modal-body">
+             <?= form_open($this->uri->segment(1).'/Ubah') ?>
+                <input type="hidden" name="id" value="<?php echo $e->id ?>">
+                <div class="form-group">
+                    <label class="control-label"> Nama Lengkap</label>
+                    <div><input type="text" required="" placeholder="Nama Lengkap" autocomplete="off" name="nama" value="<?=$e->name?>" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> NIS</label>
+                    <div><input type="text" onkeypress="return Angka(this)" required="" placeholder="NIP/NIK" autocomplete="off" name="nis" value="<?=$e->nis?>" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <div class="ra">
+                        <label class="control-label">Jenis Kelamin</label><br>
+                        <input type="radio" class="minimal"  name="gender" value="Pria" <?php if($e->sex == 'Pria') echo 'checked'; ?>><span class="lbl"> Pria</span>
+                        <input type="radio"   name="gender" class="minimal" value="Wanita" <?php if($e->sex == 'Wanita') echo 'checked'; ?>><span class="lbl"> Wanita</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Tempat Lahir</label>
+                    <div><input type="text" required="" placeholder="Tempat Lahir" autocomplete="off" name="tempat" value="<?=$e->tempat?>" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Tanggal Lahir</label>
+                    <div><input type="text" required="" placeholder="Tanggal Lahir" autocomplete="off" name="tanggal" value="<?=$e->tanggal?>" class="form-control datepicker"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Nama Wali</label>
+                    <div><input type="text" required="" placeholder="Nama Wali" autocomplete="off" name="wali" value="<?=$e->wali?>" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Alamat</label>
+                    <div><input type="text" required="" placeholder="Alamat" autocomplete="off" name="alamat" value="<?=$e->alamat?>" class="form-control"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Batal</button>
+                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Ubah</button>
+            </div>
+        </div>
+        <?=form_close() ?>
+    </div>
+</div>
+
 <div class="modal fade" id="hapus-data<?php echo $e->id ?>">
     <div class="modal-dialog">
         <div class="modal-content">

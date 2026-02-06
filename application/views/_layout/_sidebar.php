@@ -40,5 +40,6 @@
     <li class = "<?php echo activate_menu('Laporan')?>"><a href="<?= base_url()?>Laporan"><i class="fa fa-line-chart"></i> <span>Laporan</span><span class="pull-right-container"></span></a></li>
     <?php } else { ?>
         <li class = "<?php echo activate_menu('StudentArea')?>"><a href="<?= base_url()?>StudentArea"><i class="fa fa-money"></i> <span>Tagihan Saya</span><span class="pull-right-container"></span></a></li>
+        <li class = "<?php echo activate_menu('Tanggal')?>"><a href="<?= base_url()?>Tanggal"><i class="fa fa-calendar"></i> <span>Tanggal Merah</span><span class="pull-right-container"></span></a></li>
     <?php } ?>
 </ul>

@@ -44,7 +44,12 @@
             </div>
 <?= form_open('','role = "form" id = "form"')?>
             <div class="modal-body">
-            	<input type="hidden" name="id" value="">
+            	<input type="hidden" name="id_siswa" value="">
+                <div class="form-group">
+                    <label class="control-label">Nama Siswa</label>
+                    <div><input type="text" readonly="" name="nama_siswa" class="form-control"></div>
+                </div>
+
                 <div class="form-group">
                     <label class="control-label">Periode Pembayaran</label>
                     <?php $t = Date('Y'); 
@@ -256,8 +261,18 @@
             type:"GET",
             dataType:"JSON",
             success:function(data){
-                $('[name="id"]').val(id);
+                $('[name="id_siswa"]').val(id);
                 $('[name="harga"]').val(data);
+            }
+        });
+
+        // Get student name
+        $.ajax({
+            url: "<?=base_url('Ujian/GetSiswaName/')?>"+id,
+            type:"GET",
+            dataType:"JSON",
+            success:function(data){
+                $('[name="nama_siswa"]').val(data.name);
             }
         });
 

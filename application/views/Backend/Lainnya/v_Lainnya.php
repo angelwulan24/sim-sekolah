@@ -1,10 +1,7 @@
 <div class="col-xs-12">
 	<div class="box box-primary">
         <div class="box-header">
-            <a href="#" onclick="Detail()" class="btn btn-info btn-sm">Detail </a>
-            <div class="pull-right">
-            	<a href="#" onclick="Tambah()" class="btn btn-primary btn-sm">Tambah Data </a>
-            </div>
+            <a href="#" onclick="Tambah()" class="btn btn-primary btn-sm">Tambah Data </a>
         </div>
 	    <div class="box-body">
 	    	<div class="table-responsive">    	
@@ -13,8 +10,8 @@
 			            <tr>
                       <th style="width: 10px;">No</th>
                       <th>Tanggal</th>
-                      <!-- <th>Jumlah Siswa</th> -->
-                      <th>Nominal Pemasukan</th>
+                      <th>Nominal</th>
+                      <th>Keterangan</th>
 			            </tr>
 		            </thead>
 		            <tbody>
@@ -113,8 +110,8 @@
                     "searchable": false
                 },
                 {"data": "Tgl"},
-                //{"data": "jumlah"},
-                {"data": "Total",render: $.fn.dataTable.render.number('.',',','')}
+                {"data": "Total",render: $.fn.dataTable.render.number('.',',','')},
+                {"data": "keterangan"}
             ],
             order: [[0, 'asc']],
             rowId: function(a){
@@ -191,11 +188,6 @@
             text: text,
             type: tipe
         });
-    }
-
-    function Detail(){
-
-         document.location.href= "<?= base_url($this->uri->segment(1).'/Detail')?>";
     }
 
 	function Tambah(){

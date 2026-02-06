@@ -13,7 +13,7 @@
                       <th style="width: 10px;">No</th>
                       <th>Tanggal</th>
                       <th>Keterangan</th>
-                      <th width="100">Aksi</th>
+                      <th width="200">Aksi</th>
 			            </tr>
 		            </thead>
 		            <tbody>
@@ -37,6 +37,7 @@
             </div>
 <?= form_open('','role = "form" id = "form"')?>
             <div class="modal-body">
+                <input type="hidden" name="id">
                 <div class="form-group">
                     <label class="control-label"> Tanggal</label>
                     <div><input type="text" required="" placeholder="Tanggal" autocomplete="off" name="tanggal" class="form-control datepicker"></div>
@@ -155,27 +156,32 @@
 				else error.insertAfter(element.parent());
 			},
 			submitHandler: function (form) {
-				$('#simpan').text('Menyimpan...');
-				$('#simpan').attr('disabled',true);
-				var url,method;
-				if (label == 'simpan'){
-				 	url = '<?=base_url($this->uri->segment(1).'/Simpan')?>';
-				 	method = 'Tambah';
-				}
-				var isi = $('#form').serialize();
-				$.ajax({
-					url: url,
-					type:"POST",
-					data: isi,
-					dataType:"JSON",
-					success:function(data){
-						$('#modal-form').modal('hide');
-						reload();
-						sweet('Di '+method,'Berhasil '+method+' Data','success');
-						$('#simpan').text('Simpan');
-		 				$('#simpan').attr('disabled',false);
-					}
-				});
+                $('#simpan').text('Menyimpan...');
+                $('#simpan').attr('disabled', true);
+
+                var url, method;
+
+                if (label == 'simpan') {
+                    url = '<?=base_url($this->uri->segment(1).'/Simpan')?>';
+                    method = 'Tambah';
+                } else if (label == 'ubah') {
+                    url = '<?=base_url($this->uri->segment(1).'/Ubah')?>';
+                    method = 'Ubah';
+                }
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: $('#form').serialize(),
+                    dataType: "JSON",
+                    success: function () {
+                        $('#modal-form').modal('hide');
+                        reload();
+                        sweet('Di ' + method, 'Berhasil ' + method + ' Data', 'success');
+                        $('#simpan').text('Simpan');
+                        $('#simpan').attr('disabled', false);
+                    }
+                });
 			},
 			invalidHandler: function (form) {}
 		});
@@ -204,30 +210,53 @@
 	}
 
         function Hapus(id){
-        Swal({
-            title: 'Ingin menghapus data?',
-            type: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya'
-        }).then((result) => {
-            if(result.value) {
-                $.ajax({
-                    url : "<?=base_url($this->uri->segment(1).'/Hapus')?>/"+id,
-                    type: "POST",
-                    dataType: "JSON",
-                    success: function(data){
-                        reload();
-                        sweet('Dihapus !','Berhasil Hapus Data','success');
-                    },
-                    error: function (jqXHR, textStatus, errorThrown){
-                        sweet('Oops...','Gagal Hapus Data','error');
-                        console.log(jqXHR, textStatus, errorThrown);
-                    }
-                });
-            }
-        });
+            Swal({
+                title: 'Ingin menghapus data?',
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya'
+            }).then((result) => {
+                if(result.value) {
+                    $.ajax({
+                        url : "<?=base_url($this->uri->segment(1).'/Hapus')?>/"+id,
+                        type: "POST",
+                        dataType: "JSON",
+                        success: function(data){
+                            reload();
+                            sweet('Dihapus !','Berhasil Hapus Data','success');
+                        },
+                        error: function (jqXHR, textStatus, errorThrown){
+                            sweet('Oops...','Gagal Hapus Data','error');
+                            console.log(jqXHR, textStatus, errorThrown);
+                        }
+                    });
+                }
+            });
+        }
 
-    }
+        function Ubah(id){
+            label = 'ubah';
+            $('#form')[0].reset();
+            $('.form-group').removeClass('has-error');
+            $('.help-block').empty();
+
+            $.ajax({
+                url: "<?=base_url($this->uri->segment(1).'/edit/')?>"+id,
+                type:"GET",
+                dataType:"JSON",
+                success:function(data){
+                    $('[name="id"]').val(data.id);
+                    $('[name="tanggal"]').val(data.tgl);
+                    $('[name="keterangan"]').val(data.keterangan);
+
+                    $('#modal-form').modal('show');
+                    $('.modal-title').text('Ubah Data'); 
+                },
+                error:function(){
+                    sweet('Oops...','Data tidak dapat diambil','error');
+                }
+            });
+        }
 </script>
