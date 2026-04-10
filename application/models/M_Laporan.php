@@ -3,9 +3,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class M_Laporan extends CI_Model {
 
-	function getAllData(){
+	function getAllData($filter = array()){
 		$this->datatables->select("id,saldo_awal,DATE_FORMAT(tanggal,'%d-%m-%Y') as tanggal,,kas_masuk,kas_keluar, (saldo_awal + kas_masuk - kas_keluar) as saldo_akhir");
 		$this->datatables->from('laporan');
+
+		if(!empty($filter['jenis']) && !empty($filter['tanggal'])){
+            if($filter['jenis'] == 'hari'){
+                $this->datatables->where('DATE(tanggal)', $filter['tanggal']);
+            } elseif($filter['jenis'] == 'bulan'){
+                $this->datatables->where("DATE_FORMAT(tanggal, '%Y-%m') = ", $filter['tanggal']);
+            } elseif($filter['jenis'] == 'tahun'){
+                $this->datatables->where("YEAR(tanggal)", $filter['tanggal']);
+            }
+		}
+
 		$this->datatables->add_column('view','<center><a href="javascript:void(0)" onclick="Detail($1)" class="btn btn-info btn-xs"><i class="fa fa-eye"></i> Detail</a> </center> ','id');
 		return $this->datatables->generate();
 	}

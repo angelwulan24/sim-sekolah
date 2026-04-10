@@ -3,18 +3,52 @@
         <div class="box-header">
 
             <div class="pull-right">
-            	<a href="#" onclick="Tambah()" class="btn btn-primary btn-sm">Tambah Data </a>
+            	<a href="#" onclick="Tambah()" class="btn btn-primary btn-sm" style="margin-right: 5px;">Tambah Data Pengeluaran</a>
+                <a href="#" onclick="PembayaranGaji()" class="btn btn-warning btn-sm">Form Pembayaran Gaji</a>
             </div>
         </div>
-	    <div class="box-body">
+            <div class="row" style="margin-bottom: 15px;">
+                <div class="col-md-3">
+                    <select id="jenis_filter" class="form-control">
+                        <option value="">-- Pilih Jenis Filter --</option>
+                        <option value="hari">Harian</option>
+                        <option value="bulan">Bulanan</option>
+                        <option value="tahun">Tahunan</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3" id="wrap-filter-hari" style="display:none;">
+                    <input type="date" id="filter_hari" class="form-control" placeholder="Pilih Hari">
+                </div>
+                
+                <div class="col-md-3" id="wrap-filter-bulan" style="display:none;">
+                    <input type="month" id="filter_bulan" class="form-control">
+                </div>
+                
+                <div class="col-md-3" id="wrap-filter-tahun" style="display:none;">
+                    <select id="filter_tahun" class="form-control">
+                        <option value="">-- Pilih Tahun --</option>
+                        <?php 
+                            for($i = date('Y'); $i >= date('Y')-5; $i--) {
+                                echo "<option value='$i'>$i</option>";
+                            }
+                        ?>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button id="btn-filter" class="btn btn-success btn-sm"><i class="fa fa-filter"></i> Filter</button>
+                    <button id="btn-reset" class="btn btn-default btn-sm"><i class="fa fa-refresh"></i> Reset</button>
+                </div>
+            </div>
 	    	<div class="table-responsive">    	
 		        <table id="list-data" class="table table-bordered table-hover">
 		            <thead>
 			            <tr>
                       <th style="width: 10px;">No</th>
                       <th>Tanggal</th>
-                      <!-- <th>Jumlah Siswa</th> -->
+                      <th>Keterangan</th>
                       <th>Nominal Pengeluaran</th>
+                      <th>Bukti</th>
 			            </tr>
 		            </thead>
 		            <tbody>
@@ -47,10 +81,86 @@
                     <label class="control-label"> Keterangan</label>
                     <div><input type="text" required="" placeholder="Keterangan" autocomplete="off" name="keterangan" class="form-control"></div>
                 </div>
+                <div class="form-group">
+                    <label class="control-label"> Bukti Pendukung (Foto)</label>
+                    <div><input type="file" name="bukti" class="form-control" accept="image/*"></div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
                 <button type="submit" id="simpan"  class="btn btn-primary">Simpan</button>
+            </div>
+<?= form_close()?>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Gaji -->
+<div class="modal fade" id="modal-gaji">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title-gaji">Form Pembayaran Gaji</h4>
+            </div>
+<?= form_open('','role = "form" id = "form-gaji"')?>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="control-label">Gaji pada Bulan</label>
+                    <?php $t = Date('Y'); 
+                          $b = array('Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember');
+                    ?>
+                    <select name="bulan" required="" data-placeholder="--Pilih--" class="form-control">
+                        <option value="">--Pilih--</option>
+                    <?php foreach ($b as $i) { ?>
+                        <option value="<?=$i.'-'.$t?>"><?=$i.'-'.$t?></option>
+                    <?php } ?>
+                    </select>
+                </div>
+                
+                <?php $tarif_per_jam = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 6")->row()->nominal; ?>
+                <input type="hidden" id="gaji_per_jam" value="<?=$tarif_per_jam?>">
+
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Nama Guru</th>
+                                <th width="150">Jumlah Jam</th>
+                                <th width="200">Total Gaji (Rp)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php 
+                            $guru = $this->db->query("SELECT id, name, nip, status FROM guru")->result();
+                            $i = 0;
+                            foreach ($guru as $g) { 
+                                $is_berhenti = ($g->status == 'Berhenti');
+                            ?>
+                            <tr>
+                                <td><?=$g->name?> <br><small><?=$g->nip?></small></td>
+                                <td>
+                                    <?php if(!$is_berhenti) { ?>
+                                        <input type="hidden" name="id_guru[]" value="<?=$g->id?>">
+                                        <input type="number" name="jam[]" class="form-control jam-input" data-index="<?=$i?>" placeholder="Jam">
+                                    <?php } else { ?>
+                                        <input type="text" class="form-control" disabled placeholder="Berhenti">
+                                    <?php } ?>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control total-gaji" id="total_<?=$i?>" readonly <?=$is_berhenti ? 'disabled' : ''?>>
+                                </td>
+                            </tr>
+                            <?php $i++; } ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                <button type="submit" id="simpan-gaji" class="btn btn-primary">Simpan Pembayaran</button>
             </div>
 <?= form_close()?>
         </div>
@@ -104,7 +214,17 @@
             serverSide: true,
             ajax: {
                 "url": "<?= base_url().$this->uri->segment(1).'/getData'?>",
-                "type": "POST"
+                "type": "POST",
+                "data": function (d) {
+                    d.jenis = $('#jenis_filter').val();
+                    if(d.jenis === 'hari'){
+                        d.tanggal = $('#filter_hari').val();
+                    } else if(d.jenis === 'bulan'){
+                        d.tanggal = $('#filter_bulan').val();
+                    } else if(d.jenis === 'tahun'){
+                        d.tanggal = $('#filter_tahun').val();
+                    }
+                }
             },
             columns: [
                 {
@@ -113,8 +233,18 @@
                     "searchable": false
                 },
                 {"data": "Tgl"},
-                //{"data": "jumlah"},
-                {"data": "Total",render: $.fn.dataTable.render.number('.',',','')}
+                {"data": "keterangan"},
+                {"data": "Total",render: $.fn.dataTable.render.number('.',',','')},
+                {
+                    "data": "bukti", 
+                    "render": function(data) {
+                        if (data && data !== '') {
+                            return '<a href="<?=base_url('assets/images/')?>'+data+'" target="_blank"><img src="<?=base_url('assets/images/')?>'+data+'" style="max-width:50px; max-height:50px; border-radius:4px; object-fit:cover;"></a>';
+                        } else {
+                            return '-';
+                        }
+                    }
+                }
             ],
             order: [[1, 'DESC']],
             rowId: function(a){
@@ -160,11 +290,13 @@
 				 	url = '<?=base_url($this->uri->segment(1).'/Simpan')?>';
 				 	method = 'Tambah';
 				}
-				var isi = $('#form').serialize();
+				var isi = new FormData($('#form')[0]);
 				$.ajax({
 					url: url,
 					type:"POST",
 					data: isi,
+					contentType:false,
+					processData:false,
 					dataType:"JSON",
 					success:function(data){
 						$('#modal-form').modal('hide');
@@ -202,7 +334,71 @@
 		$('.form-group').removeClass('has-error');
 		$('.help-block').empty(); 
 		$('#modal-form').modal('show');
-		$('.modal-title').text('Tambah Data');
+		$('.modal-title').text('Tambah Data Pengeluaran');
 	}
+
+    $('#jenis_filter').change(function(){
+        $('#wrap-filter-hari').hide();
+        $('#wrap-filter-bulan').hide();
+        $('#wrap-filter-tahun').hide();
+        
+        $('#filter_hari').val('');
+        $('#filter_bulan').val('');
+        $('#filter_tahun').val('');
+        
+        var jenis = $(this).val();
+        if(jenis === 'hari') {
+            $('#wrap-filter-hari').show();
+        } else if(jenis === 'bulan') {
+            $('#wrap-filter-bulan').show();
+        } else if(jenis === 'tahun') {
+            $('#wrap-filter-tahun').show();
+        }
+    });
+
+    $('#btn-filter').click(function(){
+        table.ajax.reload();
+    });
+
+    $('#btn-reset').click(function(){
+        $('#jenis_filter').val('').trigger('change');
+        table.ajax.reload();
+    });
+
+    function PembayaranGaji(){
+        $('#form-gaji')[0].reset();
+        $('#modal-gaji').modal('show');
+    }
+
+    $(document).on('keyup', '.jam-input', function() {
+        var jam = $(this).val() || 0;
+        var tarif = $('#gaji_per_jam').val() || 0;
+        var index = $(this).data('index');
+        $('#total_' + index).val(jam * tarif);
+    });
+
+    $('#form-gaji').submit(function(e){
+        e.preventDefault();
+        $('#simpan-gaji').text('Menyimpan...');
+        $('#simpan-gaji').attr('disabled',true);
+        var isi = $(this).serialize();
+        $.ajax({
+            url: "<?=base_url('Gaji/Simpan')?>",
+            type:"POST",
+            data: isi,
+            dataType:"JSON",
+            success:function(data){
+                $('#modal-gaji').modal('hide');
+                $('#simpan-gaji').text('Simpan Pembayaran');
+                $('#simpan-gaji').attr('disabled',false);
+                if(data.status){
+                    reload();
+                    sweet('Sukses','Pembayaran Gaji Berhasil','success');
+                }else{
+                    sweet('Gagal','Pembayaran Gaji Sudah dilakukan','error');
+                }
+            }
+        });
+    });
 
 </script>

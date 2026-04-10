@@ -149,4 +149,10 @@ class Siswa extends CI_Controller {
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
+
+	function Hapus($id){
+		$this->M_General->delete($this->table,'id',$id);
+		$data['status'] = TRUE;
+		$this->output->set_content_type('application/json')->set_output(json_encode($data));
+	}
 }

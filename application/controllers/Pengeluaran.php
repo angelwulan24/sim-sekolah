@@ -31,7 +31,11 @@ class Pengeluaran extends CI_Controller {
 
 	function getData (){
 		header('Content-Type:application/json');
-		echo $this->mod->getAllData();
+		$filter = array(
+			'jenis'   => $this->input->post('jenis'),
+			'tanggal' => $this->input->post('tanggal')
+		);
+		echo $this->mod->getAllData($filter);
 	}
 
 	function getDetail(){
@@ -62,6 +66,18 @@ class Pengeluaran extends CI_Controller {
 	                    'time'	   => waktu(),
 	                    'keterangan'	=> filter_string($this->input->post('keterangan',TRUE))
 	                );
+
+            $config['upload_path']	= './assets/images/';
+            $config['allowed_types']= 'gif|jpg|png|jpeg';
+            $config['max_size']		= 2048;
+            $config['encrypt_name']	= TRUE;
+
+            $this->load->library('upload', $config);
+            
+            if($this->upload->do_upload('bukti')){
+                $uploadData = $this->upload->data();
+                $insert['bukti'] = $uploadData['file_name'];
+            }
 
 	        $insert = $this->M_General->insert($this->table,$insert);
 	           $this->M_General->update_kas('kas_keluar',$total);

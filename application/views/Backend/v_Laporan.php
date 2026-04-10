@@ -6,6 +6,34 @@
             </div>
         </div>
 	    <div class="box-body">
+            <div class="row" style="margin-bottom: 15px;">
+                <div class="col-md-3">
+                    <select id="jenis_filter" class="form-control">
+                        <option value="">-- Pilih Jenis Filter --</option>
+                        <option value="bulan">Bulanan</option>
+                        <option value="tahun">Tahunan</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3" id="wrap-filter-bulan" style="display:none;">
+                    <input type="month" id="filter_bulan" class="form-control">
+                </div>
+                
+                <div class="col-md-3" id="wrap-filter-tahun" style="display:none;">
+                    <select id="filter_tahun" class="form-control">
+                        <option value="">-- Pilih Tahun --</option>
+                        <?php 
+                            for($i = date('Y'); $i >= date('Y')-5; $i--) {
+                                echo "<option value='$i'>$i</option>";
+                            }
+                        ?>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button id="btn-filter" class="btn btn-success btn-sm"><i class="fa fa-filter"></i> Filter</button>
+                    <button id="btn-reset" class="btn btn-default btn-sm"><i class="fa fa-refresh"></i> Reset</button>
+                </div>
+            </div>
 	    	<div class="table-responsive">    	
 		        <table id="list-data" class="table table-bordered table-hover">
 		            <thead>
@@ -102,7 +130,15 @@
             serverSide: true,
             ajax: {
                 "url": "<?= base_url().$this->uri->segment(1).'/getData'?>",
-                "type": "POST"
+                "type": "POST",
+                "data": function (d) {
+                    d.jenis = $('#jenis_filter').val();
+                    if(d.jenis === 'bulan'){
+                        d.tanggal = $('#filter_bulan').val();
+                    } else if(d.jenis === 'tahun'){
+                        d.tanggal = $('#filter_tahun').val();
+                    }
+                }
             },
             columns: [
                 {
@@ -181,6 +217,30 @@
     function reload(){
         table.ajax.reload(null,false);
     }
+
+    $('#jenis_filter').change(function(){
+        $('#wrap-filter-bulan').hide();
+        $('#wrap-filter-tahun').hide();
+        
+        $('#filter_bulan').val('');
+        $('#filter_tahun').val('');
+        
+        var jenis = $(this).val();
+        if(jenis === 'bulan') {
+            $('#wrap-filter-bulan').show();
+        } else if(jenis === 'tahun') {
+            $('#wrap-filter-tahun').show();
+        }
+    });
+
+    $('#btn-filter').click(function(){
+        table.ajax.reload();
+    });
+
+    $('#btn-reset').click(function(){
+        $('#jenis_filter').val('').trigger('change');
+        table.ajax.reload();
+    });
 
     function Detail(id){
 

@@ -96,4 +96,24 @@ class Guru extends CI_Controller {
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
+
+	function Hapus($id){
+		$this->M_General->delete($this->table,'id',$id);
+		$data['status'] = TRUE;
+		$this->output->set_content_type('application/json')->set_output(json_encode($data));
+	}
+
+	function DetailGaji($id){
+		$this->load->helper('data');
+		$this->breadcrumb->append_crumb('SIM Sekolah ',base_url());
+		$this->breadcrumb->append_crumb($this->parents,base_url('Guru'));
+		$this->breadcrumb->append_crumb('Detail Gaji Guru',$this->parents);
+
+		$data['title']	= 'Detail Gaji Guru | SIM Sekolah ';
+		$data['judul']	= 'Detail Gaji Guru';
+		$data['icon']	= $this->icon;
+		$data['isi']	= $this->M_General->getByID('gaji','id_guru',$id,'DESC')->result();
+
+	    $this->template->views('Backend/'.$this->parents.'/v_Detail_Gaji',$data);
+	}
 }

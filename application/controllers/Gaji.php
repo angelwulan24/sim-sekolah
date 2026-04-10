@@ -59,31 +59,52 @@ class Gaji extends CI_Controller {
 
 	function Simpan(){
 
-		$id_gur = $this->input->post('guru');
 		$bln = filter_string($this->input->post('bulan',TRUE));
-		$cek = $this->db->query("SELECT id FROM gaji WHERE id_guru = '$id_gur' AND periode = '$bln' ")->num_rows();
-		$jam = filter_string($this->input->post('jam',TRUE));
-		$nominal = filter_string($this->input->post('gaji',TRUE));
-		$total = $jam * $nominal;
+        $id_guru_arr = $this->input->post('id_guru');
+        $jam_arr = $this->input->post('jam');
 
-		if ($cek > 0){
-			$data['status'] = FALSE;
-    	}
-    	else{
+        $n = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 6")->row_array();
+        $tarif_per_jam = $n['nominal'];
 
-    		$insert = array(
-	                    'id_guru'	=> $id_gur,
-	                    'periode'	=> $bln,
-	                    'time'	   => waktu(),
-	                    'jam'		=> $jam,
-	                    'nominal'	=> $nominal
-	                );
+        $total_kas = 0;
+        $success = false;
 
-	        $insert = $this->M_General->insert($this->table,$insert);
-	        $this->M_General->update_kas('kas_keluar',$total);
-	        $data['status'] = TRUE;
-    		
-    	}
+        if(!empty($id_guru_arr)) {
+            for($i=0; $i<count($id_guru_arr); $i++) {
+                $id_gur = $id_guru_arr[$i];
+                $jam = $jam_arr[$i];
+
+                if(empty($jam) || $jam <= 0) continue;
+
+                $cek = $this->db->query("SELECT id FROM gaji WHERE id_guru = '$id_gur' AND periode = '$bln' ")->num_rows();
+                if ($cek > 0) continue;
+
+                $total_gaji_guru = $jam * $tarif_per_jam;
+
+                $insert = array(
+                    'id_guru'	=> $id_gur,
+                    'periode'	=> $bln,
+                    'time'	   => waktu(),
+                    'jam'		=> $jam,
+                    'nominal'	=> $tarif_per_jam
+                );
+                
+                $this->M_General->insert($this->table,$insert);
+                $total_kas += $total_gaji_guru;
+                $success = true;
+            }
+        }
+
+        if($total_kas > 0) {
+            $this->M_General->update_kas('kas_keluar',$total_kas);
+        }
+        
+        if($success) {
+            $data['status'] = TRUE;
+        } else {
+            $data['status'] = FALSE;
+        }
+
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
 

@@ -46,7 +46,7 @@
                       <th>Alamat</th>
                       <th>Kelas</th>
                       <th>Status</th>
-                      <th width="100">Aksi</th>
+                      <th width="150">Aksi</th>
 			            </tr>
 		            </thead>
 		            <tbody>
@@ -146,7 +146,6 @@
                     <select name="status" required="" data-placeholder="--Pilih--" class="form-control">
                         <option value="">--Pilih--</option>
                         <option value="Aktif">Aktif</option>
-                        <option value="Cuti">Cuti</option>
                         <option value="Berhenti">Berhenti</option>
                     </select>
                 </div>
@@ -245,7 +244,6 @@
                     "render": function(data, type, row) {
                         var stat = "success";
                         if(data == "Berhenti") stat = "danger";
-                        else if(data == "Cuti") stat = "warning";
                         return '<span class="label label-'+stat+' control-label">'+data+'</span>';
                     }
                 },
@@ -396,6 +394,34 @@
 		$('#modal-form').modal('show');
 		$('.modal-title').text('Tambah Data');
 	}
+
+        function Hapus(id){
+            Swal({
+                title: 'Ingin menghapus data?',
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if(result.value) {
+                    $.ajax({
+                        url : "<?=base_url($this->uri->segment(1).'/Hapus')?>/"+id,
+                        type: "POST",
+                        dataType: "JSON",
+                        success: function(data){
+                            reload();
+                            sweet('Dihapus !','Berhasil Hapus Data','success');
+                        },
+                        error: function (jqXHR, textStatus, errorThrown){
+                            sweet('Oops...','Gagal Hapus Data','error');
+                            console.log(jqXHR, textStatus, errorThrown);
+                        }
+                    });
+                }
+            });
+        }
 
 	function Ubah(id){
 		label = 'ubah';

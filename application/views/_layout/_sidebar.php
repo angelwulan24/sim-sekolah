@@ -27,15 +27,7 @@
              <li class = "<?php echo activate_menu('Lainnya')?>"><a href="<?= base_url()?>Lainnya"><i class="fa fa-circle-o"></i>Pemasukan Lainnya</a></li>
         </ul>
     </li>
-    <li class="treeview <?php if ($aktif == 'Gaji' || $aktif == 'Pengeluaran') echo 'active' ?>">
-        <a href="#"><i class="fa fa-level-up"></i> <span>Kas Keluar</span>
-            <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
-        </a>
-        <ul class="treeview-menu">
-            <li class = "<?php echo activate_menu('Gaji')?>"><a href="<?= base_url()?>Gaji"><i class="fa fa-circle-o"></i>Pembayaran Gaji</a></li>
-             <li class = "<?php echo activate_menu('Pengeluaran')?>"><a href="<?= base_url()?>Pengeluaran"><i class="fa fa-circle-o"></i>Pengeluaran Lainnya</a></li>
-        </ul>
-    </li>
+    <li class = "<?php echo activate_menu('Pengeluaran')?>"><a href="<?= base_url()?>Pengeluaran"><i class="fa fa-level-up"></i> <span>Kas Keluar</span><span class="pull-right-container"></span></a></li>
     <li class = "<?php echo activate_menu('Tunggakan')?>"><a href="<?= base_url()?>Tunggakan"><i class="fa fa-exclamation-triangle"></i> <span>Info Tunggakan</span><span class="pull-right-container"></span></a></li>
     <?php if($this->session->userdata('role') != 2) { ?>
     <li class = "<?php echo activate_menu('Whatsapp')?>"><a href="<?= base_url()?>Whatsapp"><i class="fa fa-whatsapp"></i> <span>WhatsApp Gateway</span><span class="pull-right-container"></span></a></li>

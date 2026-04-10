@@ -22,8 +22,8 @@
                       <th style="width: 20px;">Bidang Studi</th>
                       <th>Alamat</th>
                       <th>Telepon</th>
-                      <th>Status</th>
-                      <th width="100">Aksi</th>
+                      <th width="50">Status</th>
+                      <th width="250">Aksi</th>
 			            </tr>
 		            </thead>
 		            <tbody>
@@ -65,7 +65,32 @@
             	</div>
                 <div class="form-group">
                     <label class="control-label"> Bidang Studi</label>
-                    <div><input type="text" required="" placeholder="Bidang Studi" autocomplete="off" name="bidang" class="form-control"></div>
+                    <select name="bidang" required="" data-placeholder="--Pilih Bidang Studi--" class="form-control">
+                        <option value="">--Pilih Bidang Studi--</option>
+                        <option value="Guru Kelas">Guru Kelas</option>
+                        <option value="Pendidikan Agama">Pendidikan Agama</option>
+                        <option value="PPKn">PPKn</option>
+                        <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                        <option value="Bahasa Inggris">Bahasa Inggris</option>
+                        <option value="Matematika">Matematika</option>
+                        <option value="IPA">IPA</option>
+                        <option value="IPS">IPS</option>
+                        <option value="Seni Budaya">Seni Budaya</option>
+                        <option value="PJOK">PJOK</option>
+                        <option value="Prakarya">Prakarya</option>
+                        <option value="TIK / Informatika">TIK / Informatika</option>
+                        <option value="Sejarah">Sejarah</option>
+                        <option value="Geografi">Geografi</option>
+                        <option value="Ekonomi">Ekonomi</option>
+                        <option value="Sosiologi">Sosiologi</option>
+                        <option value="Fisika">Fisika</option>
+                        <option value="Kimia">Kimia</option>
+                        <option value="Biologi">Biologi</option>
+                        <option value="Bahasa Daerah">Bahasa Daerah</option>
+                        <option value="Bimbingan Konseling (BK)">Bimbingan Konseling (BK)</option>
+                        <option value="BTA">BTA</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label class="control-label"> Alamat</label>
@@ -274,6 +299,38 @@
 		$('.modal-title').text('Tambah Data');
 	}
 
+        function Hapus(id){
+            Swal({
+                title: 'Ingin menghapus data?',
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if(result.value) {
+                    $.ajax({
+                        url : "<?=base_url($this->uri->segment(1).'/Hapus')?>/"+id,
+                        type: "POST",
+                        dataType: "JSON",
+                        success: function(data){
+                            reload();
+                            sweet('Dihapus !','Berhasil Hapus Data','success');
+                        },
+                        error: function (jqXHR, textStatus, errorThrown){
+                            sweet('Oops...','Gagal Hapus Data','error');
+                            console.log(jqXHR, textStatus, errorThrown);
+                        }
+                    });
+                }
+            });
+        }
+
+        function DetailGaji(id) {
+            document.location.href= "<?= base_url($this->uri->segment(1).'/DetailGaji/')?>"+id;
+        }
+
 	function Ubah(id){
 		label = 'ubah';
 		$('#form')[0].reset();
@@ -290,7 +347,7 @@
                 $('[name="nip"]').val(data.nip);
                 $('[name="telepon"]').val(data.number);
                 $('[name="alamat"]').val(data.alamat);
-                $('[name="bidang"]').val(data.bidang);
+                $('[name="bidang"]').val(data.bidang).trigger('change');
                 if ($.fn.iCheck) {
                     $('[name="gender"]').iCheck('uncheck');
                     $('[name="gender"][value="'+data.sex+'"]').iCheck('check');

@@ -47,7 +47,15 @@
             	<input type="hidden" name="id" value="">
             	<div class="form-group">
             		<label class="control-label"> Nama Kelas</label>
-            		<div><input type="text" required="" placeholder="Nama Kelas" autocomplete="off" name="nama" class="form-control"></div>
+            		<select name="nama" required="" data-placeholder="--Pilih Kelas--" class="form-control">
+                        <option value="">--Pilih Kelas--</option>
+                        <option value="Kelas 1">Kelas 1</option>
+                        <option value="Kelas 2">Kelas 2</option>
+                        <option value="Kelas 3">Kelas 3</option>
+                        <option value="Kelas 4">Kelas 4</option>
+                        <option value="Kelas 5">Kelas 5</option>
+                        <option value="Kelas 6">Kelas 6</option>
+                    </select>
             	</div>
                 <div class="form-group">
                     <label class="control-label">Wali Kelas</label>
@@ -244,7 +252,7 @@
 			dataType:"JSON",
 			success:function(data){
 				$('[name="id"]').val(data.id);
-                $('[name="nama"]').val(data.nama);
+                $('[name="nama"]').val(data.nama).trigger('change');
                 $('[name="keterangan"]').val(data.keterangan);
                 $('[name="wali"]').val(data.wali).trigger('change');
                 

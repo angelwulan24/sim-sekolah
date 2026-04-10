@@ -1,22 +1,17 @@
 <script type="text/javascript">
-    
-        function TotalGaji(){
-
-            var gaji = $('#gaji').val();
-            var jam = $('#jam').val() || 0;
-
-            var sum = gaji * jam;
-
-            $('#jumlah').val(sum);
-        }
-
+    $(document).on('keyup', '.jam-input', function() {
+        var jam = $(this).val() || 0;
+        var tarif = $('#gaji_per_jam').val() || 0;
+        var index = $(this).data('index');
+        $('#total_' + index).val(jam * tarif);
+    });
 </script>
 
 <div class="col-xs-12">
 	<div class="box box-primary">
         <div class="box-header">
             <div class="pull-right">
-            	<a href="#" onclick="Tambah()" class="btn btn-primary btn-sm">Tambah Data </a>
+            	<a href="#" onclick="Tambah()" class="btn btn-primary btn-sm">Form Pembayaran Gaji</a>
             </div>
         </div>
 	    <div class="box-body">
@@ -55,17 +50,6 @@
             </div>
 <?= form_open('','role = "form" id = "form"')?>
             <div class="modal-body">
-                <input type="hidden" id="gaji" name="gaji" value="">
-                <div class="form-group">
-                    <label class="control-label"> Nama Guru</label>
-                    <?php $kls= $this->db->query("SELECT id,name,nip FROM guru")->result() ?>
-                        <select name="guru" data-placeholder="--Pilih Guru--" class="form-control select2">
-                            <option value=""></option>
-                        <?php foreach ($kls as $key) {?>    
-                            <option value="<?=$key->id?>"><?=$key->name.'/'.$key->nip?></option>
-                        <?php } ?>
-                        </select>
-                </div>
                 <div class="form-group">
                     <label class="control-label">Gaji pada Bulan</label>
                     <?php $t = Date('Y'); 
@@ -78,13 +62,43 @@
                     <?php } ?>
                     </select>
                 </div>
-            	<div class="form-group">
-            		<label class="control-label"> Jumlah Jam Mengajar</label>
-            		<div><input type="text" required="" id="jam" onkeyup="TotalGaji()" placeholder="Jumlah Jam" onkeypress="return Angka(this)" autocomplete="off" name="jam" class="form-control"></div>
-            	</div>
-                <div class="form-group">
-                    <label class="control-label"> Jumlah Gaji</label>
-                    <div><input type="text" readonly="" id="jumlah" placeholder="Jumlah Gaji" autocomplete="off" name="jumlah" class="form-control"></div>
+                
+                <?php $tarif_per_jam = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 6")->row()->nominal; ?>
+                <input type="hidden" id="gaji_per_jam" value="<?=$tarif_per_jam?>">
+
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Nama Guru</th>
+                                <th width="150">Jumlah Jam</th>
+                                <th width="200">Total Gaji (Rp)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php 
+                            $guru = $this->db->query("SELECT id, name, nip, status FROM guru")->result();
+                            $i = 0;
+                            foreach ($guru as $g) { 
+                                $is_berhenti = ($g->status == 'Berhenti');
+                            ?>
+                            <tr>
+                                <td><?=$g->name?> <br><small><?=$g->nip?></small></td>
+                                <td>
+                                    <?php if(!$is_berhenti) { ?>
+                                        <input type="hidden" name="id_guru[]" value="<?=$g->id?>">
+                                        <input type="number" name="jam[]" class="form-control jam-input" data-index="<?=$i?>" placeholder="Jam">
+                                    <?php } else { ?>
+                                        <input type="text" class="form-control" disabled placeholder="Berhenti">
+                                    <?php } ?>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control total-gaji" id="total_<?=$i?>" readonly <?=$is_berhenti ? 'disabled' : ''?>>
+                                </td>
+                            </tr>
+                            <?php $i++; } ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div class="modal-footer">
@@ -251,16 +265,5 @@
         $('.help-block').empty();
         $('#modal-form').modal('show');
         $('.modal-title').text('Form Pembayaran Gaji'); 
-
-        $.ajax({
-
-            url: "<?=base_url($this->uri->segment(1).'/GetGaji')?>",
-            type:"GET",
-            dataType:"JSON",
-            success:function(data){
-                $('[name="gaji"]').val(data);               
-            }
-        });
-
     }
 </script>
