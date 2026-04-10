@@ -58,8 +58,8 @@
             	<div class="form-group">
             		<label class="control-label">Jenis Kelamin</label><br>
             		<div class="ra">
-            		<input type="radio" name="gender" value="Pria" class="minimal"><span class="lbl"> Pria</span>
-            		<input type="radio" name="gender" value="Wanita" class="minimal"><span class="lbl"> Wanita</span>
+            		<input type="radio" name="gender" value="Laki-Laki" class="minimal"><span class="lbl"> Laki-Laki</span>
+            		<input type="radio" name="gender" value="Perempuan" class="minimal"><span class="lbl"> Perempuan</span>
             		</div>
             	</div>
             	<div class="form-group">

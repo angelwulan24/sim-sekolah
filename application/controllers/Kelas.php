@@ -74,7 +74,7 @@ class Kelas extends CI_Controller {
 		$data['title']	= 'Data '.$this->parents.' '.get_kelas($id).' | SIM Sekolah ';
 		$data['judul']	=  $this->parents.' '.get_kelas($id);
 		$data['icon']	= $this->icon;
-		$data['siswa']	=$this->db->query("SELECT id,name,nis,sex FROM siswa WHERE kelas = $id")->result();
+		$data['siswa']	=$this->db->query("SELECT * FROM siswa WHERE kelas = $id")->result();
 
 		$this->template->views('Backend/'.$this->parents.'/v_Detail',$data);
 
@@ -102,5 +102,40 @@ class Kelas extends CI_Controller {
         $insert = $this->M_General->update($this->table,$insert,'id',$this->input->post('id'));
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
+	}
+	function Kenaikan(){
+		$this->breadcrumb->append_crumb('SIM Sekolah ',base_url());
+		$this->breadcrumb->append_crumb($this->parents,base_url('Kelas'));
+		$this->breadcrumb->append_crumb('Kenaikan Kelas',$this->parents);
+
+		$data['title']	= 'Kenaikan Kelas | SIM Sekolah ';
+		$data['judul']	= 'Kenaikan Kelas Otomatis';
+		$data['icon']	= $this->icon;
+		$data['kelas']	= $this->db->get('kelas')->result();
+
+		$this->template->views('Backend/'.$this->parents.'/v_Kenaikan',$data);
+	}
+
+	function ProsesKenaikan(){
+		$dari = $this->input->post('dari_kelas');
+		$ke = $this->input->post('ke_kelas');
+		
+		if (!empty($dari) && !empty($ke) && $dari != $ke) {
+			if ($ke == 'lulus') {
+				$data = array(
+					'status' => 'Lulus',
+					'kelas'  => 0
+				);
+			} else {
+				$data = array(
+					'kelas' => $ke
+				);
+			}
+
+			$this->db->where('kelas', $dari);
+			$this->db->update('siswa', $data);
+		}
+		
+		redirect('Kelas/Kenaikan');
 	}
 }

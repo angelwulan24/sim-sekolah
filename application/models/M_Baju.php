@@ -12,5 +12,21 @@ class M_Baju extends CI_Model {
 		return $this->datatables->generate();
 	}
 	
+	function getSiswa($kls = ''){
+		$this->datatables->select('id,name,nis,sex');
+		$this->datatables->from('siswa');
+		
+		$btn = '<center>
+			<a href="javascript:void(0)" onclick="Bayar($1)" class="btn btn-success btn-xs"><i class="fa fa-money"></i> Bayar</a>
+			<a href="javascript:void(0)" onclick="Detail($1)" class="btn btn-default btn-xs"><i class="fa fa-print"></i> Cetak</a>
+		</center>';
+		
+		$this->datatables->add_column('view', $btn, 'id');
+		if($kls != ''){
+			$this->datatables->where('kelas',$kls);
+		}
+		return $this->datatables->generate();
+	}
+	
 
 }

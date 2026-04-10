@@ -1,17 +1,3 @@
-<script type="text/javascript">
-    
-        function TotalBiaya(){
-
-            var biaya = $('#harga').val();
-            var hari = $('#total').val() || 0;
-
-            var sum = biaya * hari;
-
-            $('#seluruh').val(sum);
-        }
-
-</script>
-
 <div class="col-xs-12">
 	<div class="box box-primary">
         <div class="box-header">
@@ -59,21 +45,30 @@
 <?= form_open('','role = "form" id = "form"')?>
             <div class="modal-body">
             	<input type="hidden" name="id_siswa" value="">
-                 <div class="form-group">
-                    <label class="control-label"> Tanggal</label>
-                    <div><input type="text" required="" placeholder="Tanggal" value="" autocomplete="off" placeholder="" name="tanggal" class="form-control datepicker"></div>
-                </div>
                 <div class="form-group">
-                    <label class="control-label"> Jumlah hari</label>
-                    <div><input type="text" onkeyup="TotalBiaya()" value="" onkeypress="return Angka(this)" id="total" placeholder="Jumlah hari" autocomplete="off" required="" name="total" class="form-control"></div>
+                    <label class="control-label">Tahun Ajaran</label>
+                    <?php 
+                          $t = Date('Y');
+                          $bulan = date('m');
+                          $tahun_ajaran_list = [];
+                          // Provide options ranging around current year
+                          for ($i = -1; $i <= 1; $i++) {
+                              $y1 = $t + $i;
+                              $y2 = $y1 + 1;
+                              $label_tahun = $y1 . '/' . $y2;
+                              $tahun_ajaran_list[] = $label_tahun;
+                          }
+                    ?>
+                    <select name="tahun_ajaran" required="" data-placeholder="--Pilih--" class="form-control select2">
+                        <option value="">--Pilih Tahun Ajaran--</option>
+                        <?php foreach($tahun_ajaran_list as $ta): ?>
+                        <option value="<?=$ta?>"><?=$ta?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label class="control-label"> Nominal</label>
                     <div><input type="text" value="" readonly="" id="harga" name="harga" class="form-control"></div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label"> Total nominal</label>
-                    <div><input type="text" value="" readonly="" id="seluruh" name="seluruh" class="form-control"></div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -208,10 +203,12 @@
 						$('#modal-form').modal('hide');
 						$('#simpan').text('Bayar');
 		 				$('#simpan').attr('disabled',false);
-       
-    						reload();
+						if (data.status) {
+       						reload();
     						sweet('Sukses','Pembayaran Uang Buku Berhasil','success');
-
+						} else {
+							sweet('Gagal', data.message || 'Pembayaran Uang Buku Sudah dilakukan', 'error');
+						}
 					}
 				});
 			},

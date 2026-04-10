@@ -32,52 +32,6 @@
     </div>
 </div>
 
-<!-- Modal Tambah -->
-<div class="modal fade" id="modal-form">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title"></h4>
-            </div>
-<?= form_open('','role = "form" id = "form"')?>
-            <div class="modal-body">
-            	<input type="hidden" name="id_siswa" value="">
-                <div class="form-group">
-                    <label class="control-label">Nama Siswa</label>
-                    <div><input type="text" readonly="" name="nama_siswa" class="form-control"></div>
-                </div>
-
-                <div class="form-group">
-                    <label class="control-label">Periode Pembayaran</label>
-                    <?php $t = Date('Y'); 
-                          $b = array('Ganjil','Genap');
-                    ?>
-                    <select name="bulan" required="" data-placeholder="--Pilih--" class="form-control">
-                        <option value="">--Pilih--</option>
-                    <?php foreach ($b as $i) { ?>
-                        <option value="<?=$i.'-'.$t?>"><?=$i.'-'.$t?></option>
-                    <?php } ?>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="control-label"> Nominal</label>
-                    <div><input type="text" value="" readonly="" name="harga" class="form-control"></div>
-                </div>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                <button type="submit" id="simpan"  class="btn btn-primary">Bayar</button>
-            </div>
-<?= form_close()?>
-        </div>
-    </div>
-</div>
-
 <script type="text/javascript">
 
 	var label;
@@ -160,60 +114,6 @@
         });
     }
 
-		$('#form').validate({
-			errorElement: 'div',
-			errorClass: 'help-block',
-			focusInvalid: false,
-			ignore: "",
-			highlight: function (e) {
-				$(e).closest('.form-group').removeClass('has-info').addClass('has-error');
-			},
-			success: function (e) {
-				$(e).closest('.form-group').removeClass('has-error');//.addClass('has-info');
-				$(e).remove();
-			},
-			errorPlacement: function (error, element) {
-				if(element.is('input[type=radio]')) {
-					var controls = element.closest('div[class*="ra"]');
-					if(controls.find(':radio').length > 0) controls.append(error);
-					else error.insertAfter(element.nextAll('.lbl:eq(0)').eq(0));
-				}
-				else if(element.is('.select2')) {
-					error.insertAfter(element.siblings('[class*="select2-container"]:eq(0)'));
-				}
-				else error.insertAfter(element.parent()); 
-			},
-			submitHandler: function (form) {
-				$('#simpan').text('Membayar...');
-				$('#simpan').attr('disabled',true);
-				var url,method;
-				if (label == 'simpan'){
-				 	url = '<?=base_url($this->uri->segment(1).'/Simpan')?>';
-				 	method = 'Tambah';
-				}
-				var isi = $('#form').serialize();
-				$.ajax({
-					url: url,
-					type:"POST",
-					data: isi,
-					dataType:"JSON",
-					success:function(data){
-						$('#modal-form').modal('hide');
-						$('#simpan').text('Simpan');
-		 				$('#simpan').attr('disabled',false);
-                        if(data.status){
-    						reload();
-    						sweet('Sukses','Pembayaran Uang Ujian Berhasil','success');
-                        }else{
-                            sweet('Gagal','Pembayaran Uang Ujian sudah dilakukan','error');
-                        }
-					}
-				});
-			},
-			invalidHandler: function (form) {}
-		});
-
-
         $('#kelas').on('change',function(){
 
             var kelas = $(this).val();
@@ -246,36 +146,4 @@
 
          document.location.href= "<?= base_url($this->uri->segment(1).'/Detail/')?>"+id;
     }
-
-    function Bayar(id){
-        label = 'simpan';
-        $('#form')[0].reset();
-        $('.form-group').removeClass('has-error');
-        $('.help-block').empty();
-        $('#modal-form').modal('show');
-        $('.modal-title').text('Form Pembayaran Uang Ujian'); 
-
-        $.ajax({
-
-            url: "<?=base_url($this->uri->segment(1).'/GetUjian/')?>",
-            type:"GET",
-            dataType:"JSON",
-            success:function(data){
-                $('[name="id_siswa"]').val(id);
-                $('[name="harga"]').val(data);
-            }
-        });
-
-        // Get student name
-        $.ajax({
-            url: "<?=base_url('Ujian/GetSiswaName/')?>"+id,
-            type:"GET",
-            dataType:"JSON",
-            success:function(data){
-                $('[name="nama_siswa"]').val(data.name);
-            }
-        });
-
-    }
-
 </script>

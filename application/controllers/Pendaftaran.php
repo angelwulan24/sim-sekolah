@@ -32,7 +32,7 @@ class Pendaftaran extends CI_Controller {
 		$data['title']	= $this->parents.' | SIM Sekolah ';
 		$data['judul']	= $this->parents;
 		$data['icon']	= $this->icon;
-		$data['isi']	= $this->db->query("SELECT id,name,nis,alamat,sex,wali,bayar,tempat,tanggal FROM temp")->result();
+		$data['isi']	= $this->db->query("SELECT temp.id, temp.name, temp.nis, temp.alamat, temp.sex, temp.orangtua_wali, temp.bayar, temp.tempat, temp.tanggal, temp.telpon, temp.kelas, kelas.nama as nama_kelas FROM temp LEFT JOIN kelas ON temp.kelas = kelas.id")->result();
 		$data['bayar']	= $this->db->query("SELECT nominal FROM pembayaran WHERE id = 5 ")->row_array();
 
 		$this->template->views('Backend/'.$this->parents.'/v_'.$this->parents,$data);
@@ -59,8 +59,10 @@ class Pendaftaran extends CI_Controller {
 					'tempat'=>$row['C'],
 					'tanggal'=>$row['D'],
 					'sex'=>$row['E'],
-					'wali'=>$row['F'],
+					'orangtua_wali'=>$row['F'],
 					'alamat'=>$row['G'],
+					'telpon'=>$row['H'],
+					'kelas'=>$row['I'],
 				));
 			}
 			
@@ -85,7 +87,9 @@ class Pendaftaran extends CI_Controller {
                     'tempat'	=> filter_string($this->input->post('tempat',TRUE)),
                     'tanggal'	=> filter_string($this->input->post('tanggal',TRUE)),
                     'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
-                    'wali'		=> filter_string($this->input->post('wali',TRUE))
+                    'orangtua_wali'		=> filter_string($this->input->post('orangtua_wali',TRUE)),
+                    'telpon'		=> filter_string($this->input->post('telpon',TRUE)),
+                    'kelas'     => $this->input->post('kelas',TRUE)
                 );
 
         $insert = $this->M_General->insert($this->table,$insert);
@@ -125,64 +129,82 @@ class Pendaftaran extends CI_Controller {
 		$data = $this->db->get_where('temp', ['id' => $id])->row();
 		$bayar = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 5 ")->row_array();
 		
-		try {
-			$pdf = new FPDF();
-			$pdf->AddPage();
-			$pdf->SetFont('Arial','B',16);
-			$pdf->Cell(0,10,'BUKTI PEMBAYARAN PENDAFTARAN',0,1,'C');
-			
-			$pdf->SetFont('Arial','',12);
-			$pdf->Ln(10);
-			
-			$pdf->SetFont('Arial','B',11);
-			$pdf->Cell(50,8,'Nama Siswa');
-			$pdf->SetFont('Arial','',11);
-			$pdf->Cell(0,8,': '.$data->name,0,1);
-			
-			$pdf->SetFont('Arial','B',11);
-			$pdf->Cell(50,8,'NIS');
-			$pdf->SetFont('Arial','',11);
-			$pdf->Cell(0,8,': '.$data->nis,0,1);
-			
-			$pdf->SetFont('Arial','B',11);
-			$pdf->Cell(50,8,'Jenis Kelamin');
-			$pdf->SetFont('Arial','',11);
-			$pdf->Cell(0,8,': '.$data->sex,0,1);
-			
-			$pdf->SetFont('Arial','B',11);
-			$pdf->Cell(50,8,'Tempat, Tgl Lahir');
-			$pdf->SetFont('Arial','',11);
-			$pdf->Cell(0,8,': '.$data->tempat.', '.$data->tanggal,0,1);
-			
-			$pdf->SetFont('Arial','B',11);
-			$pdf->Cell(50,8,'Nama Wali');
-			$pdf->SetFont('Arial','',11);
-			$pdf->Cell(0,8,': '.$data->wali,0,1);
-			
-			$pdf->SetFont('Arial','B',11);
-			$pdf->Cell(50,8,'Alamat');
-			$pdf->SetFont('Arial','',11);
-			$pdf->Cell(0,8,': '.$data->alamat,0,1);
-			
-			$pdf->Ln(5);
-			$pdf->SetFont('Arial','B',11);
-			$pdf->Cell(50,8,'Nominal Pembayaran');
-			$pdf->SetFont('Arial','',11);
-			$pdf->Cell(0,8,': Rp. '.number_format($bayar['nominal'],0,',','.'),0,1);
-			
-			$pdf->SetFont('Arial','B',11);
-			$pdf->Cell(50,8,'Tanggal Pembayaran');
-			$pdf->SetFont('Arial','',11);
-			$pdf->Cell(0,8,': '.date('d-m-Y H:i:s'),0,1);
-			
-			$pdf->Ln(10);
-			$pdf->SetFont('Arial','',10);
-			$pdf->Cell(0,8,'Bukti pembayaran ini sah dan telah diproses oleh sistem.',0,1,'C');
-			
-			$pdf->Output('D','Bukti_Pembayaran_'.$data->nis.'.pdf');
-		} catch (Exception $e) {
-			echo "Error: " . $e->getMessage();
+		if(!$data) {
+			show_error('Data pendaftaran tidak ditemukan');
+			return;
 		}
+
+		$pdf = new FPDF('P','mm','A4');
+		$pdf->AddPage();
+		
+       // Header
+       $pdf->Cell(3,5,'',0,1);
+       $pdf->Image(base_url().'/assets/dist/img/MI.png', 10, 10,33);
+       $pdf->Cell(3,-5,'',0,1);
+       $pdf->SetFont('TIMES','B',14);
+       $pdf->Cell(189, 5, 'KEMENTRIAN AGAMA REPUBLIK INDONESIA', 0, 1, 'C');
+       $pdf->Cell(189, 7, 'KANTOR KEMENTRIAN AGAMA KABUPATEN PATI', 0, 1, 'C');
+       $pdf->SetFont('TIMES','B',16);
+       $pdf->Cell(192, 7, 'MADRASAH ALIYAH NEGERI PATI', 0, 1, 'C');
+       $pdf->SetFont('TIMES','',12);
+       $pdf->Cell(189, 5, 'Jl. Ratu kalinyamat Gg. Melati II, Kec. Tayu, Kabupaten Pati', 0, 1, 'C');
+       $pdf->Cell(189, 5, 'Telp.(020) 0000000,Fax(020)0000000', 0, 1, 'C');
+       $pdf->Cell(189, 5, 'E-mail : madrasahaliyah@gmail.com', 0, 1, 'C');
+       $pdf->SetLineWidth(1);
+       $pdf->Line(9, 46, 203, 46);
+       $pdf->SetLineWidth(0);
+       $pdf->Line(9, 47, 203, 47);
+		
+		$pdf->Cell(3,8,'',0,1);
+		
+		// Content
+		$pdf->SetFont('TIMES','B',11);
+		$pdf->Cell(0, 5, 'BUKTI PEMBAYARAN PENDAFTARAN', 0, 1, 'C');
+		$pdf->Ln(5);
+		
+		$pdf->SetFont('TIMES','',10);
+		$pdf->Cell(40, 6, 'Nama Siswa', 0, 0);
+		$pdf->Cell(5, 6, ':', 0, 0);
+		$pdf->Cell(0, 6, $data->name, 0, 1);
+		
+		$pdf->Cell(40, 6, 'NIS', 0, 0);
+		$pdf->Cell(5, 6, ':', 0, 0);
+		$pdf->Cell(0, 6, $data->nis, 0, 1);
+		
+		$pdf->Cell(40, 6, 'Jenis Kelamin', 0, 0);
+		$pdf->Cell(5, 6, ':', 0, 0);
+		$pdf->Cell(0, 6, $data->sex, 0, 1);
+		
+		$pdf->Cell(40, 6, 'Tempat, Tgl Lahir', 0, 0);
+		$pdf->Cell(5, 6, ':', 0, 0);
+		$pdf->Cell(0, 6, $data->tempat.', '.$data->tanggal, 0, 1);
+		
+		$pdf->Cell(40, 6, 'Orangtua / Wali', 0, 0);
+		$pdf->Cell(5, 6, ':', 0, 0);
+		$pdf->Cell(0, 6, $data->orangtua_wali, 0, 1);
+		
+		$pdf->Cell(40, 6, 'Alamat', 0, 0);
+		$pdf->Cell(5, 6, ':', 0, 0);
+		$pdf->Cell(0, 6, $data->alamat, 0, 1);
+		
+		$pdf->Ln(5);
+		$pdf->SetFont('TIMES','B',12);
+		$pdf->Cell(40, 8, 'TOTAL BAYAR', 0, 0);
+		$pdf->Cell(5, 8, ':', 0, 0);
+		$pdf->Cell(0, 8, 'Rp. '.number_format($bayar['nominal'], 0, ',', '.'), 0, 1);
+		
+       $pdf->SetFont('TIMES','',12);
+       $pdf->Cell(125, 35, '', 0, 1);
+       $pdf->Cell(125, 35, '', 0, 0);
+       $pdf->Cell(55, 5, 'Pati, '.  date('d F Y'), 0, 1);
+       $pdf->Cell(125, 5, '', 0, 0);
+       $pdf->Cell(35, 5, 'Bendahara,', 0, 1);
+       $pdf->Cell(125, 10, '', 0, 0);
+       $pdf->Cell(35, 14, '', 0, 1);
+       $pdf->Cell(125, 8, '', 0, 0);
+       $pdf->Cell(35, 9, '('.$this->session->userdata('nama').')', 0, 0);
+			
+		$pdf->Output('I','Bukti_Pembayaran_'.$data->nis.'.pdf');
 	}
 
 	function Kelas(){
@@ -195,7 +217,8 @@ class Pendaftaran extends CI_Controller {
                     'tempat'	=> filter_string($this->input->post('tempat',TRUE)),
                     'tanggal'	=> filter_string($this->input->post('tanggal',TRUE)),
                     'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
-                    'wali'		=> filter_string($this->input->post('wali',TRUE))
+                    'orangtua_wali'		=> filter_string($this->input->post('orangtua_wali',TRUE)),
+                    'telpon'		=> filter_string($this->input->post('telpon',TRUE))
                 );	
         $this->M_General->insert('siswa',$insert);
         $this->M_General->delete($this->table,'id',$this->input->post('id'));
@@ -221,7 +244,9 @@ class Pendaftaran extends CI_Controller {
                     'tempat'	=> filter_string($this->input->post('tempat',TRUE)),
                     'tanggal'	=> filter_string($this->input->post('tanggal',TRUE)),
                     'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
-                    'wali'		=> filter_string($this->input->post('wali',TRUE))
+                    'orangtua_wali'		=> filter_string($this->input->post('orangtua_wali',TRUE)),
+                    'telpon'		=> filter_string($this->input->post('telpon',TRUE)),
+                    'kelas'     => $this->input->post('kelas',TRUE)
                 );
         $insert = $this->M_General->update($this->table,$insert,'id',$this->input->post('id'));
         $this->session->set_flashdata('success','Berhasil mengubah Data!');

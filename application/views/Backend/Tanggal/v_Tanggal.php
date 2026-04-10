@@ -1,9 +1,13 @@
 <div class="col-xs-12">
 	<div class="box box-primary">
         <div class="box-header">
+
             <div class="pull-right">
+                <?php if ($this->session->userdata('role') == 1) { ?>
             	<a href="#" onclick="Tambah()" class="btn btn-primary">Tambah Data </a>
+                <?php } ?>
             </div>
+
         </div>
 	    <div class="box-body">
 	    	<div class="table-responsive">    	

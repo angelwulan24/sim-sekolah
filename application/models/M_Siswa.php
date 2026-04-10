@@ -5,28 +5,28 @@ class M_Siswa extends CI_Model {
 
 	function getAllData($kls = '')
 	{
-		$this->datatables->select('id,name,nis,status,sex,wali,telpon');
+		$this->datatables->select('siswa.id, siswa.name, siswa.nis, siswa.status, siswa.sex, siswa.orangtua_wali, siswa.telpon, siswa.tempat, siswa.tanggal, siswa.alamat, siswa.foto, kelas.nama as nama_kelas');
 		$this->datatables->from('siswa');
+		$this->datatables->join('kelas', 'siswa.kelas = kelas.id', 'left');
 
 		if ($kls !== null && $kls !== '') {
-			$this->datatables->where('kelas', $kls);
+			$this->datatables->where('siswa.kelas', $kls);
 		}
 
-		$this->datatables->add_column(
-			'view',
-			'<center>
+
+		if ($this->session->userdata('role') == 1) {
+			$btn = '<center>
 				<a href="javascript:void(0)" onclick="Ubah($1)" class="btn btn-warning btn-xs">
 					<i class="fa fa-pencil"></i> Ubah
 				</a>
-			</center>',
-			'id'
-		);
+			</center>';
+		} else {
+			$btn = '';
+		}
 
-		$this->datatables->edit_column(
-			'status',
-			'<span class="label label-success control-label">$1</span>',
-			'status'
-		);
+		$this->datatables->add_column('view', $btn, 'id');
+
+
 
 		return $this->datatables->generate();
 	}

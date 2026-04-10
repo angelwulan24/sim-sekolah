@@ -90,51 +90,122 @@ class Buku extends CI_Controller {
 	}
 
 	function Simpan(){
-
-		$tgl = filter_string($this->input->post('tanggal',TRUE));
 		$harga = $this->input->post('harga');
-		$hari = filter_string($this->input->post('total',TRUE));
 		$id = $this->input->post('id_siswa');
+		$tahun_ajaran = filter_string($this->input->post('tahun_ajaran',TRUE));
 
-		$data = array();
-
-		$i = 0;
-		$j = 0;
-		do{
-
-			$tgl2 = date('Y-m-d',strtotime('+'.$i.' days',strtotime($tgl)));
-			$bln = $this->db->query("SELECT id FROM tanggal WHERE tgl = '$tgl2'")->num_rows();
-			$udh = $this->db->query("SELECT id FROM buku WHERE waktu = '$tgl2' AND id_siswa = '$id' ")->num_rows();
+		$udh = $this->db->query("SELECT id FROM buku WHERE id_siswa = '$id' AND tahun_ajaran = '$tahun_ajaran'")->num_rows();
+		
+		if ($udh > 0) {
+			$data['status'] = FALSE;
+			$data['message'] = "Uang Buku untuk tahun ajaran " . $tahun_ajaran . " sudah lunas.";
+		} else {
+			$data_insert = array(
+				'waktu'    => waktu(),
+				'tahun_ajaran' => $tahun_ajaran,
+				'nominal'  => $harga,
+				'time'	   => waktu(),
+				'id_siswa' => $id,
+			);
+			$this->db->insert('buku', $data_insert);
+			$this->M_General->update_kas('kas_masuk', $harga);
 			
-			if ($udh == '0'){
-				if ($bln == '0'){
-					if (date("D",strtotime($tgl2)) != "Sun" && date("D",strtotime($tgl2)) != "Fri" && date("D",strtotime($tgl2)) != "Sat" ){
-						array_push($data,array(
-							'waktu'    => $tgl2,
-							'nominal'  => $harga,
-							'time'	   => waktu(),
-							'id_siswa' => $id,
-						));
-						$j++;
-					}
-				}
+			// Send WhatsApp Notification
+			$siswa = $this->db->get_where('siswa', ['id' => $id])->row_array();
+			if ($siswa && !empty($siswa['telpon'])) {
+				$message = "Terima kasih, pembayaran Uang Buku atas nama *" . $siswa['name'] . "* sebesar *" . rupiah($harga) . "* untuk tahun ajaran " . $tahun_ajaran . " telah lunas. \n\nTerima Kasih.";
+				//$this->wa_gateway->send($siswa['telpon'], $message);
 			}
-			$i++;
 
-		}while($j<$hari);
-
-		$total = $this->input->post('seluruh');
-		$this->db->insert_batch('buku',$data);
-		$this->M_General->update_kas('kas_masuk',$total);
-
-        // Send WhatsApp Notification
-        $siswa = $this->db->get_where('siswa', ['id' => $id])->row_array();
-        if ($siswa && !empty($siswa['telpon'])) {
-            $message = "Terima kasih, pembayaran Uang Buku atas nama *{$siswa['name']}* sebesar *" . rupiah($total) . "* untuk $hari hari telah berhasil diterima. \n\nTerima Kasih.";
-            $this->wa_gateway->send($siswa['telpon'], $message);
-        }
+			$data['status'] = TRUE;
+		}
 		
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
+	}
+
+	function CetakBukti($id){
+		$this->load->library('pdf');
+		$this->load->helper('data');
+		
+		$data = $this->db->query("
+			SELECT b.*, s.name, s.nis 
+			FROM buku b 
+			JOIN siswa s ON b.id_siswa = s.id 
+			WHERE b.id = '$id'
+		")->row();
+
+		if(!$data) {
+			show_error('Data pembayaran tidak ditemukan');
+			return;
+		}
+
+		$pdf = new FPDF('P','mm','A4');
+		$pdf->AddPage();
+		
+       // Header
+       $pdf->Cell(3,5,'',0,1);
+       $pdf->Image(base_url().'/assets/dist/img/MI.png', 10, 10,33);
+       $pdf->Cell(3,-5,'',0,1);
+       $pdf->SetFont('TIMES','B',14);
+       $pdf->Cell(189, 5, 'KEMENTRIAN AGAMA REPUBLIK INDONESIA', 0, 1, 'C');
+       $pdf->Cell(189, 7, 'KANTOR KEMENTRIAN AGAMA KABUPATEN PATI', 0, 1, 'C');
+       $pdf->SetFont('TIMES','B',16);
+       $pdf->Cell(192, 7, 'MADRASAH ALIYAH NEGERI PATI', 0, 1, 'C');
+       $pdf->SetFont('TIMES','',12);
+       $pdf->Cell(189, 5, 'Jl. Ratu kalinyamat Gg. Melati II, Kec. Tayu, Kabupaten Pati', 0, 1, 'C');
+       $pdf->Cell(189, 5, 'Telp.(020) 0000000,Fax(020)0000000', 0, 1, 'C');
+       $pdf->Cell(189, 5, 'E-mail : madrasahaliyah@gmail.com', 0, 1, 'C');
+       $pdf->SetLineWidth(1);
+       $pdf->Line(9, 46, 203, 46);
+       $pdf->SetLineWidth(0);
+       $pdf->Line(9, 47, 203, 47);
+		
+		$pdf->Cell(3,8,'',0,1);
+		
+		// Content
+		$pdf->SetFont('TIMES','B',11);
+		$pdf->Cell(0, 5, 'BUKTI PEMBAYARAN UANG BUKU', 0, 1, 'C');
+		$pdf->Ln(5);
+		
+		$pdf->SetFont('TIMES','',10);
+		$pdf->Cell(40, 6, 'No. Transaksi', 0, 0);
+		$pdf->Cell(5, 6, ':', 0, 0);
+		$pdf->Cell(0, 6, 'BUKU-'.$data->id, 0, 1);
+		
+		$pdf->Cell(40, 6, 'Tanggal Input', 0, 0);
+		$pdf->Cell(5, 6, ':', 0, 0);
+		$pdf->Cell(0, 6, date('d-m-Y H:i', strtotime($data->time)), 0, 1);
+		
+		$pdf->Cell(40, 6, 'Tahun Ajaran', 0, 0);
+		$pdf->Cell(5, 6, ':', 0, 0);
+		$pdf->Cell(0, 6, $data->tahun_ajaran, 0, 1);
+		
+		$pdf->Cell(40, 6, 'Nama Siswa', 0, 0);
+		$pdf->Cell(5, 6, ':', 0, 0);
+		$pdf->Cell(0, 6, $data->name, 0, 1);
+		
+		$pdf->Cell(40, 6, 'NIS', 0, 0);
+		$pdf->Cell(5, 6, ':', 0, 0);
+		$pdf->Cell(0, 6, $data->nis, 0, 1);
+		
+		$pdf->Ln(5);
+		$pdf->SetFont('TIMES','B',12);
+		$pdf->Cell(40, 8, 'TOTAL BAYAR', 0, 0);
+		$pdf->Cell(5, 8, ':', 0, 0);
+		$pdf->Cell(0, 8, 'Rp. '.number_format($data->nominal, 0, ',', '.'), 0, 1);
+		
+       $pdf->SetFont('TIMES','',12);
+       $pdf->Cell(125, 35, '', 0, 1);
+       $pdf->Cell(125, 35, '', 0, 0);
+       $pdf->Cell(55, 5, 'Pati, '.  date('d F Y'), 0, 1);
+       $pdf->Cell(125, 5, '', 0, 0);
+       $pdf->Cell(35, 5, 'Bendahara,', 0, 1);
+       $pdf->Cell(125, 10, '', 0, 0);
+       $pdf->Cell(35, 14, '', 0, 1);
+       $pdf->Cell(125, 8, '', 0, 0);
+       $pdf->Cell(35, 9, '('.$this->session->userdata('nama').')', 0, 0);
+		
+		$pdf->Output();
 	}
 
 }

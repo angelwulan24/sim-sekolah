@@ -73,6 +73,7 @@ class Transaksi extends CI_Controller {
                     'kode'		=> $this->input->post('kode',TRUE),
                     'nama'		=> filter_string($this->input->post('nama',TRUE)),
                     'nominal'	=> filter_string($this->input->post('nominal',TRUE)),
+                    'tenggat_waktu'	=> filter_string($this->input->post('tenggat_waktu',TRUE)),
                     'tipe'		=> $this->input->post('tipe',TRUE)
                 );
 
@@ -84,8 +85,10 @@ class Transaksi extends CI_Controller {
 	function Ubah(){
 		$nom = filter_string($this->input->post('nominal',TRUE));
 		$nam = filter_string($this->input->post('nama',TRUE));
+		$tenggat = filter_string($this->input->post('tenggat_waktu',TRUE));
         $insert = array(
-                             'nominal'	=> $nom
+                             'nominal'	=> $nom,
+                             'tenggat_waktu' => $tenggat
                 );
         $insert = $this->M_General->update($this->table,$insert,'id',$this->input->post('id'));
        // activity_log('Data Transaksi','Perubahan data dengan Kode: '.$this->input->post('kode').', Nama: '.$nam.', Nominal: '.$nom);

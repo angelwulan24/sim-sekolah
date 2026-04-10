@@ -84,7 +84,7 @@ class Tanggal extends CI_Controller {
         }
 
         // Get Active Students with Phone Numbers
-        $students = $this->db->select('name, telpon, wali')->from('siswa')
+        $students = $this->db->select('name, telpon, orangtua_wali')->from('siswa')
                              ->where("telpon != ''")
                              ->where("telpon IS NOT NULL")
                              ->where("status", "Aktif") // Assuming 'status' column exists for active students

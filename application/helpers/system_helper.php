@@ -11,8 +11,19 @@
         // Restrict Student Access
         $role = $CI->session->userdata('role');
         $class = $CI->router->fetch_class();
-        if ($role == 3 && $class != 'StudentArea' && $class != 'Auth') {
+        $method = $CI->router->fetch_method();
+        
+        if ($role == 3 && strtolower($class) != 'studentarea' && strtolower($class) != 'auth') {
             redirect('StudentArea', 'refresh');
+        }
+
+        // Restrict Kepsek Access
+        if ($role == 2) {
+            $blocked_methods = ['simpan', 'ubah', 'hapus', 'tambah', 'bayar', 'delete'];
+            if (in_array(strtolower($method), $blocked_methods)) {
+                $CI->session->set_flashdata('error', 'Anda tidak memiliki akses untuk melakukan aksi ini.');
+                redirect($class, 'refresh');
+            }
         }
     }
 

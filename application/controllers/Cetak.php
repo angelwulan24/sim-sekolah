@@ -159,7 +159,7 @@ foreach($data['pengeluaran'] as $r){
        $pdf->Cell(125, 35, '', 0, 0);
        $pdf->Cell(55, 5, 'Pati, '.  tanggal(waktu(),'bulan'), 0, 1);
        $pdf->Cell(125, 5, '', 0, 0);
-       $pdf->Cell(35, 5, 'Kepala Sekolah,', 0, 1);
+       $pdf->Cell(35, 5, 'Kepala Yayasan,', 0, 1);
        $pdf->Cell(125, 10, '', 0, 0);
        $pdf->Cell(35, 14, '', 0, 1);
        $pdf->Cell(125, 8, '', 0, 0);
@@ -182,7 +182,7 @@ foreach($data['pengeluaran'] as $r){
        
        $pdf->Cell(3,5,'',0,1);
        // $pdf->Image(base_url().'/assets/dist/img/j.png', 177, 10,29);
-       $pdf->Image(base_url().'/assets/dist/img/ikhlas.png', 2, 10,33);
+       $pdf->Image(base_url().'/assets/dist/img/MI.png', 10, 10,33);
        $pdf->Cell(3,-5,'',0,1);
        $pdf->SetFont('TIMES','B',14);
        $pdf->Cell(189, 5, 'KEMENTRIAN AGAMA REPUBLIK INDONESIA', 0, 1, 'C');
@@ -228,7 +228,7 @@ foreach($data['pengeluaran'] as $r){
        $pdf->Cell(125, 35, '', 0, 0);
        $pdf->Cell(55, 5, 'Pati, '.  tanggal(waktu(),'bulan'), 0, 1);
        $pdf->Cell(125, 5, '', 0, 0);
-       $pdf->Cell(35, 5, 'Kepala Sekolah,', 0, 1);
+       $pdf->Cell(35, 5, 'Kepala Yayasan,', 0, 1);
        $pdf->Cell(125, 10, '', 0, 0);
        $pdf->Cell(35, 14, '', 0, 1);
        $pdf->Cell(125, 8, '', 0, 0);

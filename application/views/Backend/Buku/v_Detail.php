@@ -22,8 +22,9 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
                         <tr>
                       <th style="width: 10px;">No</th>
                       <th>Waktu Pembayaran</th>
-                      <th>Tanggal Buku</th>
+                      <th>Tahun Ajaran</th>
                       <th>Nominal</th>
+                      <th style="width: 80px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -128,8 +129,16 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
                     "searchable": false
                 },
                 {"data": "tanggal"},
-                {"data": "waktu"},
-                {"data": "nominal",render: $.fn.dataTable.render.number('.',',','')}
+                {"data": "tahun_ajaran"},
+                {"data": "nominal",render: $.fn.dataTable.render.number('.',',','')},
+                {
+                    "data": "id",
+                    "orderable": false,
+                    "searchable": false,
+                    "render": function(data, type, row) {
+                        return '<a href="<?=base_url('Buku/CetakBukti/')?>'+data+'" target="_blank" class="btn btn-default btn-xs"><i class="fa fa-print"></i> Cetak</a>';
+                    }
+                }
             ],
             order: [[0, 'asc']],
             rowId: function(a){

@@ -67,7 +67,7 @@ class Siswa extends CI_Controller {
 					'tempat'=>$row['C'],
 					'tanggal'=>$row['D'],
 					'sex'=>$row['E'],
-					'wali'=>$row['F'],
+					'orangtua_wali'=>$row['F'],
 					'alamat'=>$row['G'],
 					'status'=>$row['H'],
 					'kelas'=>$row['I'],
@@ -98,8 +98,21 @@ class Siswa extends CI_Controller {
                     'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
                     'status'	=> filter_string($this->input->post('status',TRUE)),
                     'telpon'    => filter_string($this->input->post('telpon',TRUE)),
-                    'wali'		=> filter_string($this->input->post('wali',TRUE))
+                    'orangtua_wali'		=> filter_string($this->input->post('orangtua_wali',TRUE))
                 );
+
+        if(!empty($_FILES['foto']['name'])){
+            $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+            $config['upload_path']   = './assets/images/siswa/';
+            $config['allowed_types'] = 'gif|jpg|png|jpeg';
+            $config['file_name']     = strtolower(str_replace(' ', '_', $insert['name'])) . '_' . time() . '.' . $ext;
+            $this->load->library('upload');
+            $this->upload->initialize($config);
+            if($this->upload->do_upload('foto')){
+                $uploadData = $this->upload->data();
+                $insert['foto'] = $uploadData['file_name'];
+            }
+        }
 
         $insert = $this->M_General->insert($this->table,$insert);
         $data['status'] = TRUE;
@@ -111,13 +124,27 @@ class Siswa extends CI_Controller {
                     'name'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
                     'sex'		=> $this->input->post('gender',TRUE),
                     'nis' 		=> $this->input->post('nis',TRUE),
+                    'kelas' 	=> $this->input->post('kelas',TRUE),
                     'tempat'	=> filter_string($this->input->post('tempat',TRUE)),
                     'tanggal'	=> filter_string($this->input->post('tanggal',TRUE)),
                     'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
                     'status'	=> filter_string($this->input->post('status',TRUE)),
                     'telpon'    => filter_string($this->input->post('telpon',TRUE)),
-                    'wali'		=> filter_string($this->input->post('wali',TRUE))
+                    'orangtua_wali'		=> filter_string($this->input->post('orangtua_wali',TRUE))
                 );
+
+        if(!empty($_FILES['foto']['name'])){
+            $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+            $config['upload_path']   = './assets/images/siswa/';
+            $config['allowed_types'] = 'gif|jpg|png|jpeg';
+            $config['file_name']     = strtolower(str_replace(' ', '_', $insert['name'])) . '_' . time() . '.' . $ext;
+            $this->load->library('upload');
+            $this->upload->initialize($config);
+            if($this->upload->do_upload('foto')){
+                $uploadData = $this->upload->data();
+                $insert['foto'] = $uploadData['file_name'];
+            }
+        }
         $insert = $this->M_General->update($this->table,$insert,'id',$this->input->post('id'));
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));

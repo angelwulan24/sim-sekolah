@@ -3,7 +3,7 @@
     <li class="header">MENU UTAMA</li>
     <?php if($this->session->userdata('role') != 3) { ?>
     <li class = "<?php echo activate_menu('Beranda')?>"><a href="<?= base_url()?>Beranda"><i class="fa fa-dashboard"></i> <span>Beranda</span><span class="pull-right-container"></span></a></li>
-    <li class="treeview <?php if ($aktif == 'Guru' || $aktif == 'Siswa' || $aktif == 'Kelas' || $aktif == 'Transaksi' || $aktif == 'Tanggal') echo 'active' ?>">
+    <li class="treeview <?php if ($aktif == 'Guru' || $aktif == 'Siswa' || $aktif == 'Kelas' || $aktif == 'Transaksi') echo 'active' ?>">
         <a href="#"><i class="fa fa-database"></i> <span>Data Master</span>
             <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
         </a>
@@ -12,7 +12,6 @@
             <li class = "<?php echo activate_menu('Kelas')?>"><a href="<?= base_url()?>Kelas"><i class="fa fa-circle-o"></i>Data Kelas</a></li>
             <li class = "<?php echo activate_menu('Siswa')?>"><a href="<?= base_url()?>Siswa"><i class="fa fa-circle-o"></i>Data Siswa</a></li>
             <li class = "<?php echo activate_menu('Transaksi')?>"><a href="<?= base_url()?>Transaksi"><i class="fa fa-circle-o"></i>Jenis Transaksi</a></li>
-            <li class = "<?php echo activate_menu('Tanggal')?>"><a href="<?= base_url()?>Tanggal"><i class="fa fa-circle-o"></i>Tanggal Merah</a></li>
         </ul>
     </li>
     <li class="treeview <?php if ($aktif == 'SPP' || $aktif == 'Pendaftaran' || $aktif == 'Ujian' || $aktif == 'Buku' || $aktif == 'Baju' || $aktif == 'Lainnya' ) echo 'active' ?>">
@@ -37,10 +36,12 @@
              <li class = "<?php echo activate_menu('Pengeluaran')?>"><a href="<?= base_url()?>Pengeluaran"><i class="fa fa-circle-o"></i>Pengeluaran Lainnya</a></li>
         </ul>
     </li>
+    <li class = "<?php echo activate_menu('Tunggakan')?>"><a href="<?= base_url()?>Tunggakan"><i class="fa fa-exclamation-triangle"></i> <span>Info Tunggakan</span><span class="pull-right-container"></span></a></li>
+    <?php if($this->session->userdata('role') != 2) { ?>
     <li class = "<?php echo activate_menu('Whatsapp')?>"><a href="<?= base_url()?>Whatsapp"><i class="fa fa-whatsapp"></i> <span>WhatsApp Gateway</span><span class="pull-right-container"></span></a></li>
+    <?php } ?>
     <li class = "<?php echo activate_menu('Laporan')?>"><a href="<?= base_url()?>Laporan"><i class="fa fa-line-chart"></i> <span>Laporan</span><span class="pull-right-container"></span></a></li>
     <?php } else { ?>
         <li class = "<?php echo activate_menu('StudentArea')?>"><a href="<?= base_url()?>StudentArea"><i class="fa fa-money"></i> <span>Tagihan Saya</span><span class="pull-right-container"></span></a></li>
-        <li class = "<?php echo activate_menu('Tanggal')?>"><a href="<?= base_url()?>Tanggal"><i class="fa fa-calendar"></i> <span>Tanggal Merah</span><span class="pull-right-container"></span></a></li>
     <?php } ?>
 </ul>

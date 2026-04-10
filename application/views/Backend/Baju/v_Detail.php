@@ -24,6 +24,7 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
                       <th>Waktu Pembayaran</th>
                       <th>Tanggal Baju</th>
                       <th>Nominal</th>
+                      <th style="width: 80px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,6 +119,14 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
                 {"data": "tanggal"},
                 {"data": "waktu"},
                 {"data": "nominal",render: $.fn.dataTable.render.number('.',',','')},
+                {
+                    "data": "id",
+                    "orderable": false,
+                    "searchable": false,
+                    "render": function(data, type, row) {
+                        return '<a href="<?=base_url('Baju/CetakBukti/')?>'+data+'" target="_blank" class="btn btn-default btn-xs"><i class="fa fa-print"></i> Cetak</a>';
+                    }
+                }
             ],
             order: [[2, 'desc']],
             rowId: function(a){

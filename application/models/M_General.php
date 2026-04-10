@@ -83,7 +83,9 @@ class M_General extends CI_Model{
         $this->datatables->select('id,name,nis,sex');
         $this->datatables->from('siswa');
         $this->datatables->add_column('view','<center><a href="javascript:void(0)" onclick="Detail($1)" class="btn btn-info btn-xs"><i class="fa fa-eye"></i> Detail</a></center> ','id');
-        $this->datatables->where('kelas',$kls);
+        if($kls != ''){
+            $this->datatables->where('kelas',$kls);
+        }
         return $this->datatables->generate();
     }
 

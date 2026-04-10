@@ -3,9 +3,12 @@
         <!-- Profile Image -->
         <div class="box box-primary">
             <div class="box-body box-profile">
-                <!-- <img class="profile-user-img img-responsive img-circle" src="<?= base_url(); ?>assets/dist/img/user.png" alt="User profile picture"> -->
                 <div class="text-center">
-                    <i class="fa fa-user-circle-o fa-5x text-primary" aria-hidden="true"></i>
+                    <?php if(!empty($student->foto)): ?>
+                        <img class="profile-user-img img-responsive img-circle" src="<?= base_url('assets/images/siswa/' . $student->foto); ?>" alt="User profile picture" style="width:100px; height:100px; object-fit:cover;">
+                    <?php else: ?>
+                        <i class="fa fa-user-circle-o fa-5x text-primary" aria-hidden="true"></i>
+                    <?php endif; ?>
                 </div>
                 <h3 class="profile-username text-center"><?= $student->name; ?></h3>
                 <p class="text-muted text-center"><?= $student->nis; ?></p>
@@ -24,77 +27,101 @@
     <div class="col-md-8">
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Tagihan Belum Dibayar</h3>
+                <h3 class="box-title" style="margin-top: 5px;">Tagihan Bulanan (SPP)</h3>
+                <div class="box-tools pull-right" style="margin-right: 15px;">
+                    <form action="<?= base_url('StudentArea') ?>" method="GET" class="form-inline">
+                        <div class="form-group">
+                            <label style="font-weight: normal; margin-right: 5px;">Tahun Ajaran: </label>
+                            <select name="tahun" class="form-control input-sm" onchange="this.form.submit()">
+                                <?php foreach($tahun_list as $t): ?>
+                                    <option value="<?= $t ?>" <?= ($selected_tahun == $t) ? 'selected' : '' ?>><?= $t ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </form>
+                </div>
             </div>
             <div class="box-body">
-                <p>Silahkan pilih bulan untuk pembayaran SPP.</p>
-                <table class="table table-striped">
+                <table class="table table-striped table-bordered text-center">
                     <thead>
                         <tr>
                             <th>Bulan</th>
                             <th>Nominal</th>
+                            <th>Status</th>
+                            <th>Tanggal Bayar</th>
+                            <th>Tempat Bayar</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php
-                        // Simple Logic to generate months for the current year
-                        $months = [
-                            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
-                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-                        ];
-                        $year = date('Y');
-                        
-                        // Get paid months
-                        $paid_months = [];
-                        foreach($spp as $p){
-                            // format stored in DB: "Januari-2020" or similar based on SPP.php
-                            $paid_months[] = $p->bulan;
-                        }
-                        
-                        foreach($months as $m){
-                            $label = $m . '-' . $year;
-                            if(!in_array($label, $paid_months)){
-                                // Get nominal (Hardcoded 70000 based on DB or query)
-                                $nominal = 70000;
-                        ?>
+                        <?php foreach($tagihan_bulanan as $tb): ?>
                         <tr>
-                            <td><?= $label ?></td>
-                            <td>Rp <?= number_format($nominal, 0, ',', '.') ?></td>
+                            <td><?= $tb->label_bayar ?></td>
+                            <td>Rp <?= number_format($tb->nominal, 0, ',', '.') ?></td>
                             <td>
-                                <button class="btn btn-success btn-sm pay-button" data-bulan="<?= $label ?>" data-nominal="<?= $nominal ?>">
-                                    <i class="fa fa-credit-card"></i> Bayar
-                                </button>
+                                <?php if($tb->status == 'Lunas'): ?>
+                                    <span class="label label-success">Lunas</span>
+                                <?php else: ?>
+                                    <span class="label label-danger">Belum Lunas</span>
+                                <?php endif; ?>
+                            </td>
+                            <td><?= $tb->tanggal_bayar ?></td>
+                            <td><?= $tb->tempat_bayar ?></td>
+                            <td>
+                                <?php if($tb->status == 'Lunas'): ?>
+                                    <button class="btn btn-default btn-xs" disabled><i class="fa fa-check"></i> Sudah Bayar</button>
+                                <?php else: ?>
+                                    <button class="btn btn-success btn-xs pay-button" data-jenis="<?= $tb->jenis ?>" data-label_bayar="<?= $tb->label_bayar ?>" data-nominal="<?= $tb->nominal ?>">
+                                        <i class="fa fa-credit-card"></i> Bayar
+                                    </button>
+                                <?php endif; ?>
                             </td>
                         </tr>
-                        <?php 
-                            }
-                        }
-                        ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <div class="box box-success">
+        <div class="box box-warning">
             <div class="box-header with-border">
-                <h3 class="box-title">Riwayat Pembayaran</h3>
+                <h3 class="box-title">Tagihan Lainnya</h3>
             </div>
             <div class="box-body">
-                 <table class="table table-bordered">
+                 <table class="table table-striped table-bordered text-center">
                     <thead>
                         <tr>
-                            <th>Tanggal Bayar</th>
-                            <th>Bulan</th>
+                            <th>Nama Tagihan</th>
                             <th>Nominal</th>
+                            <th>Status</th>
+                            <th>Tanggal Bayar</th>
+                            <th>Tempat Bayar</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach($spp as $row): ?>
+                        <?php foreach($tagihan_lainnya as $tl): ?>
                         <tr>
-                            <td><?= $row->tanggal ?></td>
-                            <td><?= $row->bulan ?></td>
-                            <td>Rp <?= number_format($row->nominal, 0, ',', '.') ?></td>
+                            <td><?= $tl->nama_tagihan ?></td>
+                            <td>Rp <?= number_format($tl->nominal, 0, ',', '.') ?></td>
+                            <td>
+                                <?php if($tl->status == 'Lunas'): ?>
+                                    <span class="label label-success">Lunas</span>
+                                <?php else: ?>
+                                    <span class="label label-danger">Belum Lunas</span>
+                                <?php endif; ?>
+                            </td>
+                            <td><?= $tl->tanggal_bayar ?></td>
+                            <td><?= $tl->tempat_bayar ?></td>
+                            <td>
+                                <?php if($tl->status == 'Lunas'): ?>
+                                    <button class="btn btn-default btn-xs" disabled><i class="fa fa-check"></i> Sudah Bayar</button>
+                                <?php else: ?>
+                                    <button class="btn btn-success btn-xs pay-button" data-jenis="<?= $tl->jenis ?>" data-label_bayar="<?= $tl->label_bayar ?>" data-nominal="<?= $tl->nominal ?>">
+                                        <i class="fa fa-credit-card"></i> Bayar
+                                    </button>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -107,7 +134,8 @@
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="<?= $midtrans_client_key ?>"></script>
 <script>
     $('.pay-button').click(function(){
-        var bulan = $(this).data('bulan');
+        var jenis = $(this).data('jenis');
+        var label_bayar = $(this).data('label_bayar');
         var nominal = $(this).data('nominal');
         var button = $(this);
         
@@ -117,7 +145,8 @@
             url: '<?= base_url() ?>StudentArea/get_token',
             type: 'POST',
             data: {
-                bulan: bulan,
+                jenis: jenis,
+                label_bayar: label_bayar,
                 nominal: nominal
             },
             dataType: 'json',

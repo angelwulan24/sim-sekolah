@@ -29,8 +29,13 @@
                       <th>Nama Pendaftar</th>
                       <th>NIS</th>
                       <th>Jenis Kelamin</th>
-                      <th>Wali</th>
+                      <th>Tempat Lahir</th>
+                      <th>Tanggal Lahir</th>
+                      <th>Orangtua / Wali</th>
+                      <th>No. Telpon</th>
                       <th>Alamat</th>
+                      <th>Kelas</th>
+                      <th>Status</th>
                       <th width="">Aksi</th>
 			            </tr>
 		            </thead>
@@ -43,8 +48,19 @@
                            <td><?=$r->name;?></td> 
                            <td><?=$r->nis?></td> 
                            <td><?=$r->sex?></td> 
-                           <td><?=$r->wali?></td> 
+                           <td><?=$r->tempat?></td> 
+                           <td><?=$r->tanggal?></td> 
+                           <td><?=$r->orangtua_wali?></td>
+                           <td><?=$r->telpon?></td> 
                            <td><?=$r->alamat?></td> 
+                           <td><?=$r->nama_kelas?></td>
+                           <td>
+                               <?php if ($r->bayar == '1'): ?>
+                                   <span class="label label-success">Lunas</span>
+                               <?php else: ?>
+                                   <span class="label label-danger">Belum Lunas</span>
+                               <?php endif; ?>
+                           </td>
                            <td>
                                <center>
                                     <a class="btn btn-warning btn-xs" data-toggle="modal" data-target="#ubah-data<?php echo $r->id ?>" href=""><i class="fa fa-pencil"></i> Ubah</a>
@@ -52,7 +68,9 @@
                                 <?php  if ($r->bayar == '0') {?>
                                     <a class="btn btn-success btn-xs" data-toggle="modal" data-target="#bayar-data<?php echo $r->id ?>" href=""><i class="fa fa-money"></i> Bayar</a>
                                 <?php } else { ?>
+                                    <?php if ($this->session->userdata('role') != 2) { ?>
                                     <a class="btn btn-info btn-xs" data-toggle="modal" data-target="#kelas-data<?php echo $r->id ?>" href=""><i class="fa fa-building"></i> Kelas</a>
+                                    <?php } ?>
                                     <a class="btn btn-primary btn-xs" href="<?=base_url('Pendaftaran/cetak_bukti/'.$r->id)?>"><i class="fa fa-print"></i> Cetak</a>
                                 <?php } ?>
                                 </center>
@@ -117,8 +135,8 @@
                 <div class="form-group">
                     <div class="ra">
                         <label class="control-label">Jenis Kelamin</label><br>
-                        <input type="radio" class="minimal"  name="gender" value="Pria" ><span class="lbl"> Pria</span>
-                        <input type="radio"   name="gender" class="minimal" value="Wanita"><span class="lbl"> Wanita</span>
+                        <input type="radio" class="minimal"  name="gender" value="Laki-Laki" ><span class="lbl"> Laki-Laki</span>
+                        <input type="radio"   name="gender" class="minimal" value="Perempuan"><span class="lbl"> Perempuan</span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -130,12 +148,26 @@
                     <div><input type="text" required="" placeholder="Tanggal Lahir" autocomplete="off" name="tanggal" class="form-control datepicker"></div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label"> Nama Wali</label>
-                    <div><input type="text" required="" placeholder="Nama Wali" autocomplete="off" name="wali" class="form-control"></div>
+                    <label class="control-label"> Orangtua / Wali</label>
+                    <div><input type="text" required="" placeholder="Orangtua / Wali" autocomplete="off" name="orangtua_wali" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> No. Telpon</label>
+                    <div><input type="text" onkeypress="return Angka(this)" required="" placeholder="No. Telpon" autocomplete="off" name="telpon" class="form-control"></div>
                 </div>
                 <div class="form-group">
                     <label class="control-label"> Alamat</label>
                     <div><input type="text" required="" placeholder="Alamat" autocomplete="off" name="alamat" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Kelas</label>
+                    <?php $kls= $this->db->query("SELECT id,nama FROM kelas")->result() ?>
+                    <select name="kelas" required="" data-placeholder="--Pilih--" class="form-control select2">
+                        <option value="">--Pilih--</option>
+                            <?php foreach ($kls as $key) {?>    
+                                <option value="<?=$key->id?>"><?=$key->nama?></option>
+                            <?php } ?>
+                    </select>
                 </div>
             </div>
             <div class="modal-footer">
@@ -170,8 +202,8 @@
                 <div class="form-group">
                     <div class="ra">
                         <label class="control-label">Jenis Kelamin</label><br>
-                        <input type="radio" class="minimal"  name="gender" value="Pria" <?php if($e->sex == 'Pria') echo 'checked'; ?>><span class="lbl"> Pria</span>
-                        <input type="radio"   name="gender" class="minimal" value="Wanita" <?php if($e->sex == 'Wanita') echo 'checked'; ?>><span class="lbl"> Wanita</span>
+                        <input type="radio" class="minimal"  name="gender" value="Laki-Laki" <?php if($e->sex == 'Laki-Laki') echo 'checked'; ?>><span class="lbl"> Laki-Laki</span>
+                        <input type="radio"   name="gender" class="minimal" value="Perempuan" <?php if($e->sex == 'Perempuan') echo 'checked'; ?>><span class="lbl"> Perempuan</span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -183,12 +215,26 @@
                     <div><input type="text" required="" placeholder="Tanggal Lahir" autocomplete="off" name="tanggal" value="<?=$e->tanggal?>" class="form-control datepicker"></div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label"> Nama Wali</label>
-                    <div><input type="text" required="" placeholder="Nama Wali" autocomplete="off" name="wali" value="<?=$e->wali?>" class="form-control"></div>
+                    <label class="control-label"> Orangtua / Wali</label>
+                    <div><input type="text" required="" placeholder="Orangtua / Wali" autocomplete="off" name="orangtua_wali" value="<?=$e->orangtua_wali?>" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> No. Telpon</label>
+                    <div><input type="text" onkeypress="return Angka(this)" required="" placeholder="No. Telpon" autocomplete="off" name="telpon" value="<?=$e->telpon ?? ''?>" class="form-control"></div>
                 </div>
                 <div class="form-group">
                     <label class="control-label"> Alamat</label>
                     <div><input type="text" required="" placeholder="Alamat" autocomplete="off" name="alamat" value="<?=$e->alamat?>" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Kelas</label>
+                    <?php $kls= $this->db->query("SELECT id,nama FROM kelas")->result() ?>
+                    <select name="kelas" required="" data-placeholder="--Pilih--" class="form-control select2">
+                        <option value="">--Pilih--</option>
+                            <?php foreach ($kls as $key) {?>    
+                                <option value="<?=$key->id?>" <?= ($e->kelas == $key->id) ? 'selected' : '' ?> ><?=$key->nama?></option>
+                            <?php } ?>
+                    </select>
                 </div>
             </div>
             <div class="modal-footer">
@@ -240,17 +286,18 @@
                 <select name="kelas" data-placeholder="--Pilih kelas--" class="form-control">
                     <option value="">--Pilih--</option>
                 <?php foreach ($kls as $key) {?>    
-                    <option value="<?=$key->id?>"><?=$key->nama?></option>
+                    <option value="<?=$key->id?>" <?= ($e->kelas == $key->id) ? 'selected' : '' ?> ><?=$key->nama?></option>
                 <?php } ?>
                 </select>
                 <input type="hidden" name="id" value="<?=$e->id?>">
                   <input type="hidden" value="<?=$e->name ?>" name="nama">
                   <input type="hidden" value="<?=$e->nis ?>" name="nis">
                   <input type="hidden" value="<?= $e->sex ?>" name="sex">
-                  <input type="hidden" value="<?= $e->wali?>" name="wali">
+                  <input type="hidden" value="<?= $e->orangtua_wali?>" name="orangtua_wali">
                   <input type="hidden" value="<?=$e->alamat ?>" name="alamat">
                   <input type="hidden" value="<?=$e->tempat ?>" name="tempat">
                   <input type="hidden" value="<?=$e->tanggal ?>" name="tanggal">
+                  <input type="hidden" value="<?=$e->telpon ?>" name="telpon">
                 </div>
             </div>
             <div class="modal-footer">

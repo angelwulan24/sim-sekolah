@@ -55,7 +55,7 @@ foreach ($isi as $key ) {
                                 <?php if($status == 'Belum Lunas' && $selected_tahun == $tahun_sekarang): ?>
                                 <button onclick="BayarBulan('<?=$key->periode?>', '<?=$key->periode_label?>', <?=$key->nominal?>)" class="btn btn-success btn-sm">Bayar</button>
                                 <?php elseif($status == 'Lunas'): ?>
-                                <span class="text-muted">-</span>
+                                <a href="<?=base_url('Ujian/CetakBukti/'.$key->id)?>" target="_blank" class="btn btn-default btn-xs"><i class="fa fa-print"></i> Cetak</a>
                                 <?php else: ?>
                                 -
                                 <?php endif; ?>
@@ -76,7 +76,7 @@ foreach ($isi as $key ) {
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">&times;</span>
                 </button>
                 <h4 class="modal-title">Pembayaran Ujian</h4>
             </div>
@@ -129,10 +129,19 @@ foreach ($isi as $key ) {
                 if(data.status) {
                     Swal({
                         title: 'Sukses',
-                        text: 'Pembayaran Ujian Berhasil',
-                        type: 'success'
+                        text: 'Pembayaran Ujian Berhasil. Cetak Bukti Pembayaran?',
+                        type: 'success',
+                        showCancelButton: true,
+                        confirmButtonText: 'Cetak Bukti',
+                        cancelButtonText: 'Tutup'
+                    }).then((result) => {
+                        if (result.value) {
+                            // Open print page in new tab
+                            window.open('<?=base_url("Ujian/CetakBukti/")?>' + data.id_pembayaran, '_blank');
+                        }
+                        // Reload page to update data
+                        location.reload();
                     });
-                    location.reload();
                 } else {
                     Swal({
                         title: 'Gagal',

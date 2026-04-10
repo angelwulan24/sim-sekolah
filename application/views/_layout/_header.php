@@ -1,4 +1,17 @@
-<?php $masuk = $this->db->get_where('users',['id'=> $this->session->userdata('id')])->row_array();?>
+<?php 
+$masuk = $this->db->get_where('users',['id'=> $this->session->userdata('id')])->row_array();
+$foto_profil = base_url('assets/dist/img/') . (!empty($masuk['gambar']) ? $masuk['gambar'] : 'user.png');
+
+if ($masuk['role'] == 3) {
+    $parts = explode('@', $masuk['email']);
+    if (count($parts) > 1 && $parts[1] == 'student.sim') {
+        $siswa = $this->db->get_where('siswa', ['nis' => $parts[0]])->row_array();
+        if ($siswa && !empty($siswa['foto'])) {
+            $foto_profil = base_url('assets/images/siswa/') . $siswa['foto'];
+        }
+    }
+}
+?>
 <a href="<?=base_url('Beranda')?>" class="logo">
     <span class="logo-mini"><b>SI</b>M</span>
     <span class="logo-lg"><b>SIM</b>madrasah</span>
@@ -14,12 +27,12 @@
         <ul class="nav navbar-nav">
             <li class="dropdown user user-menu">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    <img src="<?php echo base_url('assets/dist/img/').$masuk['gambar']?>" class="user-image" alt="User Image">
+                    <img src="<?php echo $foto_profil; ?>" class="user-image" alt="User Image" style="object-fit:cover;">
                     <span class="hidden-xs"> <?php echo $masuk['name']?></span>
                 </a>
                 <ul class="dropdown-menu">
                     <li class="user-header">
-                        <img src="<?php echo base_url('assets/dist/img/').$masuk['gambar']?>" class="img-circle" alt="User Image">
+                        <img src="<?php echo $foto_profil; ?>" class="img-circle" alt="User Image" style="object-fit:cover; width:90px; height:90px;">
                         <p> <?php echo $masuk['name']?></p>
                     </li>
                     <li class="user-footer">

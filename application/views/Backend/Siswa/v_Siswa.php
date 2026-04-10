@@ -10,8 +10,9 @@
                 <?php } ?>
                 </select>
             </div>
-            <div class="pull-right">
 
+            <div class="pull-right">
+                <?php if ($this->session->userdata('role') == 1) { ?>
                 <div class="btn-group">
                     <a  class="btn btn-primary" onclick="Import()" ><i class="fa fa-download"></i> Import Data</a>
                     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
@@ -24,7 +25,9 @@
                 </div>
 
             	<a href="#" onclick="Tambah()" class="btn btn-primary">Tambah Data </a>
+                <?php } ?>
             </div>
+
         </div>
 	    <div class="box-body">
 	    	<div class="table-responsive">    	
@@ -32,11 +35,16 @@
 		            <thead>
 			            <tr>
                       <th style="width: 10px;">No</th>
+                      <th>Foto</th>
                       <th>Nama Siswa</th>
                       <th>NIS</th>
                       <th>Jenis Kelamin</th>
-                      <th>Wali</th>
+                      <th>Tempat Lahir</th>
+                      <th>Tanggal Lahir</th>
+                      <th>Orangtua / Wali</th>
                       <th>No. Telpon</th>
+                      <th>Alamat</th>
+                      <th>Kelas</th>
                       <th>Status</th>
                       <th width="100">Aksi</th>
 			            </tr>
@@ -100,8 +108,8 @@
                 <div class="form-group">
                     <div class="ra">
                         <label class="control-label">Jenis Kelamin</label><br>
-                        <input type="radio" class="minimal"  name="gender" value="Pria" ><span class="lbl"> Pria</span>
-                        <input type="radio"   name="gender" class="minimal" value="Wanita"><span class="lbl"> Wanita</span>
+                        <input type="radio" class="minimal" required="" name="gender" value="Laki-Laki" ><span class="lbl"> Laki-Laki</span>
+                        <input type="radio" required="" name="gender" class="minimal" value="Perempuan"><span class="lbl"> Perempuan</span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -113,8 +121,8 @@
                     <div><input type="text" required="" placeholder="Tanggal Lahir" autocomplete="off" name="tanggal" class="form-control datepicker"></div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label"> Nama Wali</label>
-                    <div><input type="text" required="" placeholder="Nama Wali" autocomplete="off" name="wali" class="form-control"></div>
+                    <label class="control-label"> Orangtua / Wali</label>
+                    <div><input type="text" required="" placeholder="Orangtua / Wali" autocomplete="off" name="orangtua_wali" class="form-control"></div>
                 </div>
                 <div class="form-group">
                     <label class="control-label"> No. Telpon</label>
@@ -141,6 +149,10 @@
                         <option value="Cuti">Cuti</option>
                         <option value="Berhenti">Berhenti</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Foto</label>
+                    <input type="file" name="foto" class="form-control" accept="image/*">
                 </div>
             </div>
             <div class="modal-footer">
@@ -212,12 +224,31 @@
                     "orderable": false,
                     "searchable": false
                 },
+                {
+                    "data": "foto",
+                    "render": function(data, type, row) {
+                        if(data) return '<img src="<?=base_url("assets/images/siswa/")?>' + data + '" width="50" height="50" style="object-fit:cover; border-radius:5px;">';
+                        return '<img src="https://via.placeholder.com/50" width="50" height="50" style="object-fit:cover; border-radius:5px;">';
+                    }
+                },
                 {"data": "name"},
                 {"data": "nis"},
                 {"data": "sex"},
-                {"data": "wali"},
+                {"data": "tempat"},
+                {"data": "tanggal"},
+                {"data": "orangtua_wali"},
                 {"data": "telpon"},
-                {"data": "status"},
+                {"data": "alamat"},
+                {"data": "nama_kelas"},
+                {
+                    "data": "status",
+                    "render": function(data, type, row) {
+                        var stat = "success";
+                        if(data == "Berhenti") stat = "danger";
+                        else if(data == "Cuti") stat = "warning";
+                        return '<span class="label label-'+stat+' control-label">'+data+'</span>';
+                    }
+                },
                 {
                     "data": "view",
                     "orderable": false,
@@ -357,6 +388,9 @@
 	function Tambah(){
 		label = 'simpan';
 		$('#form')[0].reset();
+        if ($.fn.iCheck) {
+            $('[name="gender"]').iCheck('uncheck');
+        }
 		$('.form-group').removeClass('has-error');
 		$('.help-block').empty(); 
 		$('#modal-form').modal('show');
@@ -377,13 +411,19 @@
 				$('[name="id"]').val(data.id);
                 $('[name="nama"]').val(data.name);
                 $('[name="nis"]').val(data.nis);
-                $('[name="wali"]').val(data.wali);
+                $('[name="orangtua_wali"]').val(data.orangtua_wali);
                 $('[name="telpon"]').val(data.telpon);
                 $('[name="alamat"]').val(data.alamat);
                 $('[name="tempat"]').val(data.tempat);
                 $('[name="tanggal"]').val(data.tanggal);
                 $('[name="status"]').val(data.status).trigger('change');
-                $('[name="gender"]').iCheck('update',data.sex);
+                $('#modal-form [name="kelas"]').val(data.kelas).trigger('change');
+                if ($.fn.iCheck) {
+                    $('[name="gender"]').iCheck('uncheck');
+                    $('[name="gender"][value="'+data.sex+'"]').iCheck('check');
+                } else {
+                    $('[name="gender"][value="'+data.sex+'"]').prop('checked', true);
+                }
                 $('#modal-form').modal('show');
                 $('.modal-title').text('Ubah Data'); 
 			},

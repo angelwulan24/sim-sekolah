@@ -22,7 +22,20 @@
         }
     </SCRIPT>
 
-<?php $masuk = $this->db->get_where('users',['id'=> $this->session->userdata('id')])->row_array();?>
+<?php 
+$masuk = $this->db->get_where('users',['id'=> $this->session->userdata('id')])->row_array();
+$foto_profil = base_url('assets/dist/img/') . (!empty($masuk['gambar']) ? $masuk['gambar'] : 'user.png');
+
+if ($masuk['role'] == 3) {
+    $parts = explode('@', $masuk['email']);
+    if (count($parts) > 1 && $parts[1] == 'student.sim') {
+        $siswa = $this->db->get_where('siswa', ['nis' => $parts[0]])->row_array();
+        if ($siswa && !empty($siswa['foto'])) {
+            $foto_profil = base_url('assets/images/siswa/') . $siswa['foto'];
+        }
+    }
+}
+?>
     <body class="hold-transition skin-blue sidebar-mini">
         <div class="wrapper">
             <header class="main-header">
@@ -33,7 +46,7 @@
                 <section class="sidebar">
                     <div class="user-panel">
                         <div class="pull-left image">
-                          <img src="<?php echo base_url('assets/dist/img/').$masuk['gambar']?>" class="img-circle" alt="User Image">
+                          <img src="<?php echo $foto_profil; ?>" class="img-circle" alt="User Image" style="object-fit:cover; width:45px; height:45px;">
                         </div>
                         <div class="pull-left info">
                           <p><?= $masuk['name']?></p>
@@ -111,5 +124,38 @@
 
         });
         </script>
+
+        <?php if ($this->session->userdata('role') == 2): ?>
+        <style>
+            a[data-target="#modal-tambah"],
+            a[data-target="#modal-import"],
+            a[onclick^="Tambah"],
+            button#simpan {
+                display: none !important;
+            }
+        </style>
+        <script>
+            $(document).ready(function(){
+                function hideMutatingActions() {
+                    $('a:contains("Tambah Data"), button:contains("Tambah Data")').remove();
+                    $('a:contains("Ubah"), button:contains("Ubah")').remove();
+                    $('a:contains("Hapus"), button:contains("Hapus")').remove();
+                    $('a:contains("Bayar"), button:contains("Bayar")').remove();
+                    $('a:contains("Import Data"), button:contains("Import Data")').remove();
+                    $('button[type="submit"]:contains("Simpan")').remove();
+                    $('button[type="submit"]:contains("Bayar")').remove();
+                }
+                
+                hideMutatingActions();
+                
+                // For tables that use DataTables, re-run after draw
+                setInterval(hideMutatingActions, 500); 
+                $(document).ajaxComplete(function() {
+                    hideMutatingActions();
+                });
+            });
+        </script>
+        <?php endif; ?>
+
     </body>
 </html>

@@ -1,9 +1,13 @@
 <div class="col-xs-12">
 	<div class="box box-primary">
         <div class="box-header">
+
             <div class="pull-right">
+                <?php if ($this->session->userdata('role') == 1) { ?>
             	<a href="#" onclick="Tambah()" class="btn btn-primary btn-sm">Tambah Data </a>
+                <?php } ?>
             </div>
+
         </div>
 	    <div class="box-body">
 	    	<div class="table-responsive">    	
@@ -11,6 +15,7 @@
 		            <thead>
 			            <tr>
                       <th style="width: 10px;">No</th>
+                      <th>Foto</th>
                       <th>Nama</th>
                       <th>NIP/NIK</th>
                       <th style="width: 10PX;">JK</th>
@@ -54,8 +59,8 @@
             	<div class="form-group">
                     <div class="ra">
                 		<label class="control-label">Jenis Kelamin</label><br>
-                		<input type="radio" class="minimal"  name="gender" value="Pria" ><span class="lbl"> Pria</span>
-                		<input type="radio"   name="gender" class="minimal" value="Wanita"><span class="lbl"> Wanita</span>
+                		<input type="radio" class="minimal" required="" name="gender" value="Laki-Laki" ><span class="lbl"> Laki-Laki</span>
+                		<input type="radio" required="" name="gender" class="minimal" value="Perempuan"><span class="lbl"> Perempuan</span>
                     </div>
             	</div>
                 <div class="form-group">
@@ -78,6 +83,10 @@
                         <option value="Cuti">Cuti</option>
                         <option value="Berhenti">Berhenti</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Foto</label>
+                    <input type="file" name="foto" class="form-control" accept="image/*">
                 </div>
             </div>
             <div class="modal-footer">
@@ -144,13 +153,28 @@
                     "orderable": false,
                     "searchable": false
                 },
+                {
+                    "data": "foto",
+                    "render": function(data, type, row) {
+                        if(data) return '<img src="<?=base_url("assets/images/guru/")?>' + data + '" width="50" height="50" style="object-fit:cover; border-radius:5px;">';
+                        return '<img src="https://via.placeholder.com/50" width="50" height="50" style="object-fit:cover; border-radius:5px;">';
+                    }
+                },
                 {"data": "name"},
                 {"data": "nip"},
                 {"data": "sex"},
                 {"data": "bidang"},
                 {"data": "alamat"},
                 {"data": "number"},
-                {"data": "status"},
+                {
+                    "data": "status",
+                    "render": function(data, type, row) {
+                        var stat = "success";
+                        if(data == "Berhenti") stat = "danger";
+                        else if(data == "Cuti") stat = "warning";
+                        return '<span class="label label-'+stat+' control-label">'+data+'</span>';
+                    }
+                },
                 {
                     "data": "view",
                     "orderable": false,
@@ -241,6 +265,9 @@
 	function Tambah(){
 		label = 'simpan';
 		$('#form')[0].reset();
+        if ($.fn.iCheck) {
+            $('[name="gender"]').iCheck('uncheck');
+        }
 		$('.form-group').removeClass('has-error');
 		$('.help-block').empty(); 
 		$('#modal-form').modal('show');
@@ -264,7 +291,12 @@
                 $('[name="telepon"]').val(data.number);
                 $('[name="alamat"]').val(data.alamat);
                 $('[name="bidang"]').val(data.bidang);
-                $('[name="gender"]').iCheck('update',data.sex);
+                if ($.fn.iCheck) {
+                    $('[name="gender"]').iCheck('uncheck');
+                    $('[name="gender"][value="'+data.sex+'"]').iCheck('check');
+                } else {
+                    $('[name="gender"][value="'+data.sex+'"]').prop('checked', true);
+                }
                 $('[name="status"]').val(data.status).trigger('change');
                 
                 $('#modal-form').modal('show');

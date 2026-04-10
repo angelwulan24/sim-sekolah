@@ -4,9 +4,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class M_Transaksi extends CI_Model {
 
 	function getAllData(){
-		$this->datatables->select('id,kode,nama,nominal');
+		$this->datatables->select('id,kode,nama,nominal,tenggat_waktu');
 		$this->datatables->from('pembayaran');
-		$this->datatables->add_column('view','<center><a href="javascript:void(0)" onclick="Ubah($1)" class="btn btn-warning btn-xs"><i class="fa fa-pencil"></i> Ubah</a> <a href="javascript:void(0)" onclick="Hapus($1)" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i> Hapus</a></center> ','id');
+
+		if ($this->session->userdata('role') == 1) {
+			$btn = '<center><a href="javascript:void(0)" onclick="Ubah($1)" class="btn btn-warning btn-xs"><i class="fa fa-pencil"></i> Ubah</a> <a href="javascript:void(0)" onclick="Hapus($1)" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i> Hapus</a></center>';
+		} else {
+			$btn = '';
+		}
+
+		$this->datatables->add_column('view', $btn, 'id');
 		//$this->datatables->edit_column('nominal','Rp. $1','nominal');
 		return $this->datatables->generate();
 	}

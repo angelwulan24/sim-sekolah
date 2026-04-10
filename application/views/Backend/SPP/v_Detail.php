@@ -44,7 +44,9 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
 $no=1;
 foreach ($isi as $key ) { 
     $status_label = ($key->status == 'Lunas') ? '<span class="label label-success">Lunas</span>' : '<span class="label label-danger">Belum Lunas</span>';
-    $aksi = ($key->status == 'Belum Lunas') ? '<button type="button" class="btn btn-success btn-xs" onclick="BayarBulan(\''.htmlspecialchars($key->bulan).'\')"><i class="fa fa-money"></i> Bayar</button>' : '-';
+    $aksi = ($key->status == 'Belum Lunas') ? 
+        '<button type="button" class="btn btn-success btn-xs" onclick="BayarBulan(\''.htmlspecialchars($key->bulan).'\')"><i class="fa fa-money"></i> Bayar</button>' : 
+        '<a href="'.base_url('SPP/CetakBukti/'.$key->id).'" target="_blank" class="btn btn-default btn-xs"><i class="fa fa-print"></i> Cetak</a>';
     $tanggal_bayar = ($key->status == 'Lunas' && $key->time) ? date('d-m-Y', strtotime($key->time)) : '-';
 ?>
                         <tr>
@@ -98,70 +100,79 @@ foreach ($isi as $key ) {
 </div>
 
 <script type="text/javascript">
+$(document).ready(function() {
 
-// Handle tahun filter change
-$('#tahun-filter').on('change', function(){
-	var tahun = $(this).val();
-	var id_siswa = '<?=$id_siswa?>';
-	window.location.href = "<?=base_url('SPP/Detail/')?>"+id_siswa+"?tahun="+tahun;
-});
-
-function BayarBulan(bulan) {
-	$('#bulan-input').val(bulan);
-	$('#form-bayar [name="bulan"]').val(bulan);
-	
-	// Get nominal SPP
-	$.ajax({
-		url: "<?=base_url($this->uri->segment(1).'/GetSPP/')?>",
-		type:"GET",
-		dataType:"JSON",
-		success:function(data){
-			$('[name="harga"]').val(data);
-			$('#modal-bayar').modal('show');
-		}
+	// Handle tahun filter change
+	$('#tahun-filter').on('change', function(){
+		var tahun = $(this).val();
+		var id_siswa = '<?=$id_siswa?>';
+		window.location.href = "<?=base_url('SPP/Detail/')?>"+id_siswa+"?tahun="+tahun;
 	});
-}
 
-$('#form-bayar').validate({
-	errorElement: 'div',
-	errorClass: 'help-block',
-	focusInvalid: false,
-	ignore: "",
-	highlight: function (e) {
-		$(e).closest('.form-group').removeClass('has-info').addClass('has-error');
-	},
-	success: function (e) {
-		$(e).closest('.form-group').removeClass('has-error');
-		$(e).remove();
-	},
-	errorPlacement: function (error, element) {
-		if(element.is('input[type=radio]')) {
-			var controls = element.closest('div[class*="ra"]');
-			if(controls.find(':radio').length > 0) controls.append(error);
-			else error.insertAfter(element.nextAll('.lbl:eq(0)').eq(0));
-		}
-		else if(element.is('.select2')) {
-			error.insertAfter(element.siblings('[class*="select2-container"]:eq(0)'));
-		}
-		else error.insertAfter(element.parent());
-	},
-	submitHandler: function (form) {
-		$(form).find('button[type=submit]').text('Membayar...').attr('disabled',true);
-		var isi = $('#form-bayar').serialize();
+	window.BayarBulan = function(bulan) {
+		$('#bulan-input').val(bulan);
+		$('#form-bayar [name="bulan"]').val(bulan);
+		
+		// Get nominal SPP
 		$.ajax({
-			url: '<?=base_url("SPP/Simpan")?>',
-			type:"POST",
-			data: isi,
+			url: "<?=base_url($this->uri->segment(1).'/GetSPP/')?>",
+			type:"GET",
 			dataType:"JSON",
 			success:function(data){
-				$('#modal-bayar').modal('hide');
-				location.reload();
-			},
-			error:function(){
-				alert('Terjadi kesalahan');
-				$(form).find('button[type=submit]').text('Bayar').attr('disabled',false);
+				$('[name="harga"]').val(data);
+				$('#modal-bayar').modal('show');
 			}
 		});
 	}
+
+	$('#form-bayar').on('submit', function(e) {
+		e.preventDefault();
+		var form = $(this);
+		form.find('button[type=submit]').text('Membayar...').attr('disabled',true);
+		
+		var isi = form.serialize();
+		$.ajax({
+			url: '<?=base_url("SPP/Simpan")?>',
+			type: "POST",
+			data: isi,
+			dataType: "JSON",
+			success: function(data){
+				$('#modal-bayar').modal('hide');
+				if (data.status) {
+					Swal({
+						title: 'Sukses',
+						text: 'Pembayaran SPP Berhasil. Cetak Bukti Pembayaran?',
+						type: 'success',
+						showCancelButton: true,
+						confirmButtonText: 'Cetak Bukti',
+						cancelButtonText: 'Tutup'
+					}).then((result) => {
+						if (result.value) {
+							// Open print page in new tab
+							window.open('<?=base_url("SPP/CetakBukti/")?>' + data.id_pembayaran, '_blank');
+						}
+						// Reload page to update data
+						location.reload();
+					});
+				} else {
+					Swal({
+						title: 'Gagal',
+						text: 'Pembayaran Gagal',
+						type: 'error'
+					});
+					form.find('button[type=submit]').text('Bayar').attr('disabled',false);
+				}
+			},
+			error: function(){
+				Swal({
+					title: 'Error',
+					text: 'Terjadi kesalahan sistem',
+					type: 'error'
+				});
+				form.find('button[type=submit]').text('Bayar').attr('disabled',false);
+			}
+		});
+	});
+
 });
 </script></div>

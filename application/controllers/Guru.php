@@ -51,6 +51,19 @@ class Guru extends CI_Controller {
                     'number'	=> filter_string($this->input->post('telepon',TRUE))
                 );
 
+        if(!empty($_FILES['foto']['name'])){
+            $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+            $config['upload_path']   = './assets/images/guru/';
+            $config['allowed_types'] = 'gif|jpg|png|jpeg';
+            $config['file_name']     = strtolower(str_replace(' ', '_', $insert['name'])) . '_' . time() . '.' . $ext;
+            $this->load->library('upload');
+            $this->upload->initialize($config);
+            if($this->upload->do_upload('foto')){
+                $uploadData = $this->upload->data();
+                $insert['foto'] = $uploadData['file_name'];
+            }
+        }
+
         $insert = $this->M_General->insert($this->table,$insert);
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
@@ -66,6 +79,19 @@ class Guru extends CI_Controller {
                     'status'	=> filter_string($this->input->post('status',TRUE)),
                     'number'	=> filter_string($this->input->post('telepon',TRUE))
                 );
+
+        if(!empty($_FILES['foto']['name'])){
+            $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+            $config['upload_path']   = './assets/images/guru/';
+            $config['allowed_types'] = 'gif|jpg|png|jpeg';
+            $config['file_name']     = strtolower(str_replace(' ', '_', $insert['name'])) . '_' . time() . '.' . $ext;
+            $this->load->library('upload');
+            $this->upload->initialize($config);
+            if($this->upload->do_upload('foto')){
+                $uploadData = $this->upload->data();
+                $insert['foto'] = $uploadData['file_name'];
+            }
+        }
         $insert = $this->M_General->update($this->table,$insert,'id',$this->input->post('id'));
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));

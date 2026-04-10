@@ -1,9 +1,13 @@
 <div class="col-xs-12">
     <div class="box box-primary">
         <div class="box-header">
+
             <div class="pull-right">
+                <?php if ($this->session->userdata('role') == 1) { ?>
                 <a href="#" onclick="Tambah()" class="btn btn-primary">Tambah Data </a>
+                <?php } ?>
             </div>
+
         </div>
         <div class="box-body">
             <div class="table-responsive">      
@@ -14,6 +18,7 @@
                       <th>Kode Transaksi</th>
                       <th>Nama Transaksi</th>
                       <th>Nominal</th>
+                      <th>Tenggat Waktu</th>
                       <th width="200">Aksi</th>
                         </tr>
                     </thead>
@@ -58,6 +63,10 @@
                 <div class="form-group">
                     <label class="control-label"> Nominal</label>
                     <div><input type="text" value="" required="" onkeypress="return Angka(this)" placeholder="Nominal" autocomplete="off" name="nominal" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Tenggat Waktu </label>
+                    <div><input type="text" value="" placeholder="Cth: Tgl 10 / Akhir bln" autocomplete="off" name="tenggat_waktu" class="form-control"></div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -127,6 +136,7 @@
                 {"data": "kode"},
                 {"data": "nama"},
                 {"data": "nominal",render: $.fn.dataTable.render.number('.',',','')},
+                {"data": "tenggat_waktu"},
                 {
                     "data": "view",
                     "orderable": false,
@@ -293,6 +303,7 @@
                 $('[name="nama"]').val(data.nama);
                 $('[name="kode"]').val(data.kode);
                 $('[name="nominal"]').val(data.nominal);
+                $('[name="tenggat_waktu"]').val(data.tenggat_waktu);
                 $('[name="tipe"]').val(data.tipe).trigger('change');
                 $('#modal-form').modal('show');
                 $('.modal-title').text('Ubah Data'); 

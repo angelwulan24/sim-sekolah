@@ -41,12 +41,87 @@ class StudentArea extends CI_Controller {
 		$data['title'] = 'Area Siswa | SIM Sekolah';
 		$data['student'] = $student;
 		
-		// Load Bills (Tagihan)
-		// Need logic to fetch bills. Example: SPP, Ujian, etc.
-		// Using simple queries for now based on tables seeing in SQL
-		// spp table: id_siswa (smallint), time, bulan, nominal
+		// Year Selection Logic
+		$tahun_sekarang = date('Y');
+		if (date('m') < 7) { $tahun_sekarang = $tahun_sekarang - 1; }
+		$selected_tahun = $this->input->get('tahun') ? $this->input->get('tahun') : $tahun_sekarang;
 		
-		$data['spp'] = $this->db->get_where('spp', ['id_siswa' => $student->id])->result();
+		$data['selected_tahun'] = $selected_tahun;
+		$tahun_list = [];
+		// Show up to 2 years back from current academic year
+		for($i = 0; $i <= 2; $i++){
+			$tahun_list[] = $tahun_sekarang - $i;
+		}
+		$data['tahun_list'] = $tahun_list;
+
+		// 1. Tagihan Bulanan (SPP)
+		$spp_nominal = $this->db->get_where('pembayaran', ['id' => 1])->row()->nominal;
+		$months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+		$year = $selected_tahun;
+		$spp_list = [];
+		foreach($months as $m){
+			$label = $m . '-' . $year;
+			$cek = $this->db->get_where('spp', ['id_siswa' => $student->id, 'bulan' => $label])->row();
+			$spp_list[] = (object)[
+				'jenis' => 'SPP',
+				'label_bayar' => $label,
+				'nama_tagihan' => "SPP $label",
+				'nominal' => $spp_nominal,
+				'status' => $cek ? 'Lunas' : 'Belum Lunas',
+				'tanggal_bayar' => $cek ? date('d-m-Y', strtotime($cek->tanggal)) : '-',
+				'tempat_bayar' => $cek ? ($cek->metode_pembayaran ? $cek->metode_pembayaran : 'Loket') : '-'
+			];
+		}
+		$data['tagihan_bulanan'] = $spp_list;
+
+		// 2. Tagihan Lainnya
+		$tagihan_lainnya = [];
+
+		// Ujian
+		$ujian_nominal = $this->db->get_where('pembayaran', ['id' => 2])->row()->nominal;
+		foreach(['Ganjil', 'Genap'] as $p){
+			$label = $p . '-' . $selected_tahun;
+			$cek = $this->db->get_where('ujian', ['id_siswa' => $student->id, 'periode' => $label])->row();
+			$tagihan_lainnya[] = (object)[
+				'jenis' => 'UJIAN',
+				'label_bayar' => $label,
+				'nama_tagihan' => "Uang Ujian $label",
+				'nominal' => $ujian_nominal,
+				'status' => $cek ? 'Lunas' : 'Belum Lunas',
+				'tanggal_bayar' => $cek ? date('d-m-Y', strtotime($cek->tanggal)) : '-',
+				'tempat_bayar' => $cek ? ($cek->metode_pembayaran ? $cek->metode_pembayaran : 'Loket') : '-'
+			];
+		}
+
+		// Buku
+		$buku_nominal = $this->db->get_where('pembayaran', ['id' => 3])->row()->nominal;
+		$cek = $this->db->get_where('buku', ['id_siswa' => $student->id, 'tahun_ajaran' => $selected_tahun])->row();
+		$tagihan_lainnya[] = (object)[
+				'jenis' => 'BUKU',
+				'label_bayar' => $selected_tahun,
+				'nama_tagihan' => "Uang Buku Tahun $selected_tahun",
+				'nominal' => $buku_nominal,
+				'status' => $cek ? 'Lunas' : 'Belum Lunas',
+				'tanggal_bayar' => $cek ? date('d-m-Y', strtotime($cek->tanggal)) : '-',
+				'tempat_bayar' => $cek ? ($cek->metode_pembayaran ? $cek->metode_pembayaran : 'Loket') : '-'
+		];
+
+		// Baju
+		$baju_nominal = $this->db->get_where('pembayaran', ['id' => 4])->row()->nominal;
+		$cek = $this->db->get_where('baju', ['id_siswa' => $student->id])->row();
+		$tagihan_lainnya[] = (object)[
+				'jenis' => 'BAJU',
+				'label_bayar' => 'Baju Seragam',
+				'nama_tagihan' => "Uang Baju Seragam",
+				'nominal' => $baju_nominal,
+				'status' => $cek ? 'Lunas' : 'Belum Lunas',
+				'tanggal_bayar' => $cek ? date('d-m-Y', strtotime($cek->tanggal)) : '-',
+				'tempat_bayar' => $cek ? ($cek->metode_pembayaran ? $cek->metode_pembayaran : 'Loket') : '-'
+		];
+
+		// Pendaftaran telah dihilangkan dari dashboard siswa, pembayaran hanya di loket / admin.
+		
+		$data['tagihan_lainnya'] = $tagihan_lainnya;
 		
 		// For sidebar active state
 		$this->parents = 'Tagihan'; 
@@ -61,8 +136,8 @@ class StudentArea extends CI_Controller {
 
 	public function get_token(){
 		$this->load->library('MidtransGateway');
-		
-		$month_label = $this->input->post('bulan');
+		$jenis = strtoupper($this->input->post('jenis') ?? 'SPP');
+		$label_bayar = $this->input->post('label_bayar');
 		$nominal = $this->input->post('nominal');
 		$user_id = $this->session->userdata('id');
 		
@@ -78,10 +153,9 @@ class StudentArea extends CI_Controller {
 		}
 
 		// Create unique Order ID
-		// Format: SPP-[ID_SISWA]-[BULAN]-[TIMESTAMP]
-		// Clean month label just in case
-		$clean_month = str_replace(' ', '_', $month_label); 
-		$order_id = 'SPP-' . $student->id . '-' . $clean_month . '-' . time();
+		// Format: JENIS-[ID_SISWA]-[LABEL]-[TIMESTAMP]
+		$clean_label = str_replace([' ', '/'], '_', $label_bayar); 
+		$order_id = $jenis . '-' . $student->id . '-' . $clean_label . '-' . time();
 
 		$params = [
 			'transaction_details' => [
@@ -91,13 +165,13 @@ class StudentArea extends CI_Controller {
 			'customer_details' => [
 				'first_name' => $student->name,
 				'email' => $user_email,
-				'phone' => '0800000000', // Optional, can fetch from studen data if available
+				'phone' => $student->telpon ? $student->telpon : '0800000000',
 			],
 			'item_details' => [[
-				'id' => 'SPP-'.$clean_month,
+				'id' => $jenis.'-'.$clean_label,
 				'price' => (int)$nominal,
 				'quantity' => 1,
-				'name' => "SPP $month_label"
+				'name' => "$jenis $label_bayar"
 			]]
 		];
 
@@ -186,47 +260,60 @@ class StudentArea extends CI_Controller {
 	}
 
 	private function _payment_success($order_id, $gross_amount){
-		// Parse Order ID: SPP-[ID_SISWA]-[BULAN]-[TIMESTAMP]
+		// Parse Order ID: JENIS-[ID_SISWA]-[LABEL]-[TIMESTAMP]
 		$parts = explode('-', $order_id);
 		if(count($parts) >= 4){
+			$jenis = strtoupper($parts[0]);
 			$siswa_id = $parts[1];
-			// Reconstruct month. It was part 2.
-			// But wait, if month has dashes this will break.
-			// My month format is "Januari-2024". That has a dash!
-			// Logic correction: 
-			// ID starts with SPP
-			// SISWA ID is index 1
-			// TIMESTAMP is the LAST index
-			// THE REST in middle is the Month.
 			
 			$timestamp = end($parts);
-			$prefix = $parts[0]; // SPP
-			$siswa_id = $parts[1];
+			$label_parts = array_slice($parts, 2, -1);
+			$label_raw = implode('-', $label_parts);
+			$label = str_replace('_', ' ', $label_raw);
 			
-			// Extract month parts
-			// Slice from index 2 to length-1
-			$month_parts = array_slice($parts, 2, -1);
-			$month_raw = implode('-', $month_parts);
-			$month = str_replace('_', ' ', $month_raw); // Restore spaces if any
+			$time = date('Y-m-d');
 
-			// Check if already paid to avoid double insert
-			// We check 'spp' table for id_siswa and bulan
-			$cek = $this->db->get_where('spp', [
-				'id_siswa' => $siswa_id,
-				'bulan' => $month
-			])->num_rows();
-
-			if($cek == 0){
-				$data = [
-					'id_siswa' => $siswa_id,
-					'time' => date('Y-m-d'),
-					'bulan' => $month,
-					'nominal' => $gross_amount // Store as string to match schema
-				];
-				$this->db->insert('spp', $data);
-				
-				// Update kas masuk if required by system logic
-				// Ensure daily report exists
+			if ($jenis == 'SPP') {
+				$cek = $this->db->get_where('spp', ['id_siswa' => $siswa_id, 'bulan' => $label])->num_rows();
+				if($cek == 0){
+					$data = ['id_siswa' => $siswa_id, 'time' => $time, 'bulan' => $label, 'nominal' => $gross_amount, 'metode_pembayaran' => 'Transfer Online (Midtrans)'];
+					$this->db->insert('spp', $data);
+					$this->M_General->cek_laporan();
+					$this->M_General->update_kas('kas_masuk', $gross_amount);
+				}
+			} 
+			else if ($jenis == 'UJIAN') {
+				$cek = $this->db->get_where('ujian', ['id_siswa' => $siswa_id, 'periode' => $label])->num_rows();
+				if($cek == 0){
+					$data = ['id_siswa' => $siswa_id, 'time' => $time, 'periode' => $label, 'nominal' => $gross_amount, 'metode_pembayaran' => 'Transfer Online (Midtrans)'];
+					$this->db->insert('ujian', $data);
+					$this->M_General->cek_laporan();
+					$this->M_General->update_kas('kas_masuk', $gross_amount);
+				}
+			}
+			else if ($jenis == 'BUKU') {
+				$cek = $this->db->get_where('buku', ['id_siswa' => $siswa_id, 'tahun_ajaran' => $label])->num_rows();
+				if($cek == 0){
+					$data = ['id_siswa' => $siswa_id, 'waktu' => $time, 'time' => $time, 'tahun_ajaran' => $label, 'nominal' => $gross_amount, 'metode_pembayaran' => 'Transfer Online (Midtrans)'];
+					$this->db->insert('buku', $data);
+					$this->M_General->cek_laporan();
+					$this->M_General->update_kas('kas_masuk', $gross_amount);
+				}
+			}
+			else if ($jenis == 'BAJU') {
+				$cek = $this->db->get_where('baju', ['id_siswa' => $siswa_id])->num_rows();
+				if($cek == 0){
+					$data = ['id_siswa' => $siswa_id, 'waktu' => $time, 'time' => $time, 'nominal' => $gross_amount, 'metode_pembayaran' => 'Transfer Online (Midtrans)'];
+					$this->db->insert('baju', $data);
+					$this->M_General->cek_laporan();
+					$this->M_General->update_kas('kas_masuk', $gross_amount);
+				}
+			}
+			else if ($jenis == 'PENDAFTARAN') {
+				// update siswa
+				$this->db->where('id', $siswa_id);
+				$this->db->update('siswa', ['bayar' => 1, 'metode_pembayaran' => 'Transfer Online (Midtrans)']);
+				$this->db->insert('pendaftaran', ['siswa' => $siswa_id, 'time' => $time, 'nominal' => $gross_amount]);
 				$this->M_General->cek_laporan();
 				$this->M_General->update_kas('kas_masuk', $gross_amount);
 			}
