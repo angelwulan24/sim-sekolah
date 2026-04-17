@@ -415,7 +415,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `email`, `password`, `name`, `role`, `active`, `gambar`) VALUES
-(1, 'madrasah@gmail.com', '$2y$10$dFdQaba34BplJRnmCv54/uhoFLU0wlXCY4lRG/EG9FpX9fN1kzjq.', 'Administrator', 1, '1', 'ikhlas.png');
+(1, 'madrasah@gmail.com', '$2y$10$dFdQaba34BplJRnmCv54/uhoFLU0wlXCY4lRG/EG9FpX9fN1kzjq.', 'Administrator', 1, '1', 'MI.png');
 
 --
 -- Indexes for dumped tables

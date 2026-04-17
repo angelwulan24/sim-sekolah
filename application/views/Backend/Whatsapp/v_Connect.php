@@ -24,23 +24,36 @@
     </div>
 </div>
 
+<!-- Load Socket.io Client -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-function getQr() {
-    $('#btn-connect').text('Menghubungkan...').attr('disabled', true);
-    
-    // Simulation: In a real app, this would fetch the QR from the controller
-    setTimeout(function() {
-        $('#qr_code_area').html('<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SimulatedConnect" alt="QR Code"><br><p>Scan QR Code ini</p>');
-        $('#btn-connect').text('Refresh QR');
-        $('#btn-connect').attr('disabled', false);
-        
-        // Simulate "Connected" after some time checking
-        setTimeout(function(){
-            swal("Terhubung!", "WhatsApp Admin Berhasil Terhubung", "success");
-             $('#qr_code_area').html('<i class="fa fa-check-circle fa-5x text-success"></i><br><h3>Terhubung</h3><p>Nomor Admin siap digunakan.</p>');
-             $('#btn-connect').hide();
-        }, 10000); 
+    const socket = io('http://localhost:5001');
 
-    }, 1500); 
-}
+    socket.on('connection_status', (data) => {
+        if (data.status === 'connected') {
+            $('#qr_code_area').html('<i class="fa fa-check-circle fa-5x text-success"></i><br><h3>Terhubung</h3><p>Nomor Admin siap digunakan.</p>');
+            $('#btn-connect').hide();
+        } else if (data.status === 'disconnected') {
+            $('#qr_code_area').html('<p class="text-muted">Koneksi Terputus</p><i class="fa fa-whatsapp fa-5x text-danger"></i>');
+            $('#btn-connect').show().text('Menghubungkan...');
+        } else if (data.status === 'logged_out') {
+            $('#qr_code_area').html('<i class="fa fa-times-circle fa-5x text-danger"></i><br><h3>Keluar</h3><p>Silakan mulai ulang Gateway service dan scan QR ulang.</p>');
+            $('#btn-connect').show().text('Hubungkan WhatsApp').attr('disabled', false);
+        }
+    });
+
+    socket.on('qr_code', (url) => {
+        $('#qr_code_area').html('<img src="' + url + '" alt="QR Code"><br><p>Scan QR Code ini</p>');
+        $('#btn-connect').text('Menunggu Hasil Scan...').attr('disabled', true).show();
+    });
+
+    function getQr() {
+        $('#btn-connect').text('Memeriksa Gateway...').attr('disabled', true);
+        if(!socket.connected) {
+            $('#qr_code_area').html('<p class="text-danger">Gagal terhubung ke Service Gateway. Pastikan Service Node.js (port 5001) sedang berjalan.</p>');
+            $('#btn-connect').text('Coba Ulang').attr('disabled', false);
+        } else {
+             $('#qr_code_area').html('<p>Gateway terhubung. Menunggu QR Code...</p>');
+        }
+    }
 </script>
