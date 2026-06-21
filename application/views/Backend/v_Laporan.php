@@ -123,6 +123,7 @@
 	var label;
 	var table;
 	$(document).ready(function(){
+        $('#modal-print').appendTo("body");
 		$.fn.dataTableExt.oApi.fnPagingInfo = function(oSettings){
             return {
                 "iStart": oSettings._iDisplayStart,
