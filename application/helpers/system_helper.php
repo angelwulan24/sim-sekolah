@@ -6,6 +6,7 @@
             return;
         }
         $CI = get_instance();
+        $CI->db->query("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))");
 
         if (empty($CI->session->userdata('id'))){
             redirect('Auth/logout','refresh');

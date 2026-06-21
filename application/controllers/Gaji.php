@@ -46,8 +46,8 @@ class Gaji extends CI_Controller {
 
 		$this->load->helper('data');
 		$this->breadcrumb->append_crumb('SIM Sekolah ',base_url());
-		$this->breadcrumb->append_crumb($this->parents,base_url('SPP'));
-		$this->breadcrumb->append_crumb('Detail Pembayaran SPP',$this->parents);
+		$this->breadcrumb->append_crumb($this->parents,base_url('Gaji'));
+		$this->breadcrumb->append_crumb('Detail Pembayaran Gaji',$this->parents);
 
 		$data['title']	= 'Detail Pembayaran '.$this->parents.' | SIM Sekolah ';
 		$data['judul']	= 'Detail Pembayaran '.$this->parents;

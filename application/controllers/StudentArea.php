@@ -60,31 +60,20 @@ class StudentArea extends CI_Controller {
 		$spp_list = [];
 		foreach($tagihan_db as $t){
             if (strpos(strtoupper($t->jenis_tagihan), 'SPP') !== false) {
-                // SYNC: Check both tables for status
                 $month_label = str_replace('SPP - ', '', $t->jenis_tagihan);
-                $spp_label_full = $month_label . '-' . $t->tahun_ajaran;
-                $spp_label_short = $month_label . '-' . explode('/', $t->tahun_ajaran)[0]; // Fallback for simple year format
-
-                $cek = $this->db->query("SELECT id, time FROM spp WHERE id_siswa = '$student->id' AND (bulan = '$spp_label_full' OR bulan = '$spp_label_short')")->row();
-                
-                $is_lunas = ($cek || $t->status == 'Lunas');
-                $tanggal_bayar = '-';
-                if ($cek) {
-                    $tanggal_bayar = date('d-m-Y', strtotime($cek->time));
-                } elseif ($t->status == 'Lunas' && $t->waktu_bayar) {
-                    $tanggal_bayar = date('d-m-Y', strtotime($t->waktu_bayar));
-                }
+                $is_lunas = ($t->status == 'Lunas');
+                $tanggal_bayar = ($is_lunas && $t->waktu_bayar) ? date('d-m-Y', strtotime($t->waktu_bayar)) : '-';
 
                 $spp_list[] = (object)[
                     'tagihan_id' => $t->id,
-                    'spp_id' => $cek ? $cek->id : null,
+                    'spp_id' => null,
                     'jenis' => 'SPP',
                     'nominal' => $t->nominal,
                     'label_bayar' => $month_label,
                     'nama_tagihan' => $t->jenis_tagihan,
                     'status' => $is_lunas ? 'Lunas' : 'Belum Lunas',
                     'tanggal_bayar' => $tanggal_bayar,
-                    'tempat_bayar' => $cek ? 'Transfer/Admin' : ($t->status == 'Lunas' ? 'Loket' : '-')
+                    'tempat_bayar' => $is_lunas ? 'Admin/Loket' : '-'
                 ];
             }
 		}
@@ -252,22 +241,7 @@ class StudentArea extends CI_Controller {
 			$this->db->where('id', $tagihan_id);
 			$this->db->update('tagihan', ['status' => 'Lunas', 'waktu_bayar' => $time]);
 
-			// If SPP, record to spp table
-			if(strpos(strtoupper($tagihan->jenis_tagihan), 'SPP') !== false){
-				$label = str_replace('SPP - ', '', $tagihan->jenis_tagihan);
-				$data_spp = [
-					'id_siswa' => $tagihan->id_siswa,
-					'time' => $time,
-					'bulan' => $label,
-					'nominal' => $tagihan->nominal,
-					'metode_pembayaran' => 'Transfer Online'
-				];
-				$this->db->insert('spp', $data_spp);
-				$this->M_General->cek_laporan();
-				$this->M_General->update_kas('kas_masuk', $tagihan->nominal);
-			} else {
-				$this->M_General->update_kas('kas_masuk', $tagihan->nominal);
-			}
+			$this->M_General->update_kas('kas_masuk', $tagihan->nominal);
 
             // Send WhatsApp Notification (Triggered for both SPP and Other Bills)
             $this->wa_gateway->send_payment_confirmation($tagihan->id_siswa, $tagihan->jenis_tagihan, $tagihan->nominal, 'Midtrans / Transfer Online');

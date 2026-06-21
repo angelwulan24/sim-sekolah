@@ -1,14 +1,21 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 $active_group = 'default';
 $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'localhost',
+	// 'hostname' => 'anggarabw.com',
+	// 'username' => 'anggarab_sim_sekolah',
+	// 'password' => 'DZBYuM6q6gXtRPEUtW2L',
+	// 'database' => 'anggarab_sim_sekolah',
+	// 'hostname' => '109.111.53.58:12732',
+	// 'username' => 'root',
+	// 'password' => '123',
+	'hostname' => 'localhost:33060',
 	'username' => 'root',
-	'password' => '',
+	'password' => '123',
 	'database' => 'sim_sekolah',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',

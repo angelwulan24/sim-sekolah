@@ -107,7 +107,7 @@
                                 <td style="vertical-align:middle;">
                                         <?php if($tb->status == 'Lunas'): ?>
                                             <?php 
-                                                $print_url = $tb->spp_id ? base_url('SPP/CetakBukti/'.$tb->spp_id) : base_url('StudentArea/print_tagihan/'.$tb->tagihan_id);
+                                                $print_url = base_url('StudentArea/print_tagihan/'.$tb->tagihan_id);
                                             ?>
                                             <a href="<?= $print_url ?>" target="_blank" class="btn btn-abu-tua btn-xs btn-flat"><i class="fa fa-print"></i> Cetak Bukti</a>
                                         <?php else: ?>
