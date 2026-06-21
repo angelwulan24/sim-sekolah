@@ -39,33 +39,27 @@ class Auth extends CI_Controller {
 		$user = $this->db->get_where('users', ['email'=> $email])->row_array();
 
 		if ($user){
-			if ($user['active'] == 1){
-				if (password_verify($password, $user['password'])){
-					$data = array(
-						'id' 	=> $user['id'],
-						'role'	=> $user['role']
-					);
+			if (password_verify($password, $user['password'])){
+				$data = array(
+					'id' 	=> $user['id_users'],
+					'role'	=> $user['role']
+				);
 				$this->session->set_userdata( $data );
-					$this->M_General->cek_laporan();
+				$this->M_General->cek_laporan();
 				if($user['role'] == 3){
 					redirect('StudentArea','refresh');
 				} else {
 					redirect('Beranda','refresh');
 				}
-				}
-				else{
-					$this->session->set_flashdata('message','<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>  Password Salah</div>');
-		redirect($this->uri->segment(1),'refresh');	
-				}
 			}
 			else{
-				$this->session->set_flashdata('message','<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>  Akun belum aktif</div>');
-		redirect($this->uri->segment(1),'refresh');	
+				$this->session->set_flashdata('message','<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>  Password Salah</div>');
+				redirect($this->uri->segment(1),'refresh');	
 			}
 		}
 		else{
 			$this->session->set_flashdata('message','<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>  Username / Email tidak terdaftar</div>');
-		redirect($this->uri->segment(1),'refresh');	
+			redirect($this->uri->segment(1),'refresh');	
 		}
 	}
 
@@ -74,10 +68,10 @@ class Auth extends CI_Controller {
 		$id   = $this->session->userdata('id');
 		$pass = $this->input->post('lama');
 		$baru = password_hash($this->input->post('baru'), PASSWORD_DEFAULT);
-		$user = $this->db->get_where('users', ['id'=> $id])->row_array();
+		$user = $this->db->get_where('users', ['id_users'=> $id])->row_array();
 
 		if (password_verify($pass, $user['password'])){
-				$this->db->where('id',$id);
+				$this->db->where('id_users',$id);
 				$this->db->update('users',array('password'=>$baru));
 				$data['status'] = true;
 		}else{
@@ -88,7 +82,7 @@ class Auth extends CI_Controller {
 
 	public function update_foto(){
 		$id = $this->session->userdata('id');
-		$user = $this->db->get_where('users', ['id' => $id])->row_array();
+		$user = $this->db->get_where('users', ['id_users' => $id])->row_array();
 		
 		if($user['role'] == 3) {
 			show_error('Akses ditolak. Siswa tidak diizinkan mengubah foto profil sendiri.', 403);
@@ -108,7 +102,7 @@ class Auth extends CI_Controller {
 					unlink('./assets/dist/img/' . $user['gambar']);
 				}
 			}
-			$this->db->where('id', $id);
+			$this->db->where('id_users', $id);
 			$this->db->update('users', ['gambar' => $this->upload->data('file_name')]);
 			$this->session->set_flashdata('message','<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> Berhasil mengubah foto profil</div>');
 		} else {
@@ -140,104 +134,18 @@ class Auth extends CI_Controller {
 		else {
 			$email = filter_string($this->input->post('email',true));
 			$data = array(
-					'name' 		=> filter_string($this->input->post('name',true)),
-					'email' 	=> $email,
-					'gambar'	=> 'user.png',
-					'password'	=> password_hash($this->input->post('password'), PASSWORD_DEFAULT),
-					'role'		=> 2,
-					'active'	=> 0,
-					'created_on'=> time()
+					'nama_users' => filter_string($this->input->post('name',true)),
+					'email' 	 => $email,
+					'gambar'	 => 'user.png',
+					'password'	 => password_hash($this->input->post('password'), PASSWORD_DEFAULT),
+					'role'		 => 2
 			);
 
-		$token = base64_encode(random_bytes(32));
+			$this->M_General->insert('users',$data);
 
-		$user_token = array (
-			'email'			=> 	$email,
-			'token'			=> 	$token,
-			'date_created'	=>	time()	
-		);
-
-		$this->M_General->insert('users',$data);
-		$this->M_General->insert('user_token',$user_token);
-		$this->_sendEmail($token,'verify');
-
-		$this->session->set_flashdata('message','<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> Berhasil Mendaftar, kiik link aktivasi yang telah terkirim di email tersebut</div>');
-		redirect($this->uri->segment(1),'refresh');
+			$this->session->set_flashdata('message','<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> Berhasil Mendaftar, silakan login</div>');
+			redirect($this->uri->segment(1),'refresh');
 		}
-	}
-
-	private function _sendEmail($token, $type){
-
-		$config = [
-			'protocol' 	=>	'smtp',
-			'smtp_host'	=>	'ssl://smtp.gmail.com',
-			'smtp_user'	=>	'Your Email',
-			'smtp_pass'	=>	'Your Password',
-			'smtp_port'	=>	465,
-			'mailtype'	=>	'html',
-			'charset'	=>	'utf-8',
-			'newline'	=>	"\r\n"
-		];
-
-		$this->load->library('email', $config);
-		$this->email->from('Your Email','Layanan Aktivasi Akun');
-		$this->email->to($this->input->post('email'));
-
-		if ($type == 'verify'){
-			$this->email->subject('Link Aktivasi Akun');
-			$this->email->message('Klik link ini untuk aktivasi akun : <a href="'.base_url().'Auth/verify?email='.$this->input->post('email').'&token='.urlencode($token).'"> Aktifasi</a>');
-		}
-
-		if($this->email->send()){
-			return true;
-		}
-		else{
-			echo $this->email->print_debugger();
-			die;
-		}
-
-	}
-
-	public function verify(){
-
-		$email = $this->input->get('email');
-		$token = $this->input->get('token');
-
-		$user = $this->db->get_where('users',['email'=>$email])->row_array();
-
-		if ($user){
-			$user_token = $this->db->get_where('user_token',['token'=>$token])->row_array();
-			if ($user_token){
-				if (time() - $user_token['date_created'] < (60*60*24)){
-
-					$this->db->set('active',1);
-					$this->db->where('email',$email);
-					$this->db->update('users');
-					$this->db->delete('user_token',['email'=>$email]);
-
-					$this->session->set_flashdata('message','<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&button> '.$email.' Telah diaktifasi! Silahkan Login </div>');
-		redirect($this->uri->segment(1));
-
-				}	
-				else{
-					$this->db->delete('users',['email'=>$email]);
-					$this->db->delete('user_token',['email'=>$email]);
-
-					$this->session->set_flashdata('message','<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>  Token Expired</div>');
-		redirect($this->uri->segment(1));
-				}
-			}
-			else{
-				$this->session->set_flashdata('message','<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>  Token Salah</div>');
-		redirect($this->uri->segment(1));
-
-			}
-		}
-		else{
-			$this->session->set_flashdata('message','<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>  Email tidak valid</div>');
-		redirect($this->uri->segment(1));
-		}
-
 	}
 
 
