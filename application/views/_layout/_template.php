@@ -203,11 +203,11 @@
     </SCRIPT>
 
 <?php 
-$masuk = $this->db->get_where('users',['id'=> $this->session->userdata('id')])->row_array();
+$masuk = $this->db->query("SELECT id_users AS id, email, password, nama_users AS name, role, gambar FROM users WHERE id_users = '".$this->session->userdata('id')."'")->row_array();
 $foto_profil = base_url('assets/dist/img/') . (!empty($masuk['gambar']) ? $masuk['gambar'] : 'user.png');
 
 if ($masuk['role'] == 3) {
-    $siswa = $this->db->get_where('siswa', ['nis' => $masuk['email']])->row_array();
+    $siswa = $this->db->query("SELECT foto_siswa AS foto FROM siswa WHERE nis_siswa = '".$masuk['email']."'")->row_array();
     if ($siswa && !empty($siswa['foto'])) {
         $foto_profil = base_url('assets/images/siswa/') . $siswa['foto'];
     }
