@@ -5,7 +5,7 @@ class Tagihan extends CI_Controller {
 
 	private $parents = 'Tagihan';
 	private $icon	 = 'fa fa-level-down';
-	var $table 		 = 'tagihan';
+	var $table 		 = 'tagihan_siswa';
 
 	function __construct(){
 		parent::__construct();
@@ -48,27 +48,34 @@ class Tagihan extends CI_Controller {
 		$data['judul']	= 'Detail Tagihan';
 		$data['icon']	= 'fa fa-search';
 
-		$data['siswa'] = $this->db->query("SELECT s.*, k.nama as nama_kelas FROM siswa s LEFT JOIN kelas k ON s.kelas = k.id WHERE s.id = '$id_siswa'")->row();
+		$data['siswa'] = $this->db->query("SELECT s.nis_siswa AS nis, s.nama_siswa AS name, s.jk_siswa AS sex, s.telp_siswa AS telpon, s.foto_siswa AS foto, k.nama_kelas FROM siswa s LEFT JOIN kelas k ON s.id_kelas = k.id_kelas WHERE s.nis_siswa = '$id_siswa'")->row();
         
 		$tahun_filter = $this->input->get('tahun_ajaran', true);
 		$data['tahun_filter'] = $tahun_filter;
 
-        $data['list_tahun'] = $this->db->query("SELECT DISTINCT tahun_ajaran FROM tagihan WHERE id_siswa = '$id_siswa' AND tahun_ajaran IS NOT NULL AND tahun_ajaran != '' ORDER BY tahun_ajaran DESC")->result();
+        $data['list_tahun'] = $this->db->query("SELECT DISTINCT j.tahun_ajaran FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan WHERE t.nis_siswa = '$id_siswa' AND j.tahun_ajaran IS NOT NULL AND j.tahun_ajaran != '' ORDER BY j.tahun_ajaran DESC")->result();
 
         $where_tahun = "";
         if (!empty($tahun_filter)) {
-            $where_tahun = " AND tahun_ajaran = '$tahun_filter'";
+            $where_tahun = " AND j.tahun_ajaran = '$tahun_filter'";
         }
 
         // Ambil Tagihan SPP
-        $data['tagihan_spp'] = $this->db->query("SELECT * FROM tagihan WHERE id_siswa = '$id_siswa' AND jenis_tagihan LIKE '%SPP%' $where_tahun 
-            ORDER BY id ASC")->result();
+        $data['tagihan_spp'] = $this->db->query("SELECT t.id_tagihan AS id, t.status, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, j.tahun_ajaran, j.tenggat_waktu 
+            FROM tagihan_siswa t 
+            JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan 
+            WHERE t.nis_siswa = '$id_siswa' AND j.nama_tagihan LIKE '%SPP%' $where_tahun 
+            ORDER BY t.id_tagihan ASC")->result();
         
         // Ambil Tagihan Lainnya (selain SPP)
-        $data['tagihan_lainnya'] = $this->db->query("SELECT * FROM tagihan WHERE id_siswa = '$id_siswa' AND jenis_tagihan NOT LIKE '%SPP%' $where_tahun ORDER BY id ASC")->result();
+        $data['tagihan_lainnya'] = $this->db->query("SELECT t.id_tagihan AS id, t.status, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, j.tahun_ajaran, j.tenggat_waktu 
+            FROM tagihan_siswa t 
+            JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan 
+            WHERE t.nis_siswa = '$id_siswa' AND j.nama_tagihan NOT LIKE '%SPP%' $where_tahun 
+            ORDER BY t.id_tagihan ASC")->result();
 
         // Ambil list jenis transaksi (pembayaran), kecualikan yang mengandung kata SPP
-        $data['jenis_transaksi'] = $this->db->query("SELECT id, nama FROM pembayaran WHERE nama NOT LIKE '%SPP%'")->result();
+        $data['jenis_transaksi'] = $this->db->query("SELECT kode_tagihan AS id, nama_tagihan AS nama, tahun_ajaran FROM jenis_tagihan WHERE nama_tagihan NOT LIKE '%SPP%'")->result();
 
         $data['id_siswa'] = $id_siswa;
 
@@ -77,10 +84,8 @@ class Tagihan extends CI_Controller {
 
     public function Simpan_Manual(){
         $insert = array(
-            'id_siswa'      => $this->input->post('id_siswa',TRUE),
-            'jenis_tagihan' => filter_string(ucwords($this->input->post('jenis_tagihan'),TRUE)),
-            'nominal'       => $this->input->post('nominal',TRUE),
-            'tahun_ajaran'  => filter_string($this->input->post('tahun_ajaran',TRUE)),
+            'nis_siswa'     => $this->input->post('id_siswa',TRUE),
+            'kode_tagihan'  => $this->input->post('kode_tagihan',TRUE),
             'status'        => 'Belum Lunas'
         );
 
@@ -92,18 +97,18 @@ class Tagihan extends CI_Controller {
     public function Bayar($id_tagihan) {
         $update = array(
             'status' => 'Lunas',
-            'waktu_bayar' => waktu()
+            'tgl_pembayaran' => waktu()
         );
-        $this->M_General->update($this->table, $update, 'id', $id_tagihan);
+        $this->M_General->update($this->table, $update, 'id_tagihan', $id_tagihan);
         
         // update kas
-        $tagihan = $this->db->query("SELECT id_siswa, nominal, jenis_tagihan FROM tagihan WHERE id = '$id_tagihan'")->row();
+        $tagihan = $this->db->query("SELECT t.nis_siswa, j.nominal_tagihan AS nominal, j.nama_tagihan AS jenis_tagihan FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan WHERE t.id_tagihan = '$id_tagihan'")->row();
         if ($tagihan) {
             $this->M_General->update_kas('kas_masuk', $tagihan->nominal);
             
             // Send WhatsApp Notification
             $this->load->library('Wa_gateway');
-            $this->wa_gateway->send_payment_confirmation($tagihan->id_siswa, $tagihan->jenis_tagihan, $tagihan->nominal);
+            $this->wa_gateway->send_payment_confirmation($tagihan->nis_siswa, $tagihan->jenis_tagihan, $tagihan->nominal);
         }
 
         $data['status'] = TRUE;
@@ -116,17 +121,17 @@ class Tagihan extends CI_Controller {
             $this->load->library('Wa_gateway');
             foreach ($ids as $id) {
                 // cek jika belum lunas
-                $ceklunas = $this->db->query("SELECT id_siswa, status, nominal, jenis_tagihan FROM tagihan WHERE id = '$id'")->row();
+                $ceklunas = $this->db->query("SELECT t.nis_siswa, t.status, j.nominal_tagihan AS nominal, j.nama_tagihan AS jenis_tagihan FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan WHERE t.id_tagihan = '$id'")->row();
                 if($ceklunas && $ceklunas->status == 'Belum Lunas') {
                     $update = array(
                         'status' => 'Lunas',
-                        'waktu_bayar' => waktu()
+                        'tgl_pembayaran' => waktu()
                     );
-                    $this->M_General->update($this->table, $update, 'id', $id);
+                    $this->M_General->update($this->table, $update, 'id_tagihan', $id);
                     $this->M_General->update_kas('kas_masuk', $ceklunas->nominal);
 
                     // Send WhatsApp Notification
-                    $this->wa_gateway->send_payment_confirmation($ceklunas->id_siswa, $ceklunas->jenis_tagihan, $ceklunas->nominal);
+                    $this->wa_gateway->send_payment_confirmation($ceklunas->nis_siswa, $ceklunas->jenis_tagihan, $ceklunas->nominal);
                 }
             }
             $data['status'] = TRUE;
@@ -142,9 +147,9 @@ class Tagihan extends CI_Controller {
 		$this->load->helper('data');
 		
         if (strpos($id, ',') !== false) {
-            $tagihan = $this->db->query("SELECT t.*, s.name, s.nis FROM tagihan t JOIN siswa s ON t.id_siswa = s.id WHERE t.id IN ($id)")->result();
+            $tagihan = $this->db->query("SELECT t.*, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, s.nama_siswa AS name, s.nis_siswa AS nis FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan JOIN siswa s ON t.nis_siswa = s.nis_siswa WHERE t.id_tagihan IN ($id)")->result();
         } else {
-            $tagihan = $this->db->query("SELECT t.*, s.name, s.nis FROM tagihan t JOIN siswa s ON t.id_siswa = s.id WHERE t.id = '$id'")->result();
+            $tagihan = $this->db->query("SELECT t.*, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, s.nama_siswa AS name, s.nis_siswa AS nis FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan JOIN siswa s ON t.nis_siswa = s.nis_siswa WHERE t.id_tagihan = '$id'")->result();
         }
 
         if(count($tagihan) == 0) {
@@ -208,7 +213,7 @@ class Tagihan extends CI_Controller {
         foreach($tagihan as $t) {
             $pdf->Cell(10, 7, $no++, 1, 0, 'C');
             $pdf->Cell(80, 7, $t->jenis_tagihan, 1, 0, 'L');
-            $pdf->Cell(50, 7, date('d-m-Y', strtotime($t->waktu_bayar)), 1, 0, 'C');
+            $pdf->Cell(50, 7, date('d-m-Y', strtotime($t->tgl_pembayaran)), 1, 0, 'C');
             $pdf->Cell(50, 7, 'Rp. '.number_format($t->nominal, 0, ',', '.'), 1, 1, 'R');
             $total += $t->nominal;
         }
@@ -233,7 +238,7 @@ class Tagihan extends CI_Controller {
     }
 
     public function Hapus($id) {
-        $this->M_General->delete($this->table, 'id', $id);
+        $this->M_General->delete($this->table, 'id_tagihan', $id);
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
@@ -242,7 +247,7 @@ class Tagihan extends CI_Controller {
         $ids = $this->input->post('ids');
         if (!empty($ids)) {
             foreach ($ids as $id) {
-                $this->M_General->delete($this->table, 'id', $id);
+                $this->M_General->delete($this->table, 'id_tagihan', $id);
             }
             $data['status'] = TRUE;
         } else {

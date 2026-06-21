@@ -59,15 +59,13 @@
                 </div>
                 <div class="form-group">
                     <label class="control-label"> Kelas</label>
+                    <?php $kls= $this->db->query("SELECT id_kelas AS id, nama_kelas AS nama FROM kelas")->result() ?>
                     <select name="kelas" required="" class="form-control">
                         <option value="">-- Pilih Kelas --</option>
-                        <option value="Semua Kelas">Semua Kelas</option>
-                        <option value="Kelas 1">Kelas 1</option>
-                        <option value="Kelas 2">Kelas 2</option>
-                        <option value="Kelas 3">Kelas 3</option>
-                        <option value="Kelas 4">Kelas 4</option>
-                        <option value="Kelas 5">Kelas 5</option>
-                        <option value="Kelas 6">Kelas 6</option>
+                        <option value="Semua">Semua Kelas</option>
+                        <?php foreach ($kls as $key) {?>    
+                            <option value="<?=$key->id?>"><?=$key->nama?></option>
+                        <?php } ?>
                     </select>
                 </div>
                 <div class="form-group">
@@ -176,15 +174,15 @@
             },
             columns: [
                 {
-                    "data": "id",
+                    "data": "kode_tagihan",
                     "orderable": false,
                     "searchable": false
                 },
-                {"data": "kode"},
-                {"data": "nama"},
+                {"data": "kode_tagihan"},
+                {"data": "nama_tagihan"},
                 {"data": "tahun_ajaran"},
                 {"data": "kelas"},
-                {"data": "nominal",render: $.fn.dataTable.render.number('.',',','')},
+                {"data": "nominal_tagihan",render: $.fn.dataTable.render.number('.',',','')},
                 {"data": "tenggat_waktu"},
                 {
                     "data": "view",
@@ -194,7 +192,7 @@
             ],
             order: [[1, 'asc']],
             rowId: function(a){
-                return a;
+                return a.kode_tagihan;
             },
             rowCallback: function(row, data, iDisplayIndex) {
                 var info = this.fnPagingInfo();
@@ -376,15 +374,15 @@
             dataType:"JSON",
             success:function(data){
                 $('#nama').attr('disabled',true);
-                $('[name="id"]').val(data.id);
-                $('[name="nama"]').val(data.nama);
-                $('[name="kode"]').val(data.kode);
-                $('[name="nominal"]').val(data.nominal);
+                $('[name="id"]').val(data.kode_tagihan);
+                $('[name="nama"]').val(data.nama_tagihan);
+                $('[name="kode"]').val(data.kode_tagihan);
+                $('[name="nominal"]').val(data.nominal_tagihan);
                 $('[name="tenggat_waktu"]').val(data.tenggat_waktu);
                 $('[name="tahun_ajaran"]').val(data.tahun_ajaran);
-                $('[name="kelas"]').val(data.kelas);
+                $('[name="kelas"]').val(data.id_kelas ? data.id_kelas : 'Semua');
 
-                var nama_val = data.nama.toUpperCase();
+                var nama_val = data.nama_tagihan.toUpperCase();
                 if(nama_val.includes('SPP')) {
                     $('#input-tenggat').attr('type', 'text').val('Setiap Bulan').prop('readonly', true);
                     $('#row-bulan-spp').show();

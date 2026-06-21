@@ -234,20 +234,12 @@
                 <input type="hidden" name="id_siswa" value="<?=$id_siswa?>">
                 <div class="form-group">
                     <label class="control-label">Jenis Tagihan</label>
-                    <select name="jenis_tagihan" class="form-control" required>
+                    <select name="kode_tagihan" class="form-control" required>
                         <option value="">--Pilih Jenis Tagihan--</option>
                         <?php foreach($jenis_transaksi as $t) { ?>
-                            <option value="<?=$t->nama?>"><?=$t->nama?></option>
+                            <option value="<?=$t->id?>"><?=$t->nama?> (<?=$t->tahun_ajaran?>)</option>
                         <?php } ?>
                     </select>
-                </div>
-                <div class="form-group">
-                    <label class="control-label">Nominal (Rp)</label>
-                    <input type="number" name="nominal" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label class="control-label">Tahun Ajaran</label>
-                    <input type="text" name="tahun_ajaran" class="form-control" placeholder="Contoh: 2023/2024">
                 </div>
             </div>
             <div class="modal-footer">

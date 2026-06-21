@@ -2,7 +2,7 @@
 	<div class="box box-primary">
         <div class="box-header">
             <div class="col-sm-2">
-<?php $kls= $this->db->query("SELECT DISTINCT sekarang, DATE_FORMAT(tanggal,'%d-%m-%Y') AS t FROM lainnya ORDER BY tanggal DESC")->result() ?>
+<?php $kls= $this->db->query("SELECT DISTINCT sekarang, DATE_FORMAT(tanggal,'%d-%m-%Y') AS t FROM pemasukan ORDER BY tanggal DESC")->result() ?>
                 <select name="kelas" id="kelas" data-placeholder="--Pilih Tanggal--" class="form-control select2">
                     <option value=""></option>
                 <?php foreach ($kls as $key) {?>    

@@ -5,21 +5,18 @@ class M_Lainnya extends CI_Model {
 
 	function getAllData(){
 		$this->db->query("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))");
-		$this->datatables->select("id,sekarang,DATE_FORMAT(s.tanggal,'%d-%m-%Y') AS Tgl, Sum(s.nominal) AS Total, GROUP_CONCAT(s.keterangan SEPARATOR ', ') AS keterangan");
-		$this->datatables->from('lainnya as s');
-		$this->datatables->group_by("DATE_FORMAT(s.tanggal,'%Y-%m-%d')");
+		$this->datatables->select("id_pemasukan AS id,sekarang,DATE_FORMAT(tgl_pemasukan,'%d-%m-%Y') AS Tgl, Sum(CAST(nominal_pemasukan AS DECIMAL(15,2))) AS Total, GROUP_CONCAT(ket_pemasukan SEPARATOR ', ') AS keterangan");
+		$this->datatables->from('pemasukan');
+		$this->datatables->group_by("tgl_pemasukan");
 		return $this->datatables->generate();
 	}
 
 	function getDetailData($detail =''){
-		$this->datatables->select("id,DATE_FORMAT(s.tanggal,'%d-%m-%Y - %H:%m:%s WIB') AS Tgl,nominal,keterangan");
-		$this->datatables->from('lainnya as s');
+		$this->datatables->select("id_pemasukan AS id,DATE_FORMAT(tanggal,'%d-%m-%Y - %H:%i:%s WIB') AS Tgl,nominal_pemasukan AS nominal,ket_pemasukan AS keterangan");
+		$this->datatables->from('pemasukan');
 		$this->datatables->where('sekarang',$detail);
 		return $this->datatables->generate();
 	}
 	
 
 }
-
-/* End of file m_Menu_1.php */
-/* Location: ./application/models/m_Menu_1.php */

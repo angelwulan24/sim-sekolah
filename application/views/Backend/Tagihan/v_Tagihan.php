@@ -2,7 +2,7 @@
 	<div class="box box-primary">
         <div class="box-header">
             <div class="col-sm-2">
-            <?php $kls= $this->db->query("SELECT id,nama FROM kelas")->result() ?>
+            <?php $kls= $this->db->query("SELECT id_kelas AS id, nama_kelas AS nama FROM kelas")->result() ?>
                 <select name="kelas" id="kelas" data-placeholder="--Pilih kelas--" class="form-control select2">
                     <option value=""></option>
                 <?php foreach ($kls as $key) {?>    

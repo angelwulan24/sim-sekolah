@@ -5,12 +5,12 @@ class M_Tagihan extends CI_Model {
 
 	function getAllData($kls = '')
 	{
-		$this->datatables->select('siswa.id, siswa.name, siswa.nis, siswa.status, siswa.sex, siswa.orangtua_wali, siswa.telpon, siswa.tempat, siswa.tanggal, siswa.alamat, siswa.foto, siswa.tanggal_masuk, siswa.tahun_ajaran, kelas.nama as nama_kelas');
+		$this->datatables->select('siswa.nis_siswa AS id, siswa.foto_siswa AS foto, siswa.nama_siswa AS name, siswa.nis_siswa AS nis, siswa.jk_siswa AS sex, siswa.tempat_lahirsiswa AS tempat, siswa.tgl_lahirsiswa AS tanggal, siswa.ortu_wali AS orangtua_wali, siswa.telp_siswa AS telpon, siswa.alamat_ssiwa AS alamat, siswa.tgl_masuk AS tanggal_masuk, siswa.thn_ajaran AS tahun_ajaran, COALESCE(kelas.nama_kelas, "Belum Diatur") AS nama_kelas, siswa.status_siswa AS status');
 		$this->datatables->from('siswa');
-		$this->datatables->join('kelas', 'siswa.kelas = kelas.id', 'left');
+		$this->datatables->join('kelas', 'siswa.id_kelas = kelas.id_kelas', 'left');
 
 		if ($kls !== null && $kls !== '') {
-			$this->datatables->where('siswa.kelas', $kls);
+			$this->datatables->where('siswa.id_kelas', $kls);
 		}
 
 
