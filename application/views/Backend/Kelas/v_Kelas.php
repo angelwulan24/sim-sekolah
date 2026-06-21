@@ -62,7 +62,7 @@
                     <select name="wali" required="" data-placeholder="--Pilih--" class="form-control select2">
                         <option value=""></option>
 <?php foreach ($guru as $r) { ?>
-                        <option value="<?=$r->name?>"><?=$r->name.' / '.$r->nip?></option>
+                        <option value="<?=$r->nip?>"><?=$r->name.' / '.$r->nip?></option>
 <?php } ?>
                     </select>
                 </div>
@@ -131,14 +131,14 @@
             },
             columns: [
                 {
-                    "data": "id",
+                    "data": "id_kelas",
                     "orderable": false,
                     "searchable": false
                 },
-                {"data": "nama"},
+                {"data": "nama_kelas"},
                 //{"data": "jumlah"},
                 {"data": "wali"},
-                {"data": "keterangan"},
+                {"data": "ket_kelas"},
                 {
                     "data": "view",
                     "orderable": false,
@@ -147,7 +147,7 @@
             ],
             order: [[1, 'asc']],
             rowId: function(a){
-                return a;
+                return a.id_kelas;
             },
             rowCallback: function(row, data, iDisplayIndex) {
                 var info = this.fnPagingInfo();
@@ -251,10 +251,10 @@
 			type:"GET",
 			dataType:"JSON",
 			success:function(data){
-				$('[name="id"]').val(data.id);
-                $('[name="nama"]').val(data.nama).trigger('change');
-                $('[name="keterangan"]').val(data.keterangan);
-                $('[name="wali"]').val(data.wali).trigger('change');
+				$('[name="id"]').val(data.id_kelas);
+                $('[name="nama"]').val(data.nama_kelas).trigger('change');
+                $('[name="keterangan"]').val(data.ket_kelas);
+                $('[name="wali"]').val(data.NUPTK).trigger('change');
                 
                 $('#modal-form').appendTo("body").modal('show');
                 $('.modal-title').text('Ubah Data'); 

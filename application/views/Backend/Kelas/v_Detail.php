@@ -25,15 +25,15 @@
 		            	<?php $no = 1; foreach ($siswa as $key) {?>
 		            	<tr>
 		            		<td><?=$no++;?></td>
-		            		<td><?=$key->name?></td>
-		            		<td><?=$key->nis?></td>
-		            		<td><?=$key->sex?></td>
-                            <td><?=$key->tempat?></td>
-                            <td><?=date('d-m-Y', strtotime($key->tanggal))?></td>
-                            <td><?=$key->orangtua_wali?></td>
-                            <td><?=$key->telpon?></td>
-                            <td><?=$key->alamat?></td>
-                            <td><?=$key->status?></td>
+		            		<td><?=$key->nama_siswa?></td>
+		            		<td><?=$key->nis_siswa?></td>
+		            		<td><?=$key->jk_siswa?></td>
+                            <td><?=$key->tempat_lahirsiswa?></td>
+                            <td><?=date('d-m-Y', strtotime($key->tgl_lahirsiswa))?></td>
+                            <td><?=$key->ortu_wali?></td>
+                            <td><?=$key->telp_siswa?></td>
+                            <td><?=$key->alamat_ssiwa?></td>
+                            <td><?=$key->status_siswa?></td>
 		            	</tr>
 		             <?php } ?>
 		            </tbody>

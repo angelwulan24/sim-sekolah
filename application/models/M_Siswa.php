@@ -5,21 +5,21 @@ class M_Siswa extends CI_Model {
 
 	function getAllData($kls = '')
 	{
-		$this->datatables->select('siswa.id, siswa.name, siswa.nis, siswa.status, siswa.sex, siswa.agama, siswa.orangtua_wali, siswa.telpon, siswa.tempat, siswa.tanggal, siswa.alamat, siswa.foto, siswa.tanggal_masuk, siswa.tahun_ajaran, kelas.nama as nama_kelas');
+		$this->datatables->select('siswa.nis_siswa, siswa.nama_siswa, siswa.jk_siswa, siswa.agama_siswa, siswa.status_siswa, siswa.ortu_wali, siswa.telp_siswa, siswa.tempat_lahirsiswa, siswa.tgl_lahirsiswa, siswa.alamat_ssiwa, siswa.foto_siswa, siswa.tgl_masuk, siswa.thn_ajaran, kelas.nama_kelas');
 		$this->datatables->from('siswa');
-		$this->datatables->join('kelas', 'siswa.kelas = kelas.id', 'left');
+		$this->datatables->join('kelas', 'siswa.id_kelas = kelas.id_kelas', 'left');
 
 		if ($kls !== null && $kls !== '') {
-			$this->datatables->where('siswa.kelas', $kls);
+			$this->datatables->where('siswa.id_kelas', $kls);
 		}
 
 
 		if ($this->session->userdata('role') == 1) {
 			$btn = '<center>
-				<a href="javascript:void(0)" onclick="Ubah($1)" class="btn btn-warning btn-xs">
+				<a href="javascript:void(0)" onclick="Ubah(\'$1\')" class="btn btn-warning btn-xs">
 					<i class="fa fa-pencil"></i> Ubah
 				</a>
-				<a href="javascript:void(0)" onclick="Hapus($1)" class="btn btn-danger btn-xs">
+				<a href="javascript:void(0)" onclick="Hapus(\'$1\')" class="btn btn-danger btn-xs">
 					<i class="fa fa-trash"></i> Hapus
 				</a>
 			</center>';
@@ -27,7 +27,7 @@ class M_Siswa extends CI_Model {
 			$btn = '';
 		}
 
-		$this->datatables->add_column('view', $btn, 'id');
+		$this->datatables->add_column('view', $btn, 'nis_siswa');
 
 
 

@@ -25,7 +25,7 @@ class Kelas extends CI_Controller {
 		$data['title']	= $this->parents.' | SIM Sekolah ';
 		$data['judul']	= $this->parents;
 		$data['icon']	= $this->icon;
-		$data['guru']	=$this->db->query("SELECT name,nip FROM guru")->result();
+		$data['guru']	=$this->db->query("SELECT nama_guru AS name, NUPTK AS nip FROM guru")->result();
 
 	$this->template->views('Backend/'.$this->parents.'/v_'.$this->parents,$data);
 	}
@@ -37,7 +37,7 @@ class Kelas extends CI_Controller {
 
 
 	public function edit($id){
-		$data = $this->M_General->getByID($this->table,'id',$id,'id')->row();
+		$data = $this->M_General->getByID($this->table,'id_kelas',$id,'id_kelas')->row();
 		echo json_encode($data);
 	}
 
@@ -52,12 +52,12 @@ class Kelas extends CI_Controller {
 			foreach ($siswa as $i => $key){
 
 				array_push($ar,array(
-					'kelas' => $kelas,
-					'id'	=> $key
+					'id_kelas' => $kelas,
+					'nis_siswa' => $key
 				));
 			}
 
-		$this->db->update_batch('siswa',$ar,'id');
+		$this->db->update_batch('siswa',$ar,'nis_siswa');
 		}
 
 		redirect($this->uri->segment(1),'refresh');
@@ -74,7 +74,7 @@ class Kelas extends CI_Controller {
 		$data['title']	= 'Data '.$this->parents.' '.get_kelas($id).' | SIM Sekolah ';
 		$data['judul']	=  $this->parents.' '.get_kelas($id);
 		$data['icon']	= $this->icon;
-		$data['siswa']	=$this->db->query("SELECT * FROM siswa WHERE kelas = $id")->result();
+		$data['siswa']	=$this->db->query("SELECT * FROM siswa WHERE id_kelas = $id")->result();
 
 		$this->template->views('Backend/'.$this->parents.'/v_Detail',$data);
 
@@ -83,23 +83,23 @@ class Kelas extends CI_Controller {
 
 	function Simpan(){
         $insert = array(
-                    'nama'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
-                    'wali'		=> $this->input->post('wali',TRUE),
-                    'keterangan'	=> filter_string($this->input->post('keterangan',TRUE))
+                    'nama_kelas'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
+                    'NUPTK'		    => $this->input->post('wali',TRUE),
+                    'ket_kelas'	    => filter_string($this->input->post('keterangan',TRUE))
                 );
 
-        $insert = $this->M_General->insert($this->table,$insert);
+        $this->M_General->insert($this->table,$insert);
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
 
 	function Ubah(){
         $insert = array(
-                    'nama'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
-                    'wali'		=> $this->input->post('wali',TRUE),
-                    'keterangan'	=> filter_string($this->input->post('keterangan',TRUE))
+                    'nama_kelas'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
+                    'NUPTK'		    => $this->input->post('wali',TRUE),
+                    'ket_kelas'	    => filter_string($this->input->post('keterangan',TRUE))
                 );
-        $insert = $this->M_General->update($this->table,$insert,'id',$this->input->post('id'));
+        $this->M_General->update($this->table,$insert,'id_kelas',$this->input->post('id'));
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
@@ -123,16 +123,16 @@ class Kelas extends CI_Controller {
 		if (!empty($dari) && !empty($ke) && $dari != $ke) {
 			if ($ke == 'lulus') {
 				$data = array(
-					'status' => 'Alumni',
-					'kelas'  => 0
+					'status_siswa' => 'Alumni',
+					'id_kelas'     => NULL
 				);
 			} else {
 				$data = array(
-					'kelas' => $ke
+					'id_kelas' => $ke
 				);
 			}
 
-			$this->db->where('kelas', $dari);
+			$this->db->where('id_kelas', $dari);
 			$this->db->update('siswa', $data);
 
             $count = $this->db->affected_rows();

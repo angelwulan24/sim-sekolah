@@ -36,69 +36,69 @@ class Guru extends CI_Controller {
 
 
 	public function edit($id){
-		$data = $this->M_General->getByID($this->table,'id',$id,'id')->row();
+		$data = $this->M_General->getByID($this->table,'NUPTK',$id,'NUPTK')->row();
 		echo json_encode($data);
 	}
 
 	function Simpan(){
         $insert = array(
-                    'name'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
-                    'sex'		=> $this->input->post('gender',TRUE),
-                    'nip' 		=> $this->input->post('nip',TRUE),
-                    'bidang'	=> filter_string($this->input->post('bidang',TRUE)),
-                    'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
-                    'status'	=> filter_string($this->input->post('status',TRUE)),
-                    'number'	=> filter_string($this->input->post('telepon',TRUE))
+                    'nama_guru'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
+                    'jk_guru'		=> $this->input->post('gender',TRUE),
+                    'NUPTK' 		=> $this->input->post('nip',TRUE),
+                    'bidang_studi'	=> filter_string($this->input->post('bidang',TRUE)),
+                    'alamat_guru'	=> filter_string($this->input->post('alamat',TRUE)),
+                    'status_guru'	=> filter_string($this->input->post('status',TRUE)),
+                    'telp_guru'	    => filter_string($this->input->post('telepon',TRUE))
                 );
 
         if(!empty($_FILES['foto']['name'])){
             $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
             $config['upload_path']   = './assets/images/guru/';
             $config['allowed_types'] = 'gif|jpg|png|jpeg';
-            $config['file_name']     = strtolower(str_replace(' ', '_', $insert['name'])) . '_' . time() . '.' . $ext;
+            $config['file_name']     = strtolower(str_replace(' ', '_', $insert['nama_guru'])) . '_' . time() . '.' . $ext;
             $this->load->library('upload');
             $this->upload->initialize($config);
             if($this->upload->do_upload('foto')){
                 $uploadData = $this->upload->data();
-                $insert['foto'] = $uploadData['file_name'];
+                $insert['foto_guru'] = $uploadData['file_name'];
             }
         }
 
-        $insert = $this->M_General->insert($this->table,$insert);
+        $this->M_General->insert($this->table,$insert);
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
 
 	function Ubah(){
         $insert = array(
-                    'name'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
-                    'sex'		=> $this->input->post('gender',TRUE),
-                    'nip' 		=> $this->input->post('nip',TRUE),
-                    'bidang'	=> filter_string($this->input->post('bidang',TRUE)),
-                    'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
-                    'status'	=> filter_string($this->input->post('status',TRUE)),
-                    'number'	=> filter_string($this->input->post('telepon',TRUE))
+                    'nama_guru'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
+                    'jk_guru'		=> $this->input->post('gender',TRUE),
+                    'NUPTK' 		=> $this->input->post('nip',TRUE),
+                    'bidang_studi'	=> filter_string($this->input->post('bidang',TRUE)),
+                    'alamat_guru'	=> filter_string($this->input->post('alamat',TRUE)),
+                    'status_guru'	=> filter_string($this->input->post('status',TRUE)),
+                    'telp_guru'	    => filter_string($this->input->post('telepon',TRUE))
                 );
 
         if(!empty($_FILES['foto']['name'])){
             $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
             $config['upload_path']   = './assets/images/guru/';
             $config['allowed_types'] = 'gif|jpg|png|jpeg';
-            $config['file_name']     = strtolower(str_replace(' ', '_', $insert['name'])) . '_' . time() . '.' . $ext;
+            $config['file_name']     = strtolower(str_replace(' ', '_', $insert['nama_guru'])) . '_' . time() . '.' . $ext;
             $this->load->library('upload');
             $this->upload->initialize($config);
             if($this->upload->do_upload('foto')){
                 $uploadData = $this->upload->data();
-                $insert['foto'] = $uploadData['file_name'];
+                $insert['foto_guru'] = $uploadData['file_name'];
             }
         }
-        $insert = $this->M_General->update($this->table,$insert,'id',$this->input->post('id'));
+        $this->M_General->update($this->table,$insert,'NUPTK',$this->input->post('id'));
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
 
 	function Hapus($id){
-		$this->M_General->delete($this->table,'id',$id);
+		$this->M_General->delete($this->table,'NUPTK',$id);
 		$data['status'] = TRUE;
 		$this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
@@ -112,7 +112,7 @@ class Guru extends CI_Controller {
 		$data['title']	= 'Detail Gaji Guru | SIM Sekolah ';
 		$data['judul']	= 'Detail Gaji Guru';
 		$data['icon']	= $this->icon;
-		$data['isi']	= $this->M_General->getByID('gaji','id_guru',$id,'DESC')->result();
+		$data['isi']	= $this->M_General->getByID('gaji','NUPTK',$id,'DESC')->result();
 
 	    $this->template->views('Backend/'.$this->parents.'/v_Detail_Gaji',$data);
 	}

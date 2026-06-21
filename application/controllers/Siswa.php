@@ -42,7 +42,7 @@ class Siswa extends CI_Controller {
 
 
 	public function edit($id){
-		$data = $this->M_General->getByID($this->table,'id',$id,'id')->row();
+		$data = $this->M_General->getByID($this->table,'nis_siswa',$id,'nis_siswa')->row();
 		echo json_encode($data);
 	}
 
@@ -60,21 +60,22 @@ class Siswa extends CI_Controller {
 		$numrow = 1;
 		foreach($sheet as $row){
 			if($numrow > 1){
+                // Create User Account with NIS as username
+                $id_users = $this->_create_account($row['B'], $row['A'], $row['D']);
+
 				// Kita push (add) array data ke variabel data
 				array_push($data, array(
-					'name'=>$row['A'],
-					'nis'=>$row['B'],
-					'tempat'=>$row['C'],
-					'tanggal'=>$row['D'],
-					'sex'=>$row['E'],
-					'orangtua_wali'=>$row['F'],
-					'alamat'=>$row['G'],
-					'status'=>$row['H'],
-					'kelas'=>$row['I'],
+					'nama_siswa'=>$row['A'],
+					'nis_siswa'=>$row['B'],
+					'tempat_lahirsiswa'=>$row['C'],
+					'tgl_lahirsiswa'=>$row['D'],
+					'jk_siswa'=>$row['E'],
+					'ortu_wali'=>$row['F'],
+					'alamat_ssiwa'=>$row['G'],
+					'status_siswa'=>$row['H'],
+					'id_kelas'=>$row['I'],
+					'id_users'=>$id_users
 				));
-
-                // Create User Account with NIS as username
-                $this->_create_account($row['B'], $row['A'], $row['D']);
 			}
 			
 			$numrow++;
@@ -82,7 +83,7 @@ class Siswa extends CI_Controller {
 		$this->M_General->insert_multiple($data);
 		
         $data['status'] = TRUE;
-        $this->M_General->delete('siswa','kelas','0');
+        $this->M_General->delete('siswa','id_kelas','0');
     	}
     	else{
     		$data['status'] = FALSE;
@@ -92,38 +93,39 @@ class Siswa extends CI_Controller {
 
 	function Simpan(){
         $insert = array(
-                    'name'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
-                    'sex'		=> $this->input->post('gender',TRUE),
-                    'nis' 		=> $this->input->post('nis',TRUE),
-                    'kelas' 	=> $this->input->post('kelas',TRUE),
-                    'tempat'	=> filter_string($this->input->post('tempat',TRUE)),
-                    'tanggal'	=> filter_string($this->input->post('tanggal',TRUE)),
-                    'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
-                    'status'	=> filter_string($this->input->post('status',TRUE)),
-                    'telpon'    => filter_string($this->input->post('telpon',TRUE)),
-                    'agama'     => filter_string($this->input->post('agama',TRUE)),
-                    'orangtua_wali'		=> filter_string($this->input->post('orangtua_wali',TRUE)),
-                    'tanggal_masuk' => filter_string($this->input->post('tanggal_masuk',TRUE)),
-                    'tahun_ajaran'	=> filter_string($this->input->post('tahun_ajaran',TRUE))
+                    'nama_siswa'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
+                    'jk_siswa'		=> $this->input->post('gender',TRUE),
+                    'nis_siswa' 	=> $this->input->post('nis',TRUE),
+                    'id_kelas' 	    => $this->input->post('kelas',TRUE),
+                    'tempat_lahirsiswa'	=> filter_string($this->input->post('tempat',TRUE)),
+                    'tgl_lahirsiswa'	=> filter_string($this->input->post('tanggal',TRUE)),
+                    'alamat_ssiwa'	=> filter_string($this->input->post('alamat',TRUE)),
+                    'status_siswa'	=> filter_string($this->input->post('status',TRUE)),
+                    'telp_siswa'    => filter_string($this->input->post('telpon',TRUE)),
+                    'agama_siswa'     => filter_string($this->input->post('agama',TRUE)),
+                    'ortu_wali'		=> filter_string($this->input->post('orangtua_wali',TRUE)),
+                    'tgl_masuk'     => filter_string($this->input->post('tanggal_masuk',TRUE)),
+                    'thn_ajaran'	=> filter_string($this->input->post('tahun_ajaran',TRUE))
                 );
 
         if(!empty($_FILES['foto']['name'])){
             $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
             $config['upload_path']   = './assets/images/siswa/';
             $config['allowed_types'] = 'gif|jpg|png|jpeg';
-            $config['file_name']     = strtolower(str_replace(' ', '_', $insert['name'])) . '_' . time() . '.' . $ext;
+            $config['file_name']     = strtolower(str_replace(' ', '_', $insert['nama_siswa'])) . '_' . time() . '.' . $ext;
             $this->load->library('upload');
             $this->upload->initialize($config);
             if($this->upload->do_upload('foto')){
                 $uploadData = $this->upload->data();
-                $insert['foto'] = $uploadData['file_name'];
+                $insert['foto_siswa'] = $uploadData['file_name'];
             }
         }
 
-        $this->M_General->insert($this->table,$insert);
-        
         // Create User Account with NIS as username
-        $this->_create_account($insert['nis'], $insert['name'], $insert['tanggal']);
+        $id_users = $this->_create_account($insert['nis_siswa'], $insert['nama_siswa'], $insert['tgl_lahirsiswa']);
+        $insert['id_users'] = $id_users;
+
+        $this->M_General->insert($this->table,$insert);
 
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
@@ -131,46 +133,42 @@ class Siswa extends CI_Controller {
 
 	function Ubah(){
         $id = $this->input->post('id');
-        $old_data = $this->M_General->getByID($this->table,'id',$id,'id')->row();
+        $old_data = $this->M_General->getByID($this->table,'nis_siswa',$id,'nis_siswa')->row();
         
         $insert = array(
-                    'name'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
-                    'sex'		=> $this->input->post('gender',TRUE),
-                    'nis' 		=> $this->input->post('nis',TRUE),
-                    'kelas' 	=> $this->input->post('kelas',TRUE),
-                    'tempat'	=> filter_string($this->input->post('tempat',TRUE)),
-                    'tanggal'	=> filter_string($this->input->post('tanggal',TRUE)),
-                    'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
-                    'status'	=> filter_string($this->input->post('status',TRUE)),
-                    'telpon'    => filter_string($this->input->post('telpon',TRUE)),
-                    'agama'     => filter_string($this->input->post('agama',TRUE)),
-                    'orangtua_wali'		=> filter_string($this->input->post('orangtua_wali',TRUE)),
-                    'tanggal_masuk' => filter_string($this->input->post('tanggal_masuk',TRUE)),
-                    'tahun_ajaran'	=> filter_string($this->input->post('tahun_ajaran',TRUE))
+                    'nama_siswa'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
+                    'jk_siswa'		=> $this->input->post('gender',TRUE),
+                    'nis_siswa' 	=> $this->input->post('nis',TRUE),
+                    'id_kelas' 	    => $this->input->post('kelas',TRUE),
+                    'tempat_lahirsiswa'	=> filter_string($this->input->post('tempat',TRUE)),
+                    'tgl_lahirsiswa'	=> filter_string($this->input->post('tanggal',TRUE)),
+                    'alamat_ssiwa'	=> filter_string($this->input->post('alamat',TRUE)),
+                    'status_siswa'	=> filter_string($this->input->post('status',TRUE)),
+                    'telp_siswa'    => filter_string($this->input->post('telpon',TRUE)),
+                    'agama_siswa'     => filter_string($this->input->post('agama',TRUE)),
+                    'ortu_wali'		=> filter_string($this->input->post('orangtua_wali',TRUE)),
+                    'tgl_masuk'     => filter_string($this->input->post('tanggal_masuk',TRUE)),
+                    'thn_ajaran'	=> filter_string($this->input->post('tahun_ajaran',TRUE))
                 );
 
         if(!empty($_FILES['foto']['name'])){
             $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
             $config['upload_path']   = './assets/images/siswa/';
             $config['allowed_types'] = 'gif|jpg|png|jpeg';
-            $config['file_name']     = strtolower(str_replace(' ', '_', $insert['name'])) . '_' . time() . '.' . $ext;
+            $config['file_name']     = strtolower(str_replace(' ', '_', $insert['nama_siswa'])) . '_' . time() . '.' . $ext;
             $this->load->library('upload');
             $this->upload->initialize($config);
             if($this->upload->do_upload('foto')){
                 $uploadData = $this->upload->data();
-                $insert['foto'] = $uploadData['file_name'];
+                $insert['foto_siswa'] = $uploadData['file_name'];
             }
         }
-        $this->M_General->update($this->table,$insert,'id',$id);
+        $this->M_General->update($this->table,$insert,'nis_siswa',$id);
 
-        // Update User Account if NIS changed
-        if($old_data && $old_data->nis != $insert['nis']){
-            $this->db->where('email', $old_data->nis);
-            $this->db->update('users', array('email' => $insert['nis'], 'name' => $insert['name']));
-        } else {
-            // Update name in user account even if NIS didn't change
-            $this->db->where('email', $insert['nis']);
-            $this->db->update('users', array('name' => $insert['name']));
+        // Update User Account associated with this student
+        if($old_data && !empty($old_data->id_users)){
+            $this->db->where('id_users', $old_data->id_users);
+            $this->db->update('users', array('email' => $insert['nis_siswa'], 'nama_users' => $insert['nama_siswa']));
         }
 
         $data['status'] = TRUE;
@@ -178,19 +176,21 @@ class Siswa extends CI_Controller {
 	}
 
 	function Hapus($id){
-        $data_siswa = $this->M_General->getByID($this->table,'id',$id,'id')->row();
+        $data_siswa = $this->M_General->getByID($this->table,'nis_siswa',$id,'nis_siswa')->row();
         if($data_siswa){
-            // Delete User Account using NIS as identity in email column
-            $this->db->where('email', $data_siswa->nis);
-            $this->db->delete('users');
+            // Delete User Account using foreign key id_users
+            if (!empty($data_siswa->id_users)) {
+                $this->db->where('id_users', $data_siswa->id_users);
+                $this->db->delete('users');
+            }
             
             // Delete photo file if exists
-            if (!empty($data_siswa->foto) && file_exists('./assets/images/siswa/' . $data_siswa->foto)) {
-                unlink('./assets/images/siswa/' . $data_siswa->foto);
+            if (!empty($data_siswa->foto_siswa) && file_exists('./assets/images/siswa/' . $data_siswa->foto_siswa)) {
+                unlink('./assets/images/siswa/' . $data_siswa->foto_siswa);
             }
         }
 
-		$this->M_General->delete($this->table,'id',$id);
+		$this->M_General->delete($this->table,'nis_siswa',$id);
 		$data['status'] = TRUE;
 		$this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
@@ -198,21 +198,23 @@ class Siswa extends CI_Controller {
     // Helper to create account
     private function _create_account($nis, $name, $dob){
         $username = $nis; 
-        $cek = $this->db->get_where('users', ['email' => $username])->num_rows();
+        $user = $this->db->get_where('users', ['email' => $username])->row_array();
         
         // Format password from DOB (yyyy-mm-dd -> ddmmyy)
         $password_raw = date('dmy', strtotime($dob));
 
-        if($cek == 0){
-            $user = array(
-                'name' 		=> $name,
-                'email' 	=> $username, // Using email column for NIS as username
-                'gambar'	=> 'user.png',
-                'password'	=> password_hash($password_raw, PASSWORD_DEFAULT),
-                'role'		=> 3, // Student
-                'active'	=> '1'
+        if(!$user){
+            $user_data = array(
+                'nama_users' => $name,
+                'email' 	 => $username,
+                'gambar'	 => 'user.png',
+                'password'	 => password_hash($password_raw, PASSWORD_DEFAULT),
+                'role'		 => 3
             );
-            $this->db->insert('users', $user);
+            $this->db->insert('users', $user_data);
+            return $this->db->insert_id();
+        } else {
+            return $user['id_users'];
         }
     }
 }

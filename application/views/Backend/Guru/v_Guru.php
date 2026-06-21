@@ -174,25 +174,25 @@
             },
             columns: [
                 {
-                    "data": "id",
+                    "data": "NUPTK",
                     "orderable": false,
                     "searchable": false
                 },
                 {
-                    "data": "foto",
+                    "data": "foto_guru",
                     "render": function(data, type, row) {
                         if(data) return '<img src="<?=base_url("assets/images/guru/")?>' + data + '" width="50" height="50" style="object-fit:cover; border-radius:5px;">';
                         return '<img src="https://via.placeholder.com/50" width="50" height="50" style="object-fit:cover; border-radius:5px;">';
                     }
                 },
-                {"data": "name"},
-                {"data": "nip"},
-                {"data": "sex"},
-                {"data": "bidang"},
-                {"data": "alamat"},
-                {"data": "number"},
+                {"data": "nama_guru"},
+                {"data": "NUPTK"},
+                {"data": "jk_guru"},
+                {"data": "bidang_studi"},
+                {"data": "alamat_guru"},
+                {"data": "telp_guru"},
                 {
-                    "data": "status",
+                    "data": "status_guru",
                     "render": function(data, type, row) {
                         var stat = "success";
                         if(data == "Berhenti") stat = "danger";
@@ -206,9 +206,9 @@
                     "searchable": false
                 }
             ],
-            order: [[1, 'asc']],
+            order: [[2, 'asc']],
             rowId: function(a){
-                return a;
+                return a.NUPTK;
             },
             rowCallback: function(row, data, iDisplayIndex) {
                 var info = this.fnPagingInfo();
@@ -342,19 +342,19 @@
 			type:"GET",
 			dataType:"JSON",
 			success:function(data){
-				$('[name="id"]').val(data.id);
-                $('[name="nama"]').val(data.name);
-                $('[name="nip"]').val(data.nip);
-                $('[name="telepon"]').val(data.number);
-                $('[name="alamat"]').val(data.alamat);
-                $('[name="bidang"]').val(data.bidang).trigger('change');
+				$('[name="id"]').val(data.NUPTK);
+                $('[name="nama"]').val(data.nama_guru);
+                $('[name="nip"]').val(data.NUPTK);
+                $('[name="telepon"]').val(data.telp_guru);
+                $('[name="alamat"]').val(data.alamat_guru);
+                $('[name="bidang"]').val(data.bidang_studi).trigger('change');
                 if ($.fn.iCheck) {
                     $('[name="gender"]').iCheck('uncheck');
-                    $('[name="gender"][value="'+data.sex+'"]').iCheck('check');
+                    $('[name="gender"][value="'+data.jk_guru+'"]').iCheck('check');
                 } else {
-                    $('[name="gender"][value="'+data.sex+'"]').prop('checked', true);
+                    $('[name="gender"][value="'+data.jk_guru+'"]').prop('checked', true);
                 }
-                $('[name="status"]').val(data.status).trigger('change');
+                $('[name="status"]').val(data.status_guru).trigger('change');
                 
                 $('#modal-form').appendTo("body").modal('show');
                 $('.modal-title').text('Ubah Data'); 

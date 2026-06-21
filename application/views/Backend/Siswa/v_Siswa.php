@@ -2,7 +2,7 @@
 	<div class="box box-primary">
         <div class="box-header">
             <div class="col-sm-2">
-<?php $kls= $this->db->query("SELECT id,nama FROM kelas")->result() ?>
+<?php $kls= $this->db->query("SELECT id_kelas AS id, nama_kelas AS nama FROM kelas")->result() ?>
                 <select name="kelas" id="kelas" data-placeholder="--Pilih kelas--" class="form-control select2">
                     <option value=""></option>
                 <?php foreach ($kls as $key) {?>    
@@ -235,31 +235,31 @@
             },
             columns: [
                 {
-                    "data": "id",
+                    "data": "nis_siswa",
                     "orderable": false,
                     "searchable": false
                 },
                 {
-                    "data": "foto",
+                    "data": "foto_siswa",
                     "render": function(data, type, row) {
                         if(data) return '<img src="<?=base_url("assets/images/siswa/")?>' + data + '" width="50" height="50" style="object-fit:cover; border-radius:5px;">';
                         return '<img src="https://via.placeholder.com/50" width="50" height="50" style="object-fit:cover; border-radius:5px;">';
                     }
                 },
-                {"data": "name"},
-                {"data": "nis"},
-                {"data": "sex"},
-                {"data": "agama"},
-                {"data": "tempat"},
-                {"data": "tanggal"},
-                {"data": "orangtua_wali"},
-                {"data": "telpon"},
-                {"data": "alamat"},
-                {"data": "tanggal_masuk"},
-                {"data": "tahun_ajaran"},
+                {"data": "nama_siswa"},
+                {"data": "nis_siswa"},
+                {"data": "jk_siswa"},
+                {"data": "agama_siswa"},
+                {"data": "tempat_lahirsiswa"},
+                {"data": "tgl_lahirsiswa"},
+                {"data": "ortu_wali"},
+                {"data": "telp_siswa"},
+                {"data": "alamat_ssiwa"},
+                {"data": "tgl_masuk"},
+                {"data": "thn_ajaran"},
                 {"data": "nama_kelas"},
                 {
-                    "data": "status",
+                    "data": "status_siswa",
                     "render": function(data, type, row) {
                         var text = data ? data : "Aktif";
                         var stat = "success"; // Default Hijau (Aktif)
@@ -284,9 +284,9 @@
                     "searchable": false
                 }
             ],
-            order: [[1, 'asc']],
+            order: [[2, 'asc']],
             rowId: function(a){
-                return a;
+                return a.nis_siswa;
             },
             rowCallback: function(row, data, iDisplayIndex) {
                 var info = this.fnPagingInfo();
@@ -465,24 +465,24 @@
 			type:"GET",
 			dataType:"JSON",
 			success:function(data){
-				$('[name="id"]').val(data.id);
-                $('[name="nama"]').val(data.name);
-                $('[name="nis"]').val(data.nis);
-                $('[name="agama"]').val(data.agama ? data.agama : 'Islam');
-                $('[name="orangtua_wali"]').val(data.orangtua_wali);
-                $('[name="telpon"]').val(data.telpon);
-                $('[name="alamat"]').val(data.alamat);
-                $('[name="tempat"]').val(data.tempat);
-                $('[name="tanggal"]').val(data.tanggal);
-                $('[name="tanggal_masuk"]').val(data.tanggal_masuk);
-                $('[name="tahun_ajaran"]').val(data.tahun_ajaran);
-                $('[name="status"]').val(data.status).trigger('change');
-                $('#modal-form [name="kelas"]').val(data.kelas).trigger('change');
+				$('[name="id"]').val(data.nis_siswa);
+                $('[name="nama"]').val(data.nama_siswa);
+                $('[name="nis"]').val(data.nis_siswa);
+                $('[name="agama"]').val(data.agama_siswa ? data.agama_siswa : 'Islam');
+                $('[name="orangtua_wali"]').val(data.ortu_wali);
+                $('[name="telpon"]').val(data.telp_siswa);
+                $('[name="alamat"]').val(data.alamat_ssiwa);
+                $('[name="tempat"]').val(data.tempat_lahirsiswa);
+                $('[name="tanggal"]').val(data.tgl_lahirsiswa);
+                $('[name="tanggal_masuk"]').val(data.tgl_masuk);
+                $('[name="tahun_ajaran"]').val(data.thn_ajaran);
+                $('[name="status"]').val(data.status_siswa).trigger('change');
+                $('#modal-form [name="kelas"]').val(data.id_kelas).trigger('change');
                 if ($.fn.iCheck) {
                     $('[name="gender"]').iCheck('uncheck');
-                    $('[name="gender"][value="'+data.sex+'"]').iCheck('check');
+                    $('[name="gender"][value="'+data.jk_siswa+'"]').iCheck('check');
                 } else {
-                    $('[name="gender"][value="'+data.sex+'"]').prop('checked', true);
+                    $('[name="gender"][value="'+data.jk_siswa+'"]').prop('checked', true);
                 }
                 $('#modal-form').appendTo("body").modal('show');
                 $('.modal-title').text('Ubah Data'); 

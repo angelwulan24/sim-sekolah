@@ -17,9 +17,9 @@
                         <select name="dari_kelas" class="form-control select2" required>
                             <option value="">-- Pilih Kelas Asal --</option>
                             <?php foreach ($kelas as $k) { 
-                                $count = $this->db->get_where('siswa', array('kelas' => $k->id, 'status' => 'Aktif'))->num_rows();
+                                $count = $this->db->get_where('siswa', array('id_kelas' => $k->id_kelas, 'status_siswa' => 'Aktif'))->num_rows();
                             ?>
-                                <option value="<?=$k->id?>"><?=$k->nama?> (<?=$count?> Siswa)</option>
+                                <option value="<?=$k->id_kelas?>"><?=$k->nama_kelas?> (<?=$count?> Siswa)</option>
                             <?php } ?>
                         </select>
                     </div>
@@ -30,7 +30,7 @@
                         <select name="ke_kelas" class="form-control select2" required>
                             <option value="">-- Pilih Kelas Tujuan --</option>
                             <?php foreach ($kelas as $k) { ?>
-                                <option value="<?=$k->id?>"><?=$k->nama?></option>
+                                <option value="<?=$k->id_kelas?>"><?=$k->nama_kelas?></option>
                             <?php } ?>
                             <option value="lulus">ALUMNI (Lulus)</option>
                         </select>
