@@ -167,4 +167,12 @@
         $CI->M_General->save_log($param);
     }
 
-
+    function current_school_year() {
+        $month = (int)date('m');
+        $year = (int)date('Y');
+        if ($month >= 7) {
+            return $year . '/' . ($year + 1);
+        } else {
+            return ($year - 1) . '/' . $year;
+        }
+    }
