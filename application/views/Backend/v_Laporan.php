@@ -58,22 +58,52 @@
 
 <div class="modal fade" id="modal-print">
     <div class="modal-dialog">
-        <div class="modal-content">
+<?= form_open('Laporan/Cetak','class="modal-content" id="form-print" target="_blank"')?>
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
                 <h4 class="modal-title">Cetak Laporan</h4>
             </div>
-<?= form_open($this->uri->segment(1).'/Cetak','id = "form" target="_blank"')?>
             <div class="modal-body">
                 <div class="form-group">
-                    <label class="control-label"> Tanggal Awal</label>
-                    <div><input type="text" autocomplete="off" placeholder="tanggal awal" class="form-control datepicker" required="" name="awal"></div>
+                    <label class="control-label">Jenis Cetak</label>
+                    <select name="jenis_cetak" id="jenis_cetak" class="form-control">
+                        <option value="rentang">Rentang Tanggal</option>
+                        <option value="bulan">Bulanan</option>
+                        <option value="tahun">Tahunan</option>
+                    </select>
                 </div>
-                <div class="form-group">
-                    <label class="control-label"> Tanggal Akhir</label>
-                    <div><input type="text" autocomplete="off"  placeholder="tanggal akhir" class="form-control datepicker" required="" name="akhir"></div>
+                
+                <div id="print-rentang-fields">
+                    <div class="form-group">
+                        <label class="control-label"> Tanggal Awal</label>
+                        <div><input type="text" autocomplete="off" placeholder="tanggal awal" class="form-control datepicker" name="awal"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label"> Tanggal Akhir</label>
+                        <div><input type="text" autocomplete="off"  placeholder="tanggal akhir" class="form-control datepicker" name="akhir"></div>
+                    </div>
+                </div>
+
+                <div id="print-bulan-fields" style="display: none;">
+                    <div class="form-group">
+                        <label class="control-label">Pilih Bulan</label>
+                        <div><input type="month" class="form-control" name="print_bulan"></div>
+                    </div>
+                </div>
+
+                <div id="print-tahun-fields" style="display: none;">
+                    <div class="form-group">
+                        <label class="control-label">Pilih Tahun</label>
+                        <select name="print_tahun" class="form-control">
+                            <?php 
+                                for($i = date('Y'); $i >= date('Y')-5; $i--) {
+                                    echo "<option value='$i'>$i</option>";
+                                }
+                            ?>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -81,10 +111,14 @@
                 <button type="submit" id="cetak" class="btn btn-primary">Cetak</button>
             </div>
 <?= form_close()?>
-        </div>
     </div>
 </div>
 <script type="text/javascript">
+    // Diagnostic error handler to catch any unhandled JS exceptions on the page
+    window.onerror = function(message, source, lineno, colno, error) {
+        alert("JS Error: " + message + " at line " + lineno + " in " + source);
+        return false;
+    };
 
 	var label;
 	var table;
@@ -170,46 +204,80 @@
             }
         });
 
-        $('#form').validate({
-            errorElement: 'div',
-            errorClass: 'help-block',
-            focusInvalid: false,
-            ignore: "",
-            rules:{
-                awal:{
-                    required:true
-                },
-                akhir:{
-                    required:true
-                },
-            },
-            messages: {
-                awal: {
-                    required:"Tambah tanggal awal."
-                },
-                akhir: {
-                    required:"Tambah tanggal akhir."
-                },
-            },
-            highlight: function (e) {
-                $(e).closest('.form-group').removeClass('has-info').addClass('has-error');
-            },
-            success: function (e) {
-                $(e).closest('.form-group').removeClass('has-error');//.addClass('has-info');
-                $(e).remove();
-            },
-            errorPlacement: function (error, element) {
-                if(element.is('input[type=radio]')) {
-                    var controls = element.closest('div[class*="ra"]');
-                    if(controls.find(':radio').length > 0) controls.append(error);
-                    else error.insertAfter(element.nextAll('.lbl:eq(0)').eq(0));
+        // Diagnostic error handler moved to the top of script tag
+
+        // Change listener for jenis cetak inside modal-print
+        $('#jenis_cetak').change(function(){
+            var val = $(this).val();
+            $('#print-rentang-fields').hide();
+            $('#print-bulan-fields').hide();
+            $('#print-tahun-fields').hide();
+            
+            if (val === 'rentang') {
+                $('#print-rentang-fields').show();
+            } else if (val === 'bulan') {
+                $('#print-bulan-fields').show();
+            } else if (val === 'tahun') {
+                $('#print-tahun-fields').show();
+            }
+        }).trigger('change');
+
+        // Automatically pre-populate print modal based on current table filter
+        $('#modal-print').on('show.bs.modal', function () {
+            var tableFilterJenis = $('#jenis_filter').val();
+            if (tableFilterJenis === 'bulan') {
+                $('#jenis_cetak').val('bulan').trigger('change');
+                var tableBulanVal = $('#filter_bulan').val();
+                if (tableBulanVal) {
+                    $('[name="print_bulan"]').val(tableBulanVal);
                 }
-                else if(element.is('.select2')) {
-                    error.insertAfter(element.siblings('[class*="select2-container"]:eq(0)'));
+            } else if (tableFilterJenis === 'tahun') {
+                $('#jenis_cetak').val('tahun').trigger('change');
+                var tableTahunVal = $('#filter_tahun').val();
+                if (tableTahunVal) {
+                    $('[name="print_tahun"]').val(tableTahunVal);
                 }
-                else error.insertAfter(element.parent());
-            },
-            invalidHandler: function (form) {}
+            } else {
+                $('#jenis_cetak').val('rentang').trigger('change');
+                $('[name="awal"]').val('');
+                $('[name="akhir"]').val('');
+            }
+        });
+
+        // Use custom Javascript validation before submitting to prevent blank/silent fails
+        $('#cetak').click(function(e) {
+            e.preventDefault(); // Stop default submit
+            
+            var val = $('#jenis_cetak').val();
+            if (val === 'rentang') {
+                var awal = $('[name="awal"]').val();
+                var akhir = $('[name="akhir"]').val();
+                if (!awal || !akhir) {
+                    alert('Validasi Gagal: Tanggal awal dan akhir harus diisi!');
+                    return false;
+                }
+            } else if (val === 'bulan') {
+                var print_bulan = $('[name="print_bulan"]').val();
+                if (!print_bulan) {
+                    alert('Validasi Gagal: Bulan harus dipilih!');
+                    return false;
+                }
+            }
+            
+            // Alert user that form is about to submit
+            alert('Validasi sukses! Mengirim data laporan tipe: ' + val);
+            
+            // Programmatic native submit to bypass any library intercept
+            var form = $('#form-print')[0];
+            if (form) {
+                form.submit();
+            } else {
+                alert('Error: Form #form-print tidak ditemukan!');
+            }
+            
+            setTimeout(function() {
+                $('#modal-print').modal('hide');
+            }, 500);
         });
 
 	});

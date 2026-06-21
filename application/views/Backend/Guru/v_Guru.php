@@ -295,7 +295,7 @@
         }
 		$('.form-group').removeClass('has-error');
 		$('.help-block').empty(); 
-		$('#modal-form').modal('show');
+		$('#modal-form').appendTo("body").modal('show');
 		$('.modal-title').text('Tambah Data');
 	}
 
@@ -356,7 +356,7 @@
                 }
                 $('[name="status"]').val(data.status).trigger('change');
                 
-                $('#modal-form').modal('show');
+                $('#modal-form').appendTo("body").modal('show');
                 $('.modal-title').text('Ubah Data'); 
 			},
             error: function (jqXHR, textStatus, errorThrown){

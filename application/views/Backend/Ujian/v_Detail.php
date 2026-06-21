@@ -55,7 +55,7 @@ foreach ($isi as $key ) {
                                 <?php if($status == 'Belum Lunas' && $selected_tahun == $tahun_sekarang): ?>
                                 <button onclick="BayarBulan('<?=$key->periode?>', '<?=$key->periode_label?>', <?=$key->nominal?>)" class="btn btn-success btn-sm">Bayar</button>
                                 <?php elseif($status == 'Lunas'): ?>
-                                <a href="<?=base_url('Ujian/CetakBukti/'.$key->id)?>" target="_blank" class="btn btn-default btn-xs"><i class="fa fa-print"></i> Cetak</a>
+                                <a href="<?=base_url('Ujian/CetakBukti/'.$key->id)?>" target="_blank" class="btn btn-abu-tua btn-xs"><i class="fa fa-print"></i> Cetak</a>
                                 <?php else: ?>
                                 -
                                 <?php endif; ?>
@@ -109,7 +109,7 @@ foreach ($isi as $key ) {
         periode_bayar_val = periode_label;
         $('#periode-bayar').text(periode + ' ' + <?=$selected_tahun?>);
         $('#nominal-bayar').text('Rp ' + nominal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
-        $('#modal-bayar').modal('show');
+        $('#modal-bayar').appendTo("body").modal('show');
     }
     
     function ProsesBayar(){

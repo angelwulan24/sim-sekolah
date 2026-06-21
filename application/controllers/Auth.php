@@ -19,7 +19,7 @@ class Auth extends CI_Controller {
 			redirect('Beranda','refresh');
 		}
 
-		$this->form_validation->set_rules('email','Email','trim|required|valid_email');
+		$this->form_validation->set_rules('email','Username / Email','trim|required');
 		$this->form_validation->set_rules('password','Password','trim|required');
 
 		if ($this->form_validation->run() == false) {
@@ -64,7 +64,7 @@ class Auth extends CI_Controller {
 			}
 		}
 		else{
-			$this->session->set_flashdata('message','<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>  Email tidak terdaftar</div>');
+			$this->session->set_flashdata('message','<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>  Username / Email tidak terdaftar</div>');
 		redirect($this->uri->segment(1),'refresh');	
 		}
 	}
@@ -86,6 +86,42 @@ class Auth extends CI_Controller {
 		 $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
 
+	public function update_foto(){
+		$id = $this->session->userdata('id');
+		$user = $this->db->get_where('users', ['id' => $id])->row_array();
+		
+		if($user['role'] == 3) {
+			show_error('Akses ditolak. Siswa tidak diizinkan mengubah foto profil sendiri.', 403);
+			return;
+		}
+
+		$config['upload_path']      = './assets/dist/img/';
+		$config['allowed_types']    = 'gif|jpg|png|jpeg';
+		$config['max_size']         = 2048;
+		$config['file_name']        = 'admin';
+		$config['overwrite']        = TRUE;
+		
+		$this->load->library('upload', $config);
+		if ($this->upload->do_upload('foto')) {
+			if (!empty($user['gambar']) && $user['gambar'] != 'user.png' && $user['gambar'] != $this->upload->data('file_name')) {
+				if (file_exists('./assets/dist/img/' . $user['gambar'])) {
+					unlink('./assets/dist/img/' . $user['gambar']);
+				}
+			}
+			$this->db->where('id', $id);
+			$this->db->update('users', ['gambar' => $this->upload->data('file_name')]);
+			$this->session->set_flashdata('message','<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> Berhasil mengubah foto profil</div>');
+		} else {
+			$this->session->set_flashdata('message','<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> Gagal upload foto: ' . strip_tags($this->upload->display_errors()) . '</div>');
+		}
+		
+		if(isset($_SERVER['HTTP_REFERER'])){
+			redirect($_SERVER['HTTP_REFERER']);
+		} else {
+			redirect('Beranda');
+		}
+	}
+
 	public function registrasi (){
 
 		if ($this->session->userdata('id')){
@@ -98,7 +134,7 @@ class Auth extends CI_Controller {
 		$this->form_validation->set_rules('password2','Kofirmasi Password','trim|required|matches[password]');
 
 		if ($this->form_validation->run() == false) {
-				$data['title']	= 'Halaman Registrasi | SIM ';
+				$data['title']	= 'Halaman Login | SIM ';
 				$this->load->view('v_Registrasi',$data);
 		} 
 		else {
@@ -179,7 +215,7 @@ class Auth extends CI_Controller {
 					$this->db->update('users');
 					$this->db->delete('user_token',['email'=>$email]);
 
-					$this->session->set_flashdata('message','<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> '.$email.' Telah diaktifasi! Silahkan Login </div>');
+					$this->session->set_flashdata('message','<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&button> '.$email.' Telah diaktifasi! Silahkan Login </div>');
 		redirect($this->uri->segment(1));
 
 				}	
@@ -212,6 +248,3 @@ class Auth extends CI_Controller {
 		redirect('Auth');
 	}
 }
-
-/* End of file Beranda.php */
-/* Location: ./application/controllers/Beranda.php */

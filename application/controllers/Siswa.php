@@ -72,6 +72,9 @@ class Siswa extends CI_Controller {
 					'status'=>$row['H'],
 					'kelas'=>$row['I'],
 				));
+
+                // Create User Account with NIS as username
+                $this->_create_account($row['B'], $row['A'], $row['D']);
 			}
 			
 			$numrow++;
@@ -98,7 +101,10 @@ class Siswa extends CI_Controller {
                     'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
                     'status'	=> filter_string($this->input->post('status',TRUE)),
                     'telpon'    => filter_string($this->input->post('telpon',TRUE)),
-                    'orangtua_wali'		=> filter_string($this->input->post('orangtua_wali',TRUE))
+                    'agama'     => filter_string($this->input->post('agama',TRUE)),
+                    'orangtua_wali'		=> filter_string($this->input->post('orangtua_wali',TRUE)),
+                    'tanggal_masuk' => filter_string($this->input->post('tanggal_masuk',TRUE)),
+                    'tahun_ajaran'	=> filter_string($this->input->post('tahun_ajaran',TRUE))
                 );
 
         if(!empty($_FILES['foto']['name'])){
@@ -114,12 +120,19 @@ class Siswa extends CI_Controller {
             }
         }
 
-        $insert = $this->M_General->insert($this->table,$insert);
+        $this->M_General->insert($this->table,$insert);
+        
+        // Create User Account with NIS as username
+        $this->_create_account($insert['nis'], $insert['name'], $insert['tanggal']);
+
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
 
 	function Ubah(){
+        $id = $this->input->post('id');
+        $old_data = $this->M_General->getByID($this->table,'id',$id,'id')->row();
+        
         $insert = array(
                     'name'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
                     'sex'		=> $this->input->post('gender',TRUE),
@@ -130,7 +143,10 @@ class Siswa extends CI_Controller {
                     'alamat'	=> filter_string($this->input->post('alamat',TRUE)),
                     'status'	=> filter_string($this->input->post('status',TRUE)),
                     'telpon'    => filter_string($this->input->post('telpon',TRUE)),
-                    'orangtua_wali'		=> filter_string($this->input->post('orangtua_wali',TRUE))
+                    'agama'     => filter_string($this->input->post('agama',TRUE)),
+                    'orangtua_wali'		=> filter_string($this->input->post('orangtua_wali',TRUE)),
+                    'tanggal_masuk' => filter_string($this->input->post('tanggal_masuk',TRUE)),
+                    'tahun_ajaran'	=> filter_string($this->input->post('tahun_ajaran',TRUE))
                 );
 
         if(!empty($_FILES['foto']['name'])){
@@ -145,14 +161,58 @@ class Siswa extends CI_Controller {
                 $insert['foto'] = $uploadData['file_name'];
             }
         }
-        $insert = $this->M_General->update($this->table,$insert,'id',$this->input->post('id'));
+        $this->M_General->update($this->table,$insert,'id',$id);
+
+        // Update User Account if NIS changed
+        if($old_data && $old_data->nis != $insert['nis']){
+            $this->db->where('email', $old_data->nis);
+            $this->db->update('users', array('email' => $insert['nis'], 'name' => $insert['name']));
+        } else {
+            // Update name in user account even if NIS didn't change
+            $this->db->where('email', $insert['nis']);
+            $this->db->update('users', array('name' => $insert['name']));
+        }
+
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
 
 	function Hapus($id){
+        $data_siswa = $this->M_General->getByID($this->table,'id',$id,'id')->row();
+        if($data_siswa){
+            // Delete User Account using NIS as identity in email column
+            $this->db->where('email', $data_siswa->nis);
+            $this->db->delete('users');
+            
+            // Delete photo file if exists
+            if (!empty($data_siswa->foto) && file_exists('./assets/images/siswa/' . $data_siswa->foto)) {
+                unlink('./assets/images/siswa/' . $data_siswa->foto);
+            }
+        }
+
 		$this->M_General->delete($this->table,'id',$id);
 		$data['status'] = TRUE;
 		$this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
+
+    // Helper to create account
+    private function _create_account($nis, $name, $dob){
+        $username = $nis; 
+        $cek = $this->db->get_where('users', ['email' => $username])->num_rows();
+        
+        // Format password from DOB (yyyy-mm-dd -> ddmmyy)
+        $password_raw = date('dmy', strtotime($dob));
+
+        if($cek == 0){
+            $user = array(
+                'name' 		=> $name,
+                'email' 	=> $username, // Using email column for NIS as username
+                'gambar'	=> 'user.png',
+                'password'	=> password_hash($password_raw, PASSWORD_DEFAULT),
+                'role'		=> 3, // Student
+                'active'	=> '1'
+            );
+            $this->db->insert('users', $user);
+        }
+    }
 }

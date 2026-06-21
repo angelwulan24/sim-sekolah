@@ -46,7 +46,7 @@ foreach ($isi as $key ) {
     $status_label = ($key->status == 'Lunas') ? '<span class="label label-success">Lunas</span>' : '<span class="label label-danger">Belum Lunas</span>';
     $aksi = ($key->status == 'Belum Lunas') ? 
         '<button type="button" class="btn btn-success btn-xs" onclick="BayarBulan(\''.htmlspecialchars($key->bulan).'\')"><i class="fa fa-money"></i> Bayar</button>' : 
-        '<a href="'.base_url('SPP/CetakBukti/'.$key->id).'" target="_blank" class="btn btn-default btn-xs"><i class="fa fa-print"></i> Cetak</a>';
+        '<a href="'.base_url('SPP/CetakBukti/'.$key->id).'" target="_blank" class="btn btn-abu-tua btn-xs"><i class="fa fa-print"></i> Cetak</a>';
     $tanggal_bayar = ($key->status == 'Lunas' && $key->time) ? date('d-m-Y', strtotime($key->time)) : '-';
 ?>
                         <tr>

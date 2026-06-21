@@ -255,7 +255,7 @@
         $('#form')[0].reset();
         $('.form-group').removeClass('has-error');
         $('.help-block').empty();
-        $('#modal-form').modal('show');
+        $('#modal-form').appendTo("body").modal('show');
         $('.modal-title').text('Form Pembayaran Uang Buku'); 
 
         $.ajax({

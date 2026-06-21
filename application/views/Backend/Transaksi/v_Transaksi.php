@@ -15,8 +15,10 @@
                     <thead>
                         <tr>
                       <th style="width: 10px;">No</th>
-                      <th>Kode Transaksi</th>
-                      <th>Nama Transaksi</th>
+                      <th>Kode Tagihan</th>
+                      <th>Jenis Tagihan</th>
+                      <th>Tahun Ajaran</th>
+                      <th>Kelas</th>
                       <th>Nominal</th>
                       <th>Tenggat Waktu</th>
                       <th width="200">Aksi</th>
@@ -31,42 +33,88 @@
     </div>
 </div>
 
-<!-- Modal Tambah -->
 <div class="modal fade" id="modal-form">
     <div class="modal-dialog">
-        <div class="modal-content">
+<?= form_open('','class="modal-content" role = "form" id = "form"')?>
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
                 <h4 class="modal-title"></h4>
             </div>
-<?= form_open('','role = "form" id = "form"')?>
             <div class="modal-body">
                 <input type="hidden" name="id" value="">
+                <!-- Tipe transaksi dihilangkan, otomatis KM di controller -->
                 <div class="form-group">
-                    <label class="control-label">Tipe Transaki</label>
-                    <select required="" name="tipe"  id="status"  data-placeholder="--Pilih--" class="form-control">
-                        <option value="">--Pilih--</option>
-                        <option value="KM">Kas Masuk</option>
-                        <option value="KK">Kas Keluar</option>
+                    <label class="control-label"> Kode Tagihan</label>
+                    <div><input type="text" readonly="" value="" placeholder="Kode Tagihan" autocomplete="off" name="kode" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Jenis Tagihan</label>
+                    <div><input type="text" id="nama" value="" required="" placeholder="Jenis Tagihan (Cth: SPP)" autocomplete="off" name="nama" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Tahun Ajaran</label>
+                    <div><input type="text" value="" required="" placeholder="Cth: 2023/2024" autocomplete="off" name="tahun_ajaran" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Kelas</label>
+                    <select name="kelas" required="" class="form-control">
+                        <option value="">-- Pilih Kelas --</option>
+                        <option value="Semua Kelas">Semua Kelas</option>
+                        <option value="Kelas 1">Kelas 1</option>
+                        <option value="Kelas 2">Kelas 2</option>
+                        <option value="Kelas 3">Kelas 3</option>
+                        <option value="Kelas 4">Kelas 4</option>
+                        <option value="Kelas 5">Kelas 5</option>
+                        <option value="Kelas 6">Kelas 6</option>
                     </select>
-                </div>
-                <div class="form-group">
-                    <label class="control-label"> Kode Transaksi</label>
-                    <div><input type="text" readonly="" value="" placeholder="Kode Transaksi" autocomplete="off" name="kode" class="form-control"></div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label"> Nama Transaksi</label>
-                    <div><input type="text" id="nama" value="" required="" placeholder="Nama Transaksi" autocomplete="off" name="nama" class="form-control"></div>
                 </div>
                 <div class="form-group">
                     <label class="control-label"> Nominal</label>
                     <div><input type="text" value="" required="" onkeypress="return Angka(this)" placeholder="Nominal" autocomplete="off" name="nominal" class="form-control"></div>
                 </div>
+                <div class="form-group" id="row-bulan-spp" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="control-label">Bulan Awal</label>
+                            <select name="bulan_awal" class="form-control">
+                                <option value="Januari">Januari</option>
+                                <option value="Februari">Februari</option>
+                                <option value="Maret">Maret</option>
+                                <option value="April">April</option>
+                                <option value="Mei">Mei</option>
+                                <option value="Juni">Juni</option>
+                                <option value="Juli" selected>Juli</option>
+                                <option value="Agustus">Agustus</option>
+                                <option value="September">September</option>
+                                <option value="Oktober">Oktober</option>
+                                <option value="November">November</option>
+                                <option value="Desember">Desember</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="control-label">Bulan Akhir</label>
+                            <select name="bulan_akhir" class="form-control">
+                                <option value="Januari">Januari</option>
+                                <option value="Februari">Februari</option>
+                                <option value="Maret">Maret</option>
+                                <option value="April">April</option>
+                                <option value="Mei">Mei</option>
+                                <option value="Juni" selected>Juni</option>
+                                <option value="Juli">Juli</option>
+                                <option value="Agustus">Agustus</option>
+                                <option value="September">September</option>
+                                <option value="Oktober">Oktober</option>
+                                <option value="November">November</option>
+                                <option value="Desember">Desember</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label class="control-label"> Tenggat Waktu </label>
-                    <div><input type="text" value="" placeholder="Cth: Tgl 10 / Akhir bln" autocomplete="off" name="tenggat_waktu" class="form-control"></div>
+                    <div><input type="date" id="input-tenggat" value="" autocomplete="off" name="tenggat_waktu" class="form-control"></div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -74,7 +122,6 @@
                 <button type="submit" id="simpan"  class="btn btn-primary">Simpan</button>
             </div>
 <?= form_close()?>
-        </div>
     </div>
 </div>
 
@@ -135,6 +182,8 @@
                 },
                 {"data": "kode"},
                 {"data": "nama"},
+                {"data": "tahun_ajaran"},
+                {"data": "kelas"},
                 {"data": "nominal",render: $.fn.dataTable.render.number('.',',','')},
                 {"data": "tenggat_waktu"},
                 {
@@ -201,36 +250,52 @@
                     dataType:"JSON",
                     success:function(data){
                         $('#modal-form').modal('hide');
-                        reload();
-                        sweet('Di '+method,'Berhasil '+method+' Data','success');
                         $('#simpan').text('Simpan');
                         $('#simpan').attr('disabled',false);
+                        if (data.status) {
+                            Swal({
+                                title: 'Berhasil',
+                                text: 'Data berhasil ' + (label == 'simpan' ? 'disimpan' : 'diubah'),
+                                type: 'success'
+                            }).then((result) => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal({
+                                title: 'Gagal',
+                                text: 'Gagal memproses data. Silahkan coba lagi.',
+                                type: 'error'
+                            });
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#modal-form').modal('hide');
+                        $('#simpan').text('Simpan');
+                        $('#simpan').attr('disabled',false);
+                        Swal({
+                            title: 'Error',
+                            text: 'Terjadi kesalahan sistem: ' + textStatus,
+                            type: 'error'
+                        });
                     }
                 });
             },
             invalidHandler: function (form) {}
         });
 
-
-        $('#status').on('change',function(){
-
-            var tipe = $(this).val();
-
-           if(label == 'simpan'){
-            $.ajax({
-
-                url:"<?=base_url($this->uri->segment(1).'/buat_kode/')?>"+tipe,
-                type:"GET",
-                dataType:"JSON",
-                success:function(data){
-                    $('[name="kode"]').val(data);
-                },
-                error: function (jqXHR, textStatus, errorThrown){
-                sweet('Oops...','Data tidak dapat diambil','error');
+        // Setup SPP Logic for Tenggat Waktu
+        $('#nama').on('input', function() {
+            var val = $(this).val().toUpperCase();
+            if(val.includes('SPP')) {
+                $('#input-tenggat').attr('type', 'text').val('Setiap Bulan').prop('readonly', true);
+                $('#row-bulan-spp').show();
+            } else {
+                if($('#input-tenggat').attr('type') === 'text') {
+                    $('#input-tenggat').attr('type', 'date').val('').prop('readonly', false);
+                }
+                $('#row-bulan-spp').hide();
             }
-            });
-        }
-       });
+        });
 
     });
 
@@ -250,12 +315,25 @@
     function Tambah(){
         label = 'simpan';
         $('#form')[0].reset();
+        $('#input-tenggat').attr('type', 'date').prop('readonly', false);
         $('.form-group').removeClass('has-error');
         $('.help-block').empty(); 
-        $('#modal-form').modal('show');
-        $('#status').attr('disabled',false);
+        
+        $.ajax({
+            url:"<?=base_url($this->uri->segment(1).'/buat_kode/')?>KM",
+            type:"GET",
+            dataType:"JSON",
+            success:function(data){
+                $('[name="kode"]').val(data);
+            },
+            error: function (jqXHR, textStatus, errorThrown){
+                sweet('Oops...','Data tidak dapat diambil','error');
+            }
+        });
+
+        $('#modal-form').appendTo("body").modal('show');
         $('#nama').attr('disabled',false);
-        $('.modal-title').text('Tambah Data');
+        $('.modal-title').text('Tambah Jenis Tagihan');
     }
 
     function Hapus(id){
@@ -297,15 +375,24 @@
             type:"GET",
             dataType:"JSON",
             success:function(data){
-                $('#status').attr('disabled',true);
                 $('#nama').attr('disabled',true);
                 $('[name="id"]').val(data.id);
                 $('[name="nama"]').val(data.nama);
                 $('[name="kode"]').val(data.kode);
                 $('[name="nominal"]').val(data.nominal);
                 $('[name="tenggat_waktu"]').val(data.tenggat_waktu);
-                $('[name="tipe"]').val(data.tipe).trigger('change');
-                $('#modal-form').modal('show');
+                $('[name="tahun_ajaran"]').val(data.tahun_ajaran);
+                $('[name="kelas"]').val(data.kelas);
+
+                var nama_val = data.nama.toUpperCase();
+                if(nama_val.includes('SPP')) {
+                    $('#input-tenggat').attr('type', 'text').val('Setiap Bulan').prop('readonly', true);
+                    $('#row-bulan-spp').show();
+                } else {
+                    $('#input-tenggat').attr('type', 'date').val(data.tenggat_waktu).prop('readonly', false);
+                    $('#row-bulan-spp').hide();
+                }
+                $('#modal-form').appendTo("body").modal('show');
                 $('.modal-title').text('Ubah Data'); 
             },
             error: function (jqXHR, textStatus, errorThrown){

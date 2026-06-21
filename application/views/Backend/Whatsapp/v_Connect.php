@@ -22,6 +22,23 @@
             </div>
 	    </div>
     </div>
+
+    <div class="box box-success">
+        <div class="box-header">
+            <h3 class="box-title">Uji Coba Pengiriman</h3>
+        </div>
+        <div class="box-body">
+            <div class="form-group">
+                <label>Nomor WhatsApp (Contoh: 08123456xxx)</label>
+                <div class="input-group">
+                    <input type="text" id="test_phone" class="form-control" placeholder="Masukkan nomor untuk tes">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" onclick="testKirim()">Kirim Pesan Tes</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Load Socket.io Client -->
@@ -55,5 +72,31 @@
         } else {
              $('#qr_code_area').html('<p>Gateway terhubung. Menunggu QR Code...</p>');
         }
+    }
+    function testKirim() {
+        const phone = $('#test_phone').val();
+        if(!phone) {
+            Swal({ title: 'Gagal', text: 'Masukkan nomor telpon', type: 'error' });
+            return;
+        }
+
+        Swal({ title: 'Mengirim...', onOpen: () => { Swal.showLoading() } });
+
+        $.ajax({
+            url: '<?= base_url("Whatsapp/test_send") ?>',
+            type: 'POST',
+            data: { phone: phone },
+            dataType: 'json',
+            success: function(res) {
+                if(res.status) {
+                    Swal({ title: 'Berhasil', text: 'Pesan tes berhasil dikirim ke ' + phone, type: 'success' });
+                } else {
+                    Swal({ title: 'Gagal', text: res.message, type: 'error' });
+                }
+            },
+            error: function() {
+                Swal({ title: 'Error', text: 'Terjadi kesalahan sistem', type: 'error' });
+            }
+        });
     }
 </script>

@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class M_Laporan extends CI_Model {
 
 	function getAllData($filter = array()){
-		$this->datatables->select("id,saldo_awal,DATE_FORMAT(tanggal,'%d-%m-%Y') as tanggal,,kas_masuk,kas_keluar, (saldo_awal + kas_masuk - kas_keluar) as saldo_akhir");
+		$this->datatables->select("id,saldo_awal,DATE_FORMAT(tanggal,'%d-%m-%Y') as tanggal,kas_masuk,kas_keluar, (saldo_awal + kas_masuk - kas_keluar) as saldo_akhir");
 		$this->datatables->from('laporan');
 
 		if(!empty($filter['jenis']) && !empty($filter['tanggal'])){
@@ -17,7 +17,7 @@ class M_Laporan extends CI_Model {
             }
 		}
 
-		$this->datatables->add_column('view','<center><a href="javascript:void(0)" onclick="Detail($1)" class="btn btn-info btn-xs"><i class="fa fa-eye"></i> Detail</a> </center> ','id');
+		$this->datatables->add_column('view','<center><a href="javascript:void(0)" onclick="Detail($1)" class="btn btn-warning btn-xs"><i class="fa fa-eye"></i> Detail</a> </center> ','id');
 		return $this->datatables->generate();
 	}
 	
@@ -25,41 +25,46 @@ class M_Laporan extends CI_Model {
 
     function Cetak_periode($data, $awal, $akhir){
         $this->load->library('pdf');
-        $this->load->helper('data'); // Ensure helper is loaded
-        $pdf = new FPDF('P','mm','A4');
+        $this->load->helper('data');
+
+        $pdf = new FPDF('p','mm','A4');
+        $pdf->SetMargins(10, 10, 10);
         $pdf->AddPage();
         
-       // Header
-       $pdf->Cell(3,5,'',0,1);
-       $pdf->Image(base_url().'/assets/dist/img/MI.png', 10, 10,33);
-       $pdf->Cell(3,-5,'',0,1);
-       $pdf->SetFont('TIMES','B',14);
-       $pdf->Cell(189, 5, 'KEMENTRIAN AGAMA REPUBLIK INDONESIA', 0, 1, 'C');
-       $pdf->Cell(189, 7, 'KANTOR KEMENTRIAN AGAMA KABUPATEN PATI', 0, 1, 'C');
-       $pdf->SetFont('TIMES','B',16);
-       $pdf->Cell(192, 7, 'MADRASAH ALIYAH NEGERI PATI', 0, 1, 'C');
-       $pdf->SetFont('TIMES','',12);
-       $pdf->Cell(189, 5, 'Jl. Ratu kalinyamat Gg. Melati II, Kec. Tayu, Kabupaten Pati', 0, 1, 'C');
-       $pdf->Cell(189, 5, 'Telp.(020) 0000000,Fax(020)0000000', 0, 1, 'C');
-       $pdf->Cell(189, 5, 'E-mail : madrasahaliyah@gmail.com', 0, 1, 'C');
-       $pdf->SetLineWidth(1);
-       $pdf->Line(9, 46, 203, 46);
-       $pdf->SetLineWidth(0);
-       $pdf->Line(9, 47, 203, 47);
-       
-       $pdf->Cell(3,8,'',0,1);
-       $pdf->SetFont('TIMES','',12);
-       $pdf->Cell(0,5,'Periode: '.date('d-m-Y', strtotime($awal)).' s/d '.date('d-m-Y', strtotime($akhir)),0,1,'C');
-       $pdf->Ln(5);
+        // Header
+        $pdf->Image(FCPATH.'assets/dist/img/MI.png', 10, 12, 28);
+        $pdf->SetFont('TIMES','B',12);
+        $pdf->Cell(28); 
+        $pdf->Cell(162, 6, 'YAYASAN PENDIDIKAN ISLAM', 0, 1, 'C');
+        $pdf->Cell(28);
+        $pdf->SetFont('TIMES','B',16);
+        $pdf->Cell(162, 8, 'MADRASATUL QURAN DAAR EL-MUFLIHIN', 0, 1, 'C');
+        $pdf->Cell(28);
+        $pdf->SetFont('TIMES','',10);
+        $pdf->Cell(162, 5, 'Perum Cikande Permai Blok G7/01 RT. 06/4 Kec. Cikande Kab. Serang', 0, 1, 'C');
+        $pdf->Cell(28);
+        $pdf->Cell(162, 5, 'Telp.0823-1138-8825, email: midaarelmuflihin@gmail.com', 0, 1, 'C');
+        
+        $pdf->Ln(2);
+        $pdf->SetLineWidth(0.8);
+        $pdf->Line(10, 42, 200, 42);
+        $pdf->SetLineWidth(0.2);
+        $pdf->Line(10, 43, 200, 43);
+
+        $pdf->Ln(8);
+        $pdf->SetFont('TIMES','B',12);
+        $pdf->Cell(190, 7, 'Laporan Kas Masuk dan Keluar Periode : '.tanggal($awal,'bulan').' - '.tanggal($akhir,'bulan'), 0, 1, 'C');
+        $pdf->Ln(5);
 
         // Header Table
         $pdf->SetFont('TIMES','B',10);
-        $pdf->Cell(10,8,'No',1,0,'C');
-        $pdf->Cell(30,8,'Tanggal',1,0,'C');
-        $pdf->Cell(35,8,'Saldo Awal',1,0,'C');
-        $pdf->Cell(35,8,'Kas Masuk',1,0,'C');
-        $pdf->Cell(35,8,'Kas Keluar',1,0,'C');
-        $pdf->Cell(35,8,'Saldo Akhir',1,1,'C');
+        $pdf->SetFillColor(240, 240, 240);
+        $pdf->Cell(10, 8, 'No', 1, 0, 'C', true);
+        $pdf->Cell(35, 8, 'Tanggal', 1, 0, 'C', true);
+        $pdf->Cell(37, 8, 'Saldo Awal', 1, 0, 'C', true);
+        $pdf->Cell(37, 8, 'Kas Masuk', 1, 0, 'C', true);
+        $pdf->Cell(37, 8, 'Kas Keluar', 1, 0, 'C', true);
+        $pdf->Cell(34, 8, 'Saldo Akhir', 1, 1, 'C', true);
 
         // Content
         $pdf->SetFont('TIMES','',10);
@@ -70,12 +75,12 @@ class M_Laporan extends CI_Model {
         foreach($data as $row){
             $saldo_akhir = $row->saldo_awal + $row->kas_masuk - $row->kas_keluar;
             
-            $pdf->Cell(10,8,$no++,1,0,'C');
-            $pdf->Cell(30,8,date('d-m-Y', strtotime($row->tanggal)),1,0,'C');
-            $pdf->Cell(35,8,number_format($row->saldo_awal,0,',','.'),1,0,'R');
-            $pdf->Cell(35,8,number_format($row->kas_masuk,0,',','.'),1,0,'R');
-            $pdf->Cell(35,8,number_format($row->kas_keluar,0,',','.'),1,0,'R');
-            $pdf->Cell(35,8,number_format($saldo_akhir,0,',','.'),1,1,'R');
+            $pdf->Cell(10, 8, $no++, 1, 0, 'C');
+            $pdf->Cell(35, 8, date('d-m-Y', strtotime($row->tanggal)), 1, 0, 'C');
+            $pdf->Cell(37, 8, rupiah($row->saldo_awal), 1, 0, 'R');
+            $pdf->Cell(37, 8, rupiah($row->kas_masuk), 1, 0, 'R');
+            $pdf->Cell(37, 8, rupiah($row->kas_keluar), 1, 0, 'R');
+            $pdf->Cell(34, 8, rupiah($saldo_akhir), 1, 1, 'R');
             
             $total_masuk += $row->kas_masuk;
             $total_keluar += $row->kas_keluar;
@@ -83,22 +88,21 @@ class M_Laporan extends CI_Model {
 
         // Summary
         $pdf->SetFont('TIMES','B',10);
-        $pdf->Cell(75,8,'Total',1,0,'R');
-        $pdf->Cell(35,8,number_format($total_masuk,0,',','.'),1,0,'R');
-        $pdf->Cell(35,8,number_format($total_keluar,0,',','.'),1,0,'R');
-        $pdf->Cell(35,8,'-',1,1,'R');
+        $pdf->Cell(82, 8, 'TOTAL', 1, 0, 'C', true);
+        $pdf->Cell(37, 8, rupiah($total_masuk), 1, 0, 'R', true);
+        $pdf->Cell(37, 8, rupiah($total_keluar), 1, 0, 'R', true);
+        $pdf->Cell(34, 8, '-', 1, 1, 'C', true);
 
-       // Footer / Signature
-       $pdf->SetFont('TIMES','',12);
-       $pdf->Cell(125, 35, '', 0, 1);
-       $pdf->Cell(125, 35, '', 0, 0);
-       $pdf->Cell(55, 5, 'Pati, '.  tanggal(waktu(),'bulan'), 0, 1);
-       $pdf->Cell(125, 5, '', 0, 0);
-       $pdf->Cell(35, 5, 'Kepala Yayasan,', 0, 1);
-       $pdf->Cell(125, 10, '', 0, 0);
-       $pdf->Cell(35, 14, '', 0, 1);
-       $pdf->Cell(125, 8, '', 0, 0);
-       $pdf->Cell(35, 9, 'Drs. Soetarmo, M.Pd.', 0, 0);
+        $pdf->Ln(15);
+        $pdf->SetFont('TIMES', '', 11);
+        $pdf->Cell(130);
+        $pdf->Cell(60, 5, 'Cikande Permai, ' . tanggal(waktu(), 'bulan'), 0, 1, 'C');
+        $pdf->Cell(130);
+        $pdf->Cell(60, 5, 'Kepala Yayasan,', 0, 1, 'C');
+        $pdf->Ln(20);
+        $pdf->Cell(130);
+        $pdf->SetFont('TIMES', 'B', 11);
+        $pdf->Cell(60, 5, 'Kh.Satibi Salim, M.Pd.I', 0, 1, 'C');
 
         $pdf->Output();
     }
@@ -108,152 +112,152 @@ class M_Laporan extends CI_Model {
     function Cetak_detail($data){
         $this->load->library('pdf');
         $this->load->helper('data');
-        $pdf = new FPDF('P','mm','A4');
+        $pdf = new FPDF('p','mm','A4');
+        $pdf->SetMargins(10, 10, 10);
         $pdf->AddPage();
         
-       // Header
-       $pdf->Cell(3,5,'',0,1);
-       $pdf->Image(base_url().'/assets/dist/img/MI.png', 10, 10,33);
-       $pdf->Cell(3,-5,'',0,1);
-       $pdf->SetFont('TIMES','B',14);
-       $pdf->Cell(189, 5, 'KEMENTRIAN AGAMA REPUBLIK INDONESIA', 0, 1, 'C');
-       $pdf->Cell(189, 7, 'KANTOR KEMENTRIAN AGAMA KABUPATEN PATI', 0, 1, 'C');
-       $pdf->SetFont('TIMES','B',16);
-       $pdf->Cell(192, 7, 'MADRASAH ALIYAH NEGERI PATI', 0, 1, 'C');
-       $pdf->SetFont('TIMES','',12);
-       $pdf->Cell(189, 5, 'Jl. Ratu kalinyamat Gg. Melati II, Kec. Tayu, Kabupaten Pati', 0, 1, 'C');
-       $pdf->Cell(189, 5, 'Telp.(020) 0000000,Fax(020)0000000', 0, 1, 'C');
-       $pdf->Cell(189, 5, 'E-mail : madrasahaliyah@gmail.com', 0, 1, 'C');
-       $pdf->SetLineWidth(1);
-       $pdf->Line(9, 46, 203, 46);
-       $pdf->SetLineWidth(0);
-       $pdf->Line(9, 47, 203, 47);
+        // Header
+        $pdf->Image(FCPATH.'assets/dist/img/MI.png', 10, 12, 28);
+        $pdf->SetFont('TIMES','B',12);
+        $pdf->Cell(28); 
+        $pdf->Cell(162, 6, 'YAYASAN PENDIDIKAN ISLAM', 0, 1, 'C');
+        $pdf->Cell(28);
+        $pdf->SetFont('TIMES','B',16);
+        $pdf->Cell(162, 8, 'MADRASATUL QURAN DAAR EL-MUFLIHIN', 0, 1, 'C');
+        $pdf->Cell(28);
+        $pdf->SetFont('TIMES','',10);
+        $pdf->Cell(162, 5, 'Perum Cikande Permai Blok G7/01 RT. 06/4 Kec. Cikande Kab. Serang', 0, 1, 'C');
+        $pdf->Cell(28);
+        $pdf->Cell(162, 5, 'Telp.0823-1138-8825, email: midaarelmuflihin@gmail.com', 0, 1, 'C');
+        
+        $pdf->Ln(2);
+        $pdf->SetLineWidth(0.8);
+        $pdf->Line(10, 42, 200, 42);
+        $pdf->SetLineWidth(0.2);
+        $pdf->Line(10, 43, 200, 43);
        
-       $pdf->Cell(3,8,'',0,1);
-       $pdf->SetFont('TIMES','',12);
-       $pdf->Cell(0,5,'Tanggal: '.date('d-m-Y', strtotime($data['tanggal'])),0,1,'C');
-       $pdf->Ln(5);
+        $pdf->Ln(8);
+        $pdf->SetFont('TIMES','B',12);
+        $pdf->Cell(190, 7, 'RINCIAN DETAIL TRANSAKSI HARIAN', 0, 1, 'C');
+        $pdf->SetFont('TIMES','',11);
+        $pdf->Cell(190, 7, 'Tanggal: '.tanggal($data['tanggal'],'bulan'), 0, 1, 'C');
+        $pdf->Ln(5);
 
         $total_pemasukan = 0;
 
         // Pendaftaran
         if(!empty($data['pendaftaran'])) {
-            $pdf->SetFillColor(255, 255, 0);
+            $pdf->SetFillColor(230, 255, 230);
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(0, 8, 'UANG PENDAFTARAN', 1, 1, 'L', true);
+            $pdf->Cell(190, 8, ' [ PEMASUKAN ] UANG PENDAFTARAN', 1, 1, 'L', true);
             $pdf->SetFont('TIMES','',10);
             $subtotal = 0;
             foreach($data['pendaftaran'] as $row) {
-                $pdf->Cell(100, 7, $row->siswa, 1);
-                $pdf->Cell(30, 7, 'Rp.', 1);
-                $pdf->Cell(60, 7, number_format($row->nominal,0,',','.'), 1, 1, 'R');
+                $pdf->Cell(130, 7, $row->siswa, 1, 0, 'L');
+                $pdf->Cell(60, 7, rupiah($row->nominal), 1, 1, 'R');
                 $subtotal += $row->nominal;
             }
             $total_pemasukan += $subtotal;
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(130, 7, 'Sub Total', 1);
-            $pdf->Cell(60, 7, number_format($subtotal,0,',','.'), 1, 1, 'R');
+            $pdf->Cell(130, 7, 'Sub Total Pendaftaran', 1, 0, 'R', true);
+            $pdf->Cell(60, 7, rupiah($subtotal), 1, 1, 'R', true);
         }
 
         // Ujian
         if(!empty($data['ujian'])) {
-            $pdf->SetFillColor(255, 255, 0);
+            $pdf->SetFillColor(230, 255, 230);
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(0, 8, 'UANG UJIAN', 1, 1, 'L', true);
+            $pdf->Cell(190, 8, ' [ PEMASUKAN ] UANG UJIAN', 1, 1, 'L', true);
             $pdf->SetFont('TIMES','',10);
             $subtotal = 0;
             foreach($data['ujian'] as $row) {
-                $pdf->Cell(100, 7, $row->name . ' (' . $row->periode . ')', 1);
-                $pdf->Cell(30, 7, 'Rp.', 1);
-                $pdf->Cell(60, 7, number_format($row->nominal,0,',','.'), 1, 1, 'R');
+                $pdf->Cell(130, 7, $row->name . ' (' . $row->periode . ')', 1, 0, 'L');
+                $pdf->Cell(60, 7, rupiah($row->nominal), 1, 1, 'R');
                 $subtotal += $row->nominal;
             }
             $total_pemasukan += $subtotal;
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(130, 7, 'Sub Total', 1);
-            $pdf->Cell(60, 7, number_format($subtotal,0,',','.'), 1, 1, 'R');
+            $pdf->Cell(130, 7, 'Sub Total Ujian', 1, 0, 'R', true);
+            $pdf->Cell(60, 7, rupiah($subtotal), 1, 1, 'R', true);
         }
 
         // SPP
         if(!empty($data['spp'])) {
-            $pdf->SetFillColor(255, 255, 0);
+            $pdf->SetFillColor(230, 255, 230);
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(0, 8, 'UANG SPP', 1, 1, 'L', true);
+            $pdf->Cell(190, 8, ' [ PEMASUKAN ] UANG SPP', 1, 1, 'L', true);
             $pdf->SetFont('TIMES','',10);
             $subtotal = 0;
             foreach($data['spp'] as $row) {
-                $pdf->Cell(100, 7, $row->name . ' (' . $row->bulan . ')', 1);
-                $pdf->Cell(30, 7, 'Rp.', 1);
-                $pdf->Cell(60, 7, number_format($row->nominal,0,',','.'), 1, 1, 'R');
+                $pdf->Cell(130, 7, $row->name . ' (' . $row->bulan . ')', 1, 0, 'L');
+                $pdf->Cell(60, 7, rupiah($row->nominal), 1, 1, 'R');
                 $subtotal += $row->nominal;
             }
             $total_pemasukan += $subtotal;
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(130, 7, 'Sub Total', 1);
-            $pdf->Cell(60, 7, number_format($subtotal,0,',','.'), 1, 1, 'R');
+            $pdf->Cell(130, 7, 'Sub Total SPP', 1, 0, 'R', true);
+            $pdf->Cell(60, 7, rupiah($subtotal), 1, 1, 'R', true);
         }
 
-         // Buku (Snack)
+         // Buku
          if(!empty($data['buku'])) {
-            $pdf->SetFillColor(255, 255, 0);
+            $pdf->SetFillColor(230, 255, 230);
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(0, 8, 'UANG BUKU/SNACK', 1, 1, 'L', true);
+            $pdf->Cell(190, 8, ' [ PEMASUKAN ] UANG BUKU', 1, 1, 'L', true);
             $pdf->SetFont('TIMES','',10);
             $subtotal = 0;
             foreach($data['buku'] as $row) {
-                $pdf->Cell(100, 7, $row->name . ' (' . $row->jumlah . ' Hari)', 1);
-                $pdf->Cell(30, 7, 'Rp.', 1);
-                $pdf->Cell(60, 7, number_format($row->total,0,',','.'), 1, 1, 'R');
+                $pdf->Cell(130, 7, $row->name, 1, 0, 'L');
+                $pdf->Cell(60, 7, rupiah($row->total), 1, 1, 'R');
                 $subtotal += $row->total;
             }
             $total_pemasukan += $subtotal;
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(130, 7, 'Sub Total', 1);
-            $pdf->Cell(60, 7, number_format($subtotal,0,',','.'), 1, 1, 'R');
+            $pdf->Cell(130, 7, 'Sub Total Buku', 1, 0, 'R', true);
+            $pdf->Cell(60, 7, rupiah($subtotal), 1, 1, 'R', true);
         }
 
-        // Baju (Catering)
+        // Baju
         if(!empty($data['baju'])) {
-            $pdf->SetFillColor(255, 255, 0);
+            $pdf->SetFillColor(230, 255, 230);
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(0, 8, 'UANG BAJU/CATERING', 1, 1, 'L', true);
+            $pdf->Cell(190, 8, ' [ PEMASUKAN ] UANG BAJU', 1, 1, 'L', true);
             $pdf->SetFont('TIMES','',10);
             $subtotal = 0;
             foreach($data['baju'] as $row) {
-                $pdf->Cell(100, 7, $row->name . ' (' . $row->jumlah . ' Hari)', 1);
-                $pdf->Cell(30, 7, 'Rp.', 1);
-                $pdf->Cell(60, 7, number_format($row->total,0,',','.'), 1, 1, 'R');
+                $pdf->Cell(130, 7, $row->name, 1, 0, 'L');
+                $pdf->Cell(60, 7, rupiah($row->total), 1, 1, 'R');
                 $subtotal += $row->total;
             }
             $total_pemasukan += $subtotal;
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(130, 7, 'Sub Total', 1);
-            $pdf->Cell(60, 7, number_format($subtotal,0,',','.'), 1, 1, 'R');
+            $pdf->Cell(130, 7, 'Sub Total Baju', 1, 0, 'R', true);
+            $pdf->Cell(60, 7, rupiah($subtotal), 1, 1, 'R', true);
         }
 
         // Lainnya (Pemasukan)
         if(!empty($data['pemasukan'])) {
-            $pdf->SetFillColor(255, 255, 0);
+            $pdf->SetFillColor(230, 255, 230);
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(0, 8, 'PEMASUKAN LAINNYA', 1, 1, 'L', true);
+            $pdf->Cell(190, 8, ' [ PEMASUKAN ] LAINNYA', 1, 1, 'L', true);
             $pdf->SetFont('TIMES','',10);
             $subtotal = 0;
             foreach($data['pemasukan'] as $row) {
-                $pdf->Cell(100, 7, $row->keterangan, 1);
-                $pdf->Cell(30, 7, 'Rp.', 1);
-                $pdf->Cell(60, 7, number_format($row->nominal,0,',','.'), 1, 1, 'R');
+                $pdf->Cell(130, 7, $row->keterangan, 1, 0, 'L');
+                $pdf->Cell(60, 7, rupiah($row->nominal), 1, 1, 'R');
                 $subtotal += $row->nominal;
             }
             $total_pemasukan += $subtotal;
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(130, 7, 'Sub Total', 1);
-            $pdf->Cell(60, 7, number_format($subtotal,0,',','.'), 1, 1, 'R');
+            $pdf->Cell(130, 7, 'Sub Total Lainnya', 1, 0, 'R', true);
+            $pdf->Cell(60, 7, rupiah($subtotal), 1, 1, 'R', true);
         }
 
         $pdf->Ln(5);
-        $pdf->SetFont('TIMES','B',12);
-        $pdf->Cell(130, 8, 'TOTAL PEMASUKAN', 1, 0, 'C');
-        $pdf->Cell(60, 8, number_format($total_pemasukan,0,',','.'), 1, 1, 'R');
+        $pdf->SetFont('TIMES','B',11);
+        $pdf->SetFillColor(200, 255, 200);
+        $pdf->Cell(130, 9, 'T O T A L   P E M A S U K A N', 1, 0, 'C', true);
+        $pdf->Cell(60, 9, rupiah($total_pemasukan), 1, 1, 'R', true);
         $pdf->Ln(10);
 
 
@@ -262,58 +266,56 @@ class M_Laporan extends CI_Model {
         
         // Gaji
         if(!empty($data['gaji'])) {
-            $pdf->SetFillColor(0, 204, 255);
+            $pdf->SetFillColor(255, 230, 230);
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(0, 8, 'GAJI GURU', 1, 1, 'L', true);
+            $pdf->Cell(190, 8, ' [ PENGELUARAN ] GAJI GURU', 1, 1, 'L', true);
             $pdf->SetFont('TIMES','',10);
             $subtotal = 0;
             foreach($data['gaji'] as $row) {
-                $pdf->Cell(100, 7, $row->name . ' (' . $row->periode . ')', 1);
-                $pdf->Cell(30, 7, 'Rp.', 1);
-                $pdf->Cell(60, 7, number_format($row->gaji,0,',','.'), 1, 1, 'R');
+                $pdf->Cell(130, 7, $row->name . ' (' . $row->periode . ')', 1, 0, 'L');
+                $pdf->Cell(60, 7, rupiah($row->gaji), 1, 1, 'R');
                 $subtotal += $row->gaji;
             }
             $total_pengeluaran += $subtotal;
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(130, 7, 'Sub Total', 1);
-            $pdf->Cell(60, 7, number_format($subtotal,0,',','.'), 1, 1, 'R');
+            $pdf->Cell(130, 7, 'Sub Total Gaji', 1, 0, 'R', true);
+            $pdf->Cell(60, 7, rupiah($subtotal), 1, 1, 'R', true);
         }
 
         // Pengeluaran Lainnya
         if(!empty($data['pengeluaran'])) {
-            $pdf->SetFillColor(0, 204, 255);
+            $pdf->SetFillColor(255, 230, 230);
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(0, 8, 'PENGELUARAN LAINNYA', 1, 1, 'L', true);
+            $pdf->Cell(190, 8, ' [ PENGELUARAN ] LAINNYA', 1, 1, 'L', true);
             $pdf->SetFont('TIMES','',10);
             $subtotal = 0;
             foreach($data['pengeluaran'] as $row) {
-                $pdf->Cell(100, 7, $row->keterangan, 1);
-                $pdf->Cell(30, 7, 'Rp.', 1);
-                $pdf->Cell(60, 7, number_format($row->nominal,0,',','.'), 1, 1, 'R');
+                $pdf->Cell(130, 7, $row->keterangan, 1, 0, 'L');
+                $pdf->Cell(60, 7, rupiah($row->nominal), 1, 1, 'R');
                 $subtotal += $row->nominal;
             }
             $total_pengeluaran += $subtotal;
             $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(130, 7, 'Sub Total', 1);
-            $pdf->Cell(60, 7, number_format($subtotal,0,',','.'), 1, 1, 'R');
+            $pdf->Cell(130, 7, 'Sub Total Lainnya', 1, 0, 'R', true);
+            $pdf->Cell(60, 7, rupiah($subtotal), 1, 1, 'R', true);
         }
 
         $pdf->Ln(5);
-        $pdf->SetFont('TIMES','B',12);
-        $pdf->Cell(130, 8, 'TOTAL PENGELUARAN', 1, 0, 'C');
-        $pdf->Cell(60, 8, number_format($total_pengeluaran,0,',','.'), 1, 1, 'R');
+        $pdf->SetFont('TIMES','B',11);
+        $pdf->SetFillColor(255, 200, 200);
+        $pdf->Cell(130, 9, 'T O T A L   P E N G E L U A R A N', 1, 0, 'C', true);
+        $pdf->Cell(60, 9, rupiah($total_pengeluaran), 1, 1, 'R', true);
 
-       // Footer / Signature
-       $pdf->SetFont('TIMES','',12);
-       $pdf->Cell(125, 35, '', 0, 1);
-       $pdf->Cell(125, 35, '', 0, 0);
-       $pdf->Cell(55, 5, 'Pati, '.  tanggal(waktu(),'bulan'), 0, 1);
-       $pdf->Cell(125, 5, '', 0, 0);
-       $pdf->Cell(35, 5, 'Kepala Yayasan,', 0, 1);
-       $pdf->Cell(125, 10, '', 0, 0);
-       $pdf->Cell(35, 14, '', 0, 1);
-       $pdf->Cell(125, 8, '', 0, 0);
-       $pdf->Cell(35, 9, 'Drs. Soetarmo, M.Pd.', 0, 0);
+        $pdf->Ln(15);
+        $pdf->SetFont('TIMES', '', 11);
+        $pdf->Cell(130);
+        $pdf->Cell(60, 5, 'Cikande Permai, ' . tanggal(waktu(), 'bulan'), 0, 1, 'C');
+        $pdf->Cell(130);
+        $pdf->Cell(60, 5, 'Kepala Yayasan,', 0, 1, 'C');
+        $pdf->Ln(20);
+        $pdf->Cell(130);
+        $pdf->SetFont('TIMES', 'B', 11);
+        $pdf->Cell(60, 5, 'Kh.Satibi Salim, M.Pd.I', 0, 1, 'C');
 
         $pdf->Output();
     }

@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class M_Transaksi extends CI_Model {
 
 	function getAllData(){
-		$this->datatables->select('id,kode,nama,nominal,tenggat_waktu');
+		$this->datatables->select('id,kode,nama,nominal,tenggat_waktu,tahun_ajaran,kelas');
 		$this->datatables->from('pembayaran');
 
 		if ($this->session->userdata('role') == 1) {

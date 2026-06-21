@@ -123,7 +123,7 @@ class Kelas extends CI_Controller {
 		if (!empty($dari) && !empty($ke) && $dari != $ke) {
 			if ($ke == 'lulus') {
 				$data = array(
-					'status' => 'Lulus',
+					'status' => 'Alumni',
 					'kelas'  => 0
 				);
 			} else {
@@ -134,7 +134,16 @@ class Kelas extends CI_Controller {
 
 			$this->db->where('kelas', $dari);
 			$this->db->update('siswa', $data);
-		}
+
+            $count = $this->db->affected_rows();
+            if ($count > 0) {
+                $this->session->set_flashdata('success', 'Berhasil memproses ' . $count . ' siswa.');
+            } else {
+                $this->session->set_flashdata('error', 'Tidak ada data siswa yang diupdate. Pastikan kelas asal memiliki siswa.');
+            }
+		} else {
+            $this->session->set_flashdata('error', 'Kelas asal dan tujuan tidak boleh sama atau kosong.');
+        }
 		
 		redirect('Kelas/Kenaikan');
 	}

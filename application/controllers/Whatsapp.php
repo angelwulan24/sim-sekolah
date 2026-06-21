@@ -46,4 +46,17 @@ class Whatsapp extends CI_Controller {
             echo json_encode(['status' => false, 'message' => $e->getMessage()]);
         }
     }
+
+    public function test_send() {
+        header('Content-Type: application/json');
+        $phone = $this->input->post('phone');
+        $msg = "Tes Koneksi WhatsApp Gateway SIM Sekolah Berhasil! ✅\n\nWaktu: " . date('d-m-Y H:i:s');
+        
+        try {
+            $result = $this->wa_gateway->send($phone, $msg);
+            echo json_encode($result);
+        } catch (Exception $e) {
+            echo json_encode(['status' => false, 'message' => $e->getMessage()]);
+        }
+    }
 }

@@ -7,12 +7,14 @@
     });
 </script>
 
+<style>
+    .btn-pastel-gaji { background-color: #A5D6A7 !important; color: #2D4A3E !important; border: 1px solid #94c396 !important; font-weight: bold; }
+    .btn-pastel-gaji:hover { background-color: #94c396 !important; color: #2D4A3E !important; }
+</style>
+
 <div class="col-xs-12">
 	<div class="box box-primary">
         <div class="box-header">
-            <div class="pull-right">
-            	<a href="#" onclick="Tambah()" class="btn btn-primary btn-sm">Form Pembayaran Gaji</a>
-            </div>
         </div>
 	    <div class="box-body">
 	    	<div class="table-responsive">    	
@@ -38,77 +40,7 @@
 
 
 
-<!-- Modal Tambah -->
-<div class="modal fade" id="modal-form">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title"></h4>
-            </div>
-<?= form_open('','role = "form" id = "form"')?>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="control-label">Gaji pada Bulan</label>
-                    <?php $t = Date('Y'); 
-                          $b = array('Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember');
-                    ?>
-                    <select name="bulan" required="" data-placeholder="--Pilih--" class="form-control">
-                        <option value="">--Pilih--</option>
-                    <?php foreach ($b as $i) { ?>
-                        <option value="<?=$i.'-'.$t?>"><?=$i.'-'.$t?></option>
-                    <?php } ?>
-                    </select>
-                </div>
-                
-                <?php $tarif_per_jam = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 6")->row()->nominal; ?>
-                <input type="hidden" id="gaji_per_jam" value="<?=$tarif_per_jam?>">
-
-                <div style="max-height: 400px; overflow-y: auto;">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Nama Guru</th>
-                                <th width="150">Jumlah Jam</th>
-                                <th width="200">Total Gaji (Rp)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php 
-                            $guru = $this->db->query("SELECT id, name, nip, status FROM guru")->result();
-                            $i = 0;
-                            foreach ($guru as $g) { 
-                                $is_berhenti = ($g->status == 'Berhenti');
-                            ?>
-                            <tr>
-                                <td><?=$g->name?> <br><small><?=$g->nip?></small></td>
-                                <td>
-                                    <?php if(!$is_berhenti) { ?>
-                                        <input type="hidden" name="id_guru[]" value="<?=$g->id?>">
-                                        <input type="number" name="jam[]" class="form-control jam-input" data-index="<?=$i?>" placeholder="Jam">
-                                    <?php } else { ?>
-                                        <input type="text" class="form-control" disabled placeholder="Berhenti">
-                                    <?php } ?>
-                                </td>
-                                <td>
-                                    <input type="text" class="form-control total-gaji" id="total_<?=$i?>" readonly <?=$is_berhenti ? 'disabled' : ''?>>
-                                </td>
-                            </tr>
-                            <?php $i++; } ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                <button type="submit" id="simpan"  class="btn btn-primary">Simpan</button>
-            </div>
-<?= form_close()?>
-        </div>
-    </div>
-</div>
+<!-- Modal Removed -->
 
 
 <script type="text/javascript">
@@ -254,16 +186,10 @@
     }
 
     function Detail(id){
-
          document.location.href= "<?= base_url($this->uri->segment(1).'/Detail/')?>"+id;
     }
 
-    function Tambah(){
-        label = 'simpan';
-        $('#form')[0].reset();
-        $('.form-group').removeClass('has-error');
-        $('.help-block').empty();
-        $('#modal-form').modal('show');
-        $('.modal-title').text('Form Pembayaran Gaji'); 
+    function Bayar(id){
+         document.location.href= "<?= base_url($this->uri->segment(1).'/Bayar/')?>"+id;
     }
 </script>

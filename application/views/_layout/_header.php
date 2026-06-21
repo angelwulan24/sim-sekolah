@@ -3,18 +3,15 @@ $masuk = $this->db->get_where('users',['id'=> $this->session->userdata('id')])->
 $foto_profil = base_url('assets/dist/img/') . (!empty($masuk['gambar']) ? $masuk['gambar'] : 'user.png');
 
 if ($masuk['role'] == 3) {
-    $parts = explode('@', $masuk['email']);
-    if (count($parts) > 1 && $parts[1] == 'student.sim') {
-        $siswa = $this->db->get_where('siswa', ['nis' => $parts[0]])->row_array();
-        if ($siswa && !empty($siswa['foto'])) {
-            $foto_profil = base_url('assets/images/siswa/') . $siswa['foto'];
-        }
+    $siswa = $this->db->get_where('siswa', ['nis' => $masuk['email']])->row_array();
+    if ($siswa && !empty($siswa['foto'])) {
+        $foto_profil = base_url('assets/images/siswa/') . $siswa['foto'];
     }
 }
 ?>
-<a href="<?=base_url('Beranda')?>" class="logo">
-    <span class="logo-mini"><b>SI</b>M</span>
-    <span class="logo-lg"><b>SIM</b>madrasah</span>
+<a href="<?=base_url('Beranda')?>" class="logo" style="display: flex; align-items: center; justify-content: center; height: 50px; overflow: hidden;">
+    <span class="logo-mini"><b>MI</b></span>
+    <span class="logo-lg" style="font-size: 14px; font-weight: 700; letter-spacing: 0px; line-height: 1.2;">MI DAAR EL-MUFLIHIN</span>
 </a>
 <nav class="navbar navbar-static-top">
     <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
@@ -36,11 +33,14 @@ if ($masuk['role'] == 3) {
                         <p> <?php echo $masuk['name']?></p>
                     </li>
                     <li class="user-footer">
+                        <?php if ($masuk['role'] != 3): ?>
                         <div class="pull-left">
                           <!--   <a href="#" onclick="Password()" class="btn btn-default btn-flat">Password</a> -->
+                            <a href="#" onclick="UbahFoto()" class="btn btn-default btn-flat">Ubah Foto</a>
                         </div>
-                        <div class="pull-right">
-                            <a href="<?php echo base_url('Auth/logout')?>" class="btn btn-default btn-flat">Sign out</a>
+                        <?php endif; ?>
+                        <div class="pull-right" style="<?= ($masuk['role'] == 3) ? 'width: 100%; text-align: center;' : '' ?>">
+                            <a href="<?php echo base_url('Auth/logout')?>" class="btn btn-default btn-flat" style="<?= ($masuk['role'] == 3) ? 'width: 100%;' : '' ?>">Sign out</a>
                         </div>
                     </li>
                 </ul>
@@ -48,6 +48,37 @@ if ($masuk['role'] == 3) {
         </ul>
     </div>
 </nav>
+
+<?php if($this->session->flashdata('message')): ?>
+    <div style="padding: 15px 15px 0 15px;">
+        <?= $this->session->flashdata('message') ?>
+    </div>
+<?php endif; ?>
+
+<div class="modal fade" id="modal-foto">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Ubah Foto Profil</h4>
+            </div>
+            <?= form_open_multipart('Auth/update_foto') ?>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Pilih Foto Baru</label>
+                    <input type="file" name="foto" class="form-control" accept="image/*" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+            <?= form_close() ?>
+        </div>
+    </div>
+</div>
 
  <!--   
 <div class="modal fade"  id="modal-password">
@@ -182,6 +213,10 @@ if ($masuk['role'] == 3) {
         $('.help-block').empty(); 
         $('#modal-password').appendTo("body").modal('show');
         $('.modal-title').text('Ganti Password');
+    }
+
+    function UbahFoto(){
+        $('#modal-foto').appendTo("body").modal('show');
     }
 
 </script>

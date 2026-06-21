@@ -11,6 +11,9 @@
                 <div class="col-md-6">
                     <h3 class="box-title">Laporan Kas Masuk Sekolah</h3>
                  </div>
+                 <div class="col-md-6 text-right">
+                    <h4 class="text-primary"><b>Tanggal Laporan: <?= tgl_indo($isi['tanggal']) ?></b></h4>
+                 </div>
             </div>
         </div>
         <div class="box-body">
@@ -22,14 +25,16 @@ if (!empty($isi['pendaftaran'])) {
                  <thead><tr> <th colspan="4" style="size: 16px; background-color: #ffff00;">Uang Pendaftaran</th></tr></thead>
                 <tbody>
                     <tr>
-                      <th colspan="2">Nama Pendaftar</th>
+                      <th>Tanggal</th>
+                      <th>Nama Pendaftar</th>
                       <th colspan="2">Nominal</th>
             </tr>
                      <?php 
 			$total = 0;
 			foreach ($isi['pendaftaran'] as $k) { ?>
                     <tr>
-                      <td colspan="2"><?=$k->siswa?></td>
+                      <td><?= tgl_indo($isi['tanggal']) ?></td>
+                      <td><?=$k->siswa?></td>
                       <td style="width: 10px;">Rp.</td>
                       <td style="text-align: right;"><?=number_format($k->nominal,0,',','.')?></td>
                     </tr>
@@ -49,6 +54,7 @@ if (!empty($isi['pendaftaran'])) {
 				<thead><tr><th colspan="4" style="size: 16px; background-color: #ffff00;">UANG UJIAN</th></tr></thead>
                 <tbody>
                     <tr>
+                      <th>Tanggal</th>
                       <th>Nama Siswa</th>
                       <th>Periode</th>
                       <th colspan="2">Nominal</th>
@@ -57,6 +63,7 @@ if (!empty($isi['pendaftaran'])) {
 			$total = 0;
 			foreach ($isi['ujian'] as $k) { ?>
                     <tr>
+                      <td><?= tgl_indo($isi['tanggal']) ?></td>
                       <td><?=$k->name?></td>
                       <td><?=$k->periode?></td>
                       <td style="width: 10px;">Rp.</td>
@@ -66,7 +73,7 @@ if (!empty($isi['pendaftaran'])) {
             $total+=$k->nominal;
              } $katot+=$total; ?>
                     <tr>
-                      <th colspan="2">Sub Total</th>
+                      <th colspan="3">Sub Total</th>
                       <th>Rp.</th>
                       <th style="text-align: right;"><?=number_format($total,0,',','.')?></th>
                     </tr>
@@ -78,6 +85,7 @@ if (!empty($isi['pendaftaran'])) {
 				<thead><tr><th colspan="4" style="size: 16px; background-color: #ffff00;">UANG BUKU/SNACK</th></tr></thead>
                 <tbody>
                     <tr>
+                      <th>Tanggal</th>
                       <th>Nama Siswa</th>
                       <th>Jumlah Hari</th>
                       <th colspan="2">Nominal</th>
@@ -86,6 +94,7 @@ if (!empty($isi['pendaftaran'])) {
 			$total = 0;
 			foreach ($isi['buku'] as $k) { ?>
                     <tr>
+                      <td><?= tgl_indo($isi['tanggal']) ?></td>
                       <td><?=$k->name?></td>
                       <td><?=$k->jumlah?></td>
                       <td style="width: 10px;">Rp.</td>
@@ -95,7 +104,7 @@ if (!empty($isi['pendaftaran'])) {
             $total+=$k->total;
              }$katot+=$total; ?>
                     <tr>
-                      <th colspan="2">Total</th>
+                      <th colspan="3">Total</th>
                       <th>Rp.</th>
                       <th style="text-align: right;"><?=number_format($total,0,',','.')?></th>
                     </tr>
@@ -107,6 +116,7 @@ if (!empty($isi['pendaftaran'])) {
 				<thead><tr><th colspan="4" style="size: 16px; background-color: #ffff00;">UANG BAJU/CATERING</th></tr></thead>
                 <tbody>
                     <tr>
+                      <th>Tanggal</th>
                       <th>Nama Siswa</th>
                       <th>Jumlah Hari</th>
                       <th colspan="2">Nominal</th>
@@ -115,6 +125,7 @@ if (!empty($isi['pendaftaran'])) {
 			$total = 0;
 			foreach ($isi['baju'] as $k) { ?>
                     <tr>
+                      <td><?= tgl_indo($isi['tanggal']) ?></td>
                       <td><?=$k->name?></td>
                       <td><?=$k->jumlah?></td>
                       <td style="width: 10px;">Rp.</td>
@@ -124,7 +135,7 @@ if (!empty($isi['pendaftaran'])) {
             $total+=$k->total;
              }$katot+=$total; ?>
                     <tr>
-                      <th colspan="2">Total</th>
+                      <th colspan="3">Total</th>
                       <th>Rp.</th>
                       <th style="text-align: right;"><?=number_format($total,0,',','.')?></th>
                     </tr>
@@ -134,6 +145,7 @@ if (!empty($isi['spp'])) { ?>
                 <thead><tr> <th colspan="4" style="background-color: #ffff00;">SPP</th></tr></thead>
                 <tbody>
                     <tr>
+                      <th>Tanggal</th>
                       <th>Nama Siswa</th>
                       <th>Bulan</th>
                       <th colspan="2">Nominal</th>
@@ -142,6 +154,7 @@ if (!empty($isi['spp'])) { ?>
             $total = 0;
             foreach ($isi['spp'] as $k) {?>
                     <tr>
+                      <td><?= tgl_indo($isi['tanggal']) ?></td>
                       <td><?=$k->name?></td>
                       <td><?=$k->bulan?></td>
                       <td style="width: 10px;">Rp.</td>
@@ -151,7 +164,7 @@ if (!empty($isi['spp'])) { ?>
             $total+=$k->nominal;
              }$katot+=$total; ?>
                     <tr>
-                      <th colspan="2">Sub Total</th>
+                      <th colspan="3">Sub Total</th>
                       <th>Rp.</th>
                       <th style="text-align: right;"><?=number_format($total,0,',','.')?></th>
                     </tr>
@@ -163,14 +176,16 @@ if (!empty($isi['spp'])) { ?>
                 <thead><tr> <th colspan="4" style="size: 16px; background-color: #ffff00;">Lainnya</th></tr></thead>
                 <tbody>
                     <tr>
-                      <th colspan="2">Keterangan</th>
+                      <th>Tanggal</th>
+                      <th>Keterangan</th>
                       <th colspan="2">Nominal</th>
             </tr>
                      <?php 
 			$total = 0;
 			foreach ($isi['pemasukan'] as $k) { ?>
                     <tr>
-                      <td colspan="2"><?=$k->keterangan?></td>
+                      <td><?= tgl_indo($isi['tanggal']) ?></td>
+                      <td><?=$k->keterangan?></td>
                       <td style="width: 10px;">Rp.</td>
                       <td style="text-align: right;"><?=number_format($k->nominal,0,',','.')?></td>
                     </tr>
@@ -186,7 +201,7 @@ if (!empty($isi['spp'])) { ?>
 
 <?php } ?>
                   <tr style="size: 18; background-color: #ffff00;">
-                    <th colspan="2"> <i>Total Pemasukan haril ini</i> </th>
+                    <th colspan="3"> <i>Total Pemasukan hari ini</i> </th>
                     <th>Rp.</th>
                     <th style="text-align: right;"><?=number_format($katot,0,',','.')?></th>
                   </tr>
@@ -211,6 +226,7 @@ if (!empty($isi['gaji'])) {
             	<thead><tr><th colspan="4" style="background-color: #00ccff;">GAJI GURU</th></tr></thead>
                 <tbody>
                     <tr>
+                      <th>Tanggal</th>
                       <th>Nama Guru</th>
                       <th>Bulan</th>
                       <th colspan="2">Nominal</th>
@@ -219,6 +235,7 @@ if (!empty($isi['gaji'])) {
 			$total = 0;
 			foreach ($isi['gaji'] as $k) { ?>
                     <tr>
+                      <td><?= tgl_indo($isi['tanggal']) ?></td>
                       <td><?=$k->name?></td>
                       <td><?=$k->periode?></td>
                       <td style="width: 10px;">Rp.</td>
@@ -229,7 +246,7 @@ if (!empty($isi['gaji'])) {
              }$katot+=$total; ?>
 
                     <tr>
-                      <th colspan="2">Total</th>
+                      <th colspan="3">Total</th>
                       <th>Rp.</th>
                       <th style="text-align: right;"><?=number_format($total,0,',','.')?></th>
                     </tr>
@@ -240,14 +257,16 @@ if (!empty($isi['pengeluaran'])) {
 				<thead><tr><th colspan="4" style="size: 16px; background-color: #00ccff;">Pengeluaran Lainnya</th></tr></thead>
                 <tbody>
                     <tr>
-                      <th colspan="2">Keterangan</th>
+                      <th>Tanggal</th>
+                      <th>Keterangan</th>
                       <th colspan="2">Nominal</th>
                     </tr>
                    <?php 
 		$total = 0;
 		foreach ($isi['pengeluaran'] as $k) { ?>
                     <tr>
-                      <td colspan="2"><?=$k->keterangan?></td>
+                      <td><?= tgl_indo($isi['tanggal']) ?></td>
+                      <td><?=$k->keterangan?></td>
                       <td style="width: 10px;">Rp.</td>
                       <td style="text-align: right;"><?=number_format($k->nominal,0,',','.')?></td>
                     </tr>
@@ -256,7 +275,7 @@ if (!empty($isi['pengeluaran'])) {
              }$katot+=$total; ?>
                   </tbody>
                   <tr style="size: 18; background-color: #00ccff;">
-                    <th colspan="2"> <i>Total Pengeluaran hari ini</i> </th>
+                    <th colspan="3"> <i>Total Pengeluaran hari ini</i> </th>
                     <th>Rp.</th>
                     <th style="text-align: right;"><?=number_format($katot,0,',','.')?></th>
                   </tr>

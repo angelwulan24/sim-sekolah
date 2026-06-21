@@ -1,28 +1,26 @@
 dari system yang udah jadi, ada beberapa fitur yang harus dikembangkan:
 1. fitur hak akses, system belum bisa di akses oleh orang tua murid dan juga kepala sekolah, hanya bisa oleh admin saja✅
 2. karna belum bisa login orangtua/murid, maka belum bisa melakukan pembayaran online✅
-3. integrasi dengan wa atau system pengingat nya
+3. integrasi dengan wa atau system pengingat nya✅
 4. tambahin foto untuk siswa dan guru✅
 5. tambahin no telp di table data siswa untuk fitur pengingat dan pembayaran berhasil✅
-6. tambahin menu/table tunggakan
-7. cetak bukti pembayaran siswa di admin dan siswa
-8. edit semua table pembayaran jadi kaya myunpam
+6. tambahin menu/table tunggakan✅
+7. cetak bukti pembayaran siswa di admin dan siswa✅
+8. edit semua table pembayaran jadi kaya myunpam✅
 9. belum bisa tambah atau ubah jenis transaksi,cuma bisa ubah nominal nya aja✅
 10. // (GAK JADI) tambah button edit✅ dan share ke wa untuk menu tanggal merah✅ tambahin menu ini ke dashboard siswa
 11. setelah menambahkan data siswa di menu pendaftaran, pop up jadi bug✅
-12. desain pdf cetak bukti pembayarannya diubah jadi lebih professional
+12. desain pdf cetak bukti pembayarannya diubah jadi lebih professional✅
 13. tombol cetak di menu laporpan ngga berfungsi✅
 14. fitur kenaikkan kelas✅
 15. uang sncak dan uang catering muncul pesan error table✅
 16. tombol cetak laporan keseluruhan belum berfungsi✅
 17. ubah pdf (cetak) di menu laporan - Detail✅
-18. alur di menu data kelas untuk data siswanya bingung
-19. tambahin no telp di tabel pendaftaran✅
-20. ubah tombol detail di menu uang baju jadi bayar dan cetak
-21. set tenggat pembayaran spp jadi tanggal 10
+18. alur di menu data kelas untuk data siswanya bingung✅
+19. set tenggat pembayaran spp jadi tanggal 14✅
 
 bingung:
-1. gimana cara upload image user
+1. gimana cara upload image user✅
 
 
 minta data ke sekolah
@@ -67,3 +65,7 @@ https://www.youtube.com/watch?v=_EGVKdtG3jw&t=659s
     > ctrl + shift + g
     > klik tambah (+) untuk masing-masing file yang diubah (yang mau di push)
     > click dropdown commit (commit & push untuk push ke github)
+6. cara nyalain whatsapp-service:
+    > cd whatsapp-service
+    > npm install (kalo udah pernah gausah lagi)
+    > node index.js

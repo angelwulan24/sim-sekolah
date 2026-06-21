@@ -209,7 +209,7 @@
 		$('#form')[0].reset();
 		$('.form-group').removeClass('has-error');
 		$('.help-block').empty(); 
-		$('#modal-form').modal('show');
+		$('#modal-form').appendTo("body").modal('show');
 		$('.modal-title').text('Tambah Data');
 	}
 
@@ -255,7 +255,7 @@
                     $('[name="tanggal"]').val(data.tgl);
                     $('[name="keterangan"]').val(data.keterangan);
 
-                    $('#modal-form').modal('show');
+                    $('#modal-form').appendTo("body").modal('show');
                     $('.modal-title').text('Ubah Data'); 
                 },
                 error:function(){

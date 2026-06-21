@@ -15,26 +15,69 @@
   <link rel="stylesheet" href="<?= base_url('assets/') ?>bower_components/Ionicons/css/ionicons.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="<?= base_url('assets/') ?>dist/css/AdminLTE.min.css">
-  <link rel="shorcut icon" type="text/css" href="<?php echo base_url('assets/dist/img/MI.png') ?>">
+  <link rel="shortcut icon" type="text/css" href="<?php echo base_url('assets/dist/img/MI.png') ?>">
 
   <!-- Google Font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+  <!-- Custom Pastel Green Theme for Login -->
+    <style>
+    :root {
+        --pastel-green: #A2D5AB;       /* Matched Green */
+        --pastel-green-hover: #8BBF95; /* Darker accent */
+        --pastel-green-light: #E1F2E5;
+        --pastel-green-bg: #F2FAF4;
+        --text-dark: #2D4A3E;
+        --shadow-sm: 0 4px 15px rgba(0,0,0,0.05);
+        --shadow-hover: 0 6px 20px rgba(162,213,171,0.25);
+        --transition: all 0.3s ease;
+    }
+    body {
+        background-color: var(--pastel-green-bg) !important;
+    }
+    .login-box-body {
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+        border-top: 5px solid var(--pastel-green);
+        transition: var(--transition);
+    }
+    .login-box-body:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+    }
+    .btn-primary {
+        background-color: var(--pastel-green) !important;
+        border-color: var(--pastel-green) !important;
+        color: #fff !important;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: var(--transition);
+    }
+    .btn-primary:hover, .btn-primary:active, .btn-primary:focus {
+        background-color: var(--pastel-green-hover) !important;
+        border-color: var(--pastel-green-hover) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(162,213,171,0.3);
+    }
+  </style>
 </head>
 
-<body style="background-color: #66a3ff " class="hold-transition login-page">
+<body class="hold-transition login-page">
   <div class="login-box">
     <div class="login-logo">
       <img style="width: 40%" src="<?= base_url('assets/dist/img/MI.png') ?>">
     </div>
     <!-- /.login-logo -->
     <div class="login-box-body">
-      <p class="login-box-msg"><strong style="color:#66a3ff  ">Login Untuk Masuk</strong></p>
+      <p class="login-box-msg">
+        <span style="color:var(--text-dark); font-size: 0.85em; display: block; margin-bottom: 2px;">APLIKASI KEUANGAN SEKOLAH</span>
+        <strong style="color:var(--text-dark); font-size: 1.25em; display: block;">MI DAAR EL-MUFLIHIN</strong>
+      </p>
       <?= $this->session->flashdata('message'); ?>
 
       <form action="<?= base_url('Auth') ?>" method="post">
         <div class="form-group has-feedback">
-          <input type="text" class="form-control" autocomplete="off" value="<?= set_value('email') ?>" name="email" id="email" placeholder="Email">
-          <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+          <input type="text" class="form-control" autocomplete="off" value="<?= set_value('email') ?>" name="email" id="email" placeholder="NIS / Email">
+          <span class="glyphicon glyphicon-user form-control-feedback"></span>
           <?= form_error('email', '<small class="text-danger">', '</small>'); ?>
         </div>
         <div class="form-group has-feedback">

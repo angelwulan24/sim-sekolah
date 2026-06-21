@@ -16,3 +16,15 @@
 <link rel="stylesheet" href="<?php echo base_url('')?>assets/dist/css/AdminLTE.min.css">
 <link rel="stylesheet" href="<?php echo base_url('')?>assets/dist/css/skins/_all-skins.min.css">
 
+<style>
+    .btn-abu-tua {
+        background-color: #e0e0e0 !important;
+        border-color: #d0d0d0 !important;
+        color: #333333 !important;
+    }
+    .btn-abu-tua:hover, .btn-abu-tua:focus {
+        background-color: #d0d0d0 !important;
+        border-color: #c0c0c0 !important;
+        color: #000000 !important;
+    }
+</style>

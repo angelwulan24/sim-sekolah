@@ -15,6 +15,7 @@ class Ujian extends CI_Controller {
 		//$this->load->model('M_'.$this->parents,'mod');
 		$this->load->library('form_validation');
 		$this->load->library('Datatables'); 
+		$this->load->library('Wa_gateway');
 	}
 
 	public function index(){
@@ -67,9 +68,6 @@ class Ujian extends CI_Controller {
 		
 		// Get current year
 		$tahun_sekarang = date('Y');
-		if (date('m') < 7) {
-			$tahun_sekarang = $tahun_sekarang - 1;
-		}
 		
 		// Get student class information for history
 		$siswa = $this->db->query("SELECT s.id, k.nama FROM siswa s LEFT JOIN kelas k ON s.kelas = k.id WHERE s.id = '$id'")->row();
@@ -141,6 +139,11 @@ class Ujian extends CI_Controller {
 			$data['id_pembayaran'] = $this->db->insert_id();
 			
 	         $this->M_General->update_kas('kas_masuk',$total);
+			 
+			 // Send WhatsApp Notification
+			 $this->load->library('Wa_gateway');
+			 $this->wa_gateway->send_payment_confirmation($id, "Uang Ujian - " . $bln, $total);
+
 	        $data['status'] = TRUE;
     		
     	}
@@ -163,71 +166,68 @@ class Ujian extends CI_Controller {
 			return;
 		}
 
-		$pdf = new FPDF('P','mm','A4');
+		$pdf = new FPDF('p','mm','A4');
+        $pdf->SetMargins(10, 10, 10);
 		$pdf->AddPage();
 		
-       // Header
-       $pdf->Cell(3,5,'',0,1);
-       $pdf->Image(base_url().'/assets/dist/img/MI.png', 10, 10,33);
-       $pdf->Cell(3,-5,'',0,1);
-       $pdf->SetFont('TIMES','B',14);
-       $pdf->Cell(189, 5, 'KEMENTRIAN AGAMA REPUBLIK INDONESIA', 0, 1, 'C');
-       $pdf->Cell(189, 7, 'KANTOR KEMENTRIAN AGAMA KABUPATEN PATI', 0, 1, 'C');
-       $pdf->SetFont('TIMES','B',16);
-       $pdf->Cell(192, 7, 'MADRASAH ALIYAH NEGERI PATI', 0, 1, 'C');
-       $pdf->SetFont('TIMES','',12);
-       $pdf->Cell(189, 5, 'Jl. Ratu kalinyamat Gg. Melati II, Kec. Tayu, Kabupaten Pati', 0, 1, 'C');
-       $pdf->Cell(189, 5, 'Telp.(020) 0000000,Fax(020)0000000', 0, 1, 'C');
-       $pdf->Cell(189, 5, 'E-mail : madrasahaliyah@gmail.com', 0, 1, 'C');
-       $pdf->SetLineWidth(1);
-       $pdf->Line(9, 46, 203, 46);
-       $pdf->SetLineWidth(0);
-       $pdf->Line(9, 47, 203, 47);
+        // Header
+        $pdf->Image(FCPATH.'assets/dist/img/MI.png', 10, 12, 28);
+        $pdf->SetFont('TIMES','B',12);
+        $pdf->Cell(28); 
+        $pdf->Cell(162, 6, 'YAYASAN PENDIDIKAN ISLAM', 0, 1, 'C');
+        $pdf->Cell(28);
+        $pdf->SetFont('TIMES','B',16);
+        $pdf->Cell(162, 8, 'MADRASATUL QURAN DAAR EL-MUFLIHIN', 0, 1, 'C');
+        $pdf->Cell(28);
+        $pdf->SetFont('TIMES','',10);
+        $pdf->Cell(162, 5, 'Perum Cikande Permai Blok G7/01 RT. 06/4 Kec. Cikande Kab. Serang', 0, 1, 'C');
+        $pdf->Cell(28);
+        $pdf->Cell(162, 5, 'Telp.0823-1138-8825, email: midaarelmuflihin@gmail.com', 0, 1, 'C');
+        
+        $pdf->Ln(2);
+        $pdf->SetLineWidth(0.8);
+        $pdf->Line(10, 42, 200, 42);
+        $pdf->SetLineWidth(0.2);
+        $pdf->Line(10, 43, 200, 43);
 		
-		$pdf->Cell(3,8,'',0,1);
-		
-		// Content
-		$pdf->SetFont('TIMES','B',11);
-		$pdf->Cell(0, 5, 'BUKTI PEMBAYARAN UJIAN', 0, 1, 'C');
+		$pdf->Ln(8);
+		$pdf->SetFont('TIMES','B',12);
+		$pdf->Cell(190, 7, 'BUKTI PEMBAYARAN UJIAN', 0, 1, 'C');
 		$pdf->Ln(5);
 		
-		$pdf->SetFont('TIMES','',10);
-		$pdf->Cell(40, 6, 'No. Transaksi', 0, 0);
+		$pdf->SetFont('TIMES','',11);
+		$pdf->Cell(35, 6, 'Nama Siswa', 0, 0);
 		$pdf->Cell(5, 6, ':', 0, 0);
-		$pdf->Cell(0, 6, 'UJIAN-'.$data->id, 0, 1);
-		
-		$pdf->Cell(40, 6, 'Tanggal', 0, 0);
-		$pdf->Cell(5, 6, ':', 0, 0);
-		$pdf->Cell(0, 6, date('d-m-Y H:i', strtotime($data->time)), 0, 1);
-		
-		$pdf->Cell(40, 6, 'Nama Siswa', 0, 0);
-		$pdf->Cell(5, 6, ':', 0, 0);
+		$pdf->SetFont('TIMES','B',11);
 		$pdf->Cell(0, 6, $data->name, 0, 1);
 		
-		$pdf->Cell(40, 6, 'NIS', 0, 0);
+		$pdf->SetFont('TIMES','',11);
+		$pdf->Cell(35, 6, 'NIS', 0, 0);
 		$pdf->Cell(5, 6, ':', 0, 0);
 		$pdf->Cell(0, 6, $data->nis, 0, 1);
 		
-		$pdf->Cell(40, 6, 'Periode Ujian', 0, 0);
+		$pdf->SetFont('TIMES','',11);
+		$pdf->Cell(35, 6, 'Periode Ujian', 0, 0);
 		$pdf->Cell(5, 6, ':', 0, 0);
 		$pdf->Cell(0, 6, $data->periode, 0, 1);
-		
+
 		$pdf->Ln(5);
 		$pdf->SetFont('TIMES','B',12);
-		$pdf->Cell(40, 8, 'TOTAL BAYAR', 0, 0);
+		$pdf->Cell(35, 8, 'TOTAL BAYAR', 0, 0);
 		$pdf->Cell(5, 8, ':', 0, 0);
 		$pdf->Cell(0, 8, 'Rp. '.number_format($data->nominal, 0, ',', '.'), 0, 1);
 		
-       $pdf->SetFont('TIMES','',12);
-       $pdf->Cell(125, 35, '', 0, 1);
-       $pdf->Cell(125, 35, '', 0, 0);
-       $pdf->Cell(55, 5, 'Pati, '.  date('d F Y'), 0, 1);
-       $pdf->Cell(125, 5, '', 0, 0);
-       $pdf->Cell(35, 5, 'Bendahara,', 0, 1);
-       $pdf->Cell(125, 10, '', 0, 0);
-       $pdf->Cell(35, 14, '', 0, 1);
-       $pdf->Cell(125, 8, '', 0, 0);
-       $pdf->Cell(35, 9, '('.$this->session->userdata('nama').')', 0, 0);
+		$pdf->Ln(15);
+		$pdf->SetFont('TIMES','',11);
+		$pdf->Cell(130);
+		$pdf->Cell(60, 5, 'Cikande Permai, '.date('d F Y'), 0, 1, 'C');
+		$pdf->Cell(130);
+		$pdf->Cell(60, 5, 'Bendahara Sekolah,', 0, 1, 'C');
+		
+		$pdf->Ln(20);
+		$pdf->Cell(130);
+        $pdf->SetFont('TIMES','B',11);
+		$pdf->Cell(60, 5, 'Nani Nuraeni S.Pd', 0, 1, 'C');
 		
 		$pdf->Output();
 	}

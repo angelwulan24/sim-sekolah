@@ -5,7 +5,7 @@ class M_Siswa extends CI_Model {
 
 	function getAllData($kls = '')
 	{
-		$this->datatables->select('siswa.id, siswa.name, siswa.nis, siswa.status, siswa.sex, siswa.orangtua_wali, siswa.telpon, siswa.tempat, siswa.tanggal, siswa.alamat, siswa.foto, kelas.nama as nama_kelas');
+		$this->datatables->select('siswa.id, siswa.name, siswa.nis, siswa.status, siswa.sex, siswa.agama, siswa.orangtua_wali, siswa.telpon, siswa.tempat, siswa.tanggal, siswa.alamat, siswa.foto, siswa.tanggal_masuk, siswa.tahun_ajaran, kelas.nama as nama_kelas');
 		$this->datatables->from('siswa');
 		$this->datatables->join('kelas', 'siswa.kelas = kelas.id', 'left');
 

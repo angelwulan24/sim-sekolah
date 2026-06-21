@@ -39,11 +39,14 @@
                       <th>Nama Siswa</th>
                       <th>NIS</th>
                       <th>Jenis Kelamin</th>
+                      <th>Agama</th>
                       <th>Tempat Lahir</th>
                       <th>Tanggal Lahir</th>
                       <th>Orangtua / Wali</th>
                       <th>No. Telpon</th>
                       <th>Alamat</th>
+                      <th>Tanggal Masuk</th>
+                      <th>Tahun Ajaran</th>
                       <th>Kelas</th>
                       <th>Status</th>
                       <th width="150">Aksi</th>
@@ -113,6 +116,10 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label class="control-label"> Agama</label>
+                    <div><input type="text" value="Islam" readonly="" name="agama" class="form-control"></div>
+                </div>
+                <div class="form-group">
                     <label class="control-label"> Tempat Lahir</label>
                     <div><input type="text" required="" placeholder="Tempat Lahir" autocomplete="off" name="tempat" class="form-control"></div>
                 </div>
@@ -133,6 +140,14 @@
                     <div><input type="text" required="" placeholder="Alamat" autocomplete="off" name="alamat" class="form-control"></div>
                 </div>
                 <div class="form-group">
+                    <label class="control-label"> Tanggal Masuk</label>
+                    <div><input type="text" required="" placeholder="Tanggal Masuk" autocomplete="off" name="tanggal_masuk" class="form-control datepicker"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Tahun Ajaran</label>
+                    <div><input type="text" required="" placeholder="Contoh: 2023/2024" autocomplete="off" name="tahun_ajaran" class="form-control"></div>
+                </div>
+                <div class="form-group">
                     <label class="control-label">Kelas</label>
                     <select name="kelas" required="" data-placeholder="--Pilih--" class="form-control select2">
                         <option value="">--Pilih--</option>
@@ -146,6 +161,7 @@
                     <select name="status" required="" data-placeholder="--Pilih--" class="form-control">
                         <option value="">--Pilih--</option>
                         <option value="Aktif">Aktif</option>
+                        <option value="Alumni">Alumni</option>
                         <option value="Berhenti">Berhenti</option>
                     </select>
                 </div>
@@ -233,18 +249,33 @@
                 {"data": "name"},
                 {"data": "nis"},
                 {"data": "sex"},
+                {"data": "agama"},
                 {"data": "tempat"},
                 {"data": "tanggal"},
                 {"data": "orangtua_wali"},
                 {"data": "telpon"},
                 {"data": "alamat"},
+                {"data": "tanggal_masuk"},
+                {"data": "tahun_ajaran"},
                 {"data": "nama_kelas"},
                 {
                     "data": "status",
                     "render": function(data, type, row) {
-                        var stat = "success";
-                        if(data == "Berhenti") stat = "danger";
-                        return '<span class="label label-'+stat+' control-label">'+data+'</span>';
+                        var text = data ? data : "Aktif";
+                        var stat = "success"; // Default Hijau (Aktif)
+                        
+                        // Cek status dengan case-insensitive
+                        var checkStatus = text.toLowerCase().trim();
+                        
+                        if(checkStatus === "berhenti") {
+                            stat = "danger"; // Merah
+                        } else if(checkStatus === "alumni" || checkStatus === "lulus") {
+                            stat = "warning"; // Kuning
+                        } else if(checkStatus === "cuti") {
+                            stat = "info"; // Biru
+                        }
+                        
+                        return '<span class="label label-'+stat+' control-label">'+text+'</span>';
                     }
                 },
                 {
@@ -371,7 +402,7 @@
     function Import(){
         label = 'import';
         $('#form-import')[0].reset();
-        $('#modal-import').modal('show');
+        $('#modal-import').appendTo("body").modal('show');
         $('.modal-title').text('Import Data');
     }
 
@@ -391,7 +422,7 @@
         }
 		$('.form-group').removeClass('has-error');
 		$('.help-block').empty(); 
-		$('#modal-form').modal('show');
+		$('#modal-form').appendTo("body").modal('show');
 		$('.modal-title').text('Tambah Data');
 	}
 
@@ -437,11 +468,14 @@
 				$('[name="id"]').val(data.id);
                 $('[name="nama"]').val(data.name);
                 $('[name="nis"]').val(data.nis);
+                $('[name="agama"]').val(data.agama ? data.agama : 'Islam');
                 $('[name="orangtua_wali"]').val(data.orangtua_wali);
                 $('[name="telpon"]').val(data.telpon);
                 $('[name="alamat"]').val(data.alamat);
                 $('[name="tempat"]').val(data.tempat);
                 $('[name="tanggal"]').val(data.tanggal);
+                $('[name="tanggal_masuk"]').val(data.tanggal_masuk);
+                $('[name="tahun_ajaran"]').val(data.tahun_ajaran);
                 $('[name="status"]').val(data.status).trigger('change');
                 $('#modal-form [name="kelas"]').val(data.kelas).trigger('change');
                 if ($.fn.iCheck) {
@@ -450,7 +484,7 @@
                 } else {
                     $('[name="gender"][value="'+data.sex+'"]').prop('checked', true);
                 }
-                $('#modal-form').modal('show');
+                $('#modal-form').appendTo("body").modal('show');
                 $('.modal-title').text('Ubah Data'); 
 			},
             error: function (jqXHR, textStatus, errorThrown){

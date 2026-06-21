@@ -119,17 +119,42 @@ class M_General extends CI_Model{
         $r = $this->db->query("SELECT tanggal FROM laporan where id = '$id'")->row_array();
         $t = $r['tanggal'];
 
-        $spp = $this->db->query("SELECT s.name, p.bulan,p.nominal FROM spp AS p, siswa AS s WHERE time = '$t' AND s.id = p.id_siswa ")->result();
-        $ujian = $this->db->query("SELECT s.name, u.periode,u.nominal FROM ujian as u, siswa as s WHERE time = '$t' AND s.id=u.id_siswa")->result();
-        $snack = $this->db->query("SELECT s.name, Sum(n.nominal) AS total,Count(n.id_siswa) AS jumlah FROM buku as n, siswa as s WHERE time = '$t' AND s.id=n.id_siswa GROUP BY s.name")->result();
-        $catering = $this->db->query("SELECT s.name, Sum(n.nominal) AS total,Count(n.id_siswa) AS jumlah FROM baju as n, siswa as s WHERE time = '$t' AND s.id=n.id_siswa GROUP BY s.name")->result();
+        // Ambil SEMUA tagihan dari tabel tagihan yang dibayar pada tanggal $t
+        $all_tagihan = $this->db->query("SELECT s.name, t.jenis_tagihan, t.nominal 
+                                       FROM tagihan AS t, siswa AS s 
+                                       WHERE DATE(t.waktu_bayar) = '$t' 
+                                       AND s.id = t.id_siswa 
+                                       AND t.status = 'Lunas'")->result();
+
+        // Pisahkan ke kategori lama untuk kompatibilitas tampilan (view laporan mengharapkan array terpisah)
+        $spp = []; $ujian = []; $buku = []; $baju = []; $pendaftaran = []; $lainnya_tagihan = [];
+        
+        foreach($all_tagihan as $row) {
+            $jenis = strtoupper($row->jenis_tagihan);
+            if(strpos($jenis, 'SPP') !== false) {
+                $spp[] = (object)['name' => $row->name, 'bulan' => str_replace('SPP - ', '', $row->jenis_tagihan), 'nominal' => $row->nominal];
+            } else if(strpos($jenis, 'UJIAN') !== false) {
+                $ujian[] = (object)['name' => $row->name, 'periode' => $row->jenis_tagihan, 'nominal' => $row->nominal];
+            } else if(strpos($jenis, 'BUKU') !== false) {
+                $buku[] = (object)['name' => $row->name, 'total' => $row->nominal, 'jumlah' => 1];
+            } else if(strpos($jenis, 'BAJU') !== false) {
+                $baju[] = (object)['name' => $row->name, 'total' => $row->nominal, 'jumlah' => 1];
+            } else if(strpos($jenis, 'PENDAFTARAN') !== false) {
+                $pendaftaran[] = (object)['siswa' => $row->name, 'nominal' => $row->nominal];
+            } else {
+                // Semua tagihan kustom (Praktek, dll) masuk ke kategori ini
+                $lainnya_tagihan[] = (object)['keterangan' => $row->name . " (".$row->jenis_tagihan.")", 'nominal' => $row->nominal];
+            }
+        }
+
         $pemasukan = $this->db->query("SELECT nominal, keterangan FROM lainnya WHERE time = '$t'")->result();
-        $pendaftaran = $this->db->query("SELECT siswa, nominal FROM pendaftaran WHERE time = '$t'")->result();
+        // Gabungkan tagihan kustom ke pemasukan lainnya agar muncul di laporan
+        $pemasukan = array_merge($pemasukan, $lainnya_tagihan);
 
         $gaji     = $this->db->query("SELECT name, periode, (jam * nominal) as gaji FROM gaji,guru WHERE time = '$t' AND guru.id=id_guru ")->result();
         $pengeluaran = $this->db->query("SELECT nominal, keterangan FROM pengeluaran WHERE time = '$t'")->result();
 
-         return array('baju'=>$catering,'gaji'=>$gaji,'pemasukan'=>$pemasukan,'pendaftaran'=>$pendaftaran,'pengeluaran'=>$pengeluaran,'buku'=>$snack,'spp'=>$spp,'ujian'=>$ujian,'tanggal'=>$t);
+        return array('baju'=>$baju,'gaji'=>$gaji,'pemasukan'=>$pemasukan,'pendaftaran'=>$pendaftaran,'pengeluaran'=>$pengeluaran,'buku'=>$buku,'spp'=>$spp,'ujian'=>$ujian,'tanggal'=>$t);
 
     }
 }

@@ -2,6 +2,9 @@
 
 	
     function is_login(){
+        if (is_cli()) {
+            return;
+        }
         $CI = get_instance();
 
         if (empty($CI->session->userdata('id'))){
@@ -71,6 +74,9 @@
     }
 
 	function filter_string($data){
+		if ($data === null || $data === false) {
+			return '';
+		}
 		return htmlspecialchars(htmlentities(trim($data)));
 	}
 
@@ -139,6 +145,14 @@
     function _gethari($hari){
         $seminggu = array("Min","Sen","Sel","Rab","Kam","Jum","Sab");
         return $seminggu[$hari];
+    }
+
+    function tgl_indo($tgl){
+        $pecah = explode("-",$tgl);
+        $tanggal = $pecah[2];
+        $bulan = bulan((int)$pecah[1]);
+        $tahun = $pecah[0];
+        return $tanggal.' '.$bulan.' '.$tahun;
     }
 
     function activity_log ($item,$aksi){

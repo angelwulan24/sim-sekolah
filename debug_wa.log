@@ -1,0 +1,4 @@
+2026-04-27 19:58:39 | Attempting Send | ID/NIS: 25 | Name: Angelina Wulandari | Target Telp: 085216165214
+API Response: {"status":true,"message":"Success"}
+2026-06-17 14:58:18 | Attempting Send | ID/NIS: 25 | Name: Angelina Wulandari | Target Telp: 085216165214
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}

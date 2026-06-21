@@ -1,4 +1,14 @@
 <?php
+// Prevent PHP warnings/errors from corrupting PDF and JSON/AJAX responses
+$is_ajax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+$is_pdf = (isset($_SERVER['REQUEST_URI']) && stripos($_SERVER['REQUEST_URI'], 'cetak') !== false);
+$is_cli = (php_sapi_name() === 'cli');
+
+if ($is_ajax || $is_pdf || $is_cli) {
+    ini_set('display_errors', 0);
+    error_reporting(0);
+}
+
 /**
  * CodeIgniter
  *
@@ -66,8 +76,10 @@
 switch (ENVIRONMENT)
 {
 	case 'development':
-		error_reporting(-1);
-		ini_set('display_errors', 1);
+		// In PHP 8.1+, deprecations, notices, and warnings corrupt redirects, PDFs, and AJAX responses.
+		// We suppress direct display to avoid stream corruption while keeping the system stable.
+		error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT & ~E_USER_NOTICE & ~E_USER_DEPRECATED & ~E_WARNING);
+		ini_set('display_errors', 0);
 	break;
 
 	case 'testing':

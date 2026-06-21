@@ -20,10 +20,10 @@ class Transaksi extends CI_Controller {
 	public function index(){
 
 		$this->breadcrumb->append_crumb('SIM Sekolah ','Beranda');
-		$this->breadcrumb->append_crumb($this->parents,$this->parents);
+		$this->breadcrumb->append_crumb('Jenis Tagihan',$this->parents);
 
-		$data['title']	= $this->parents.' | SIM Sekolah ';
-		$data['judul']	= $this->parents;
+		$data['title']	= 'Jenis Tagihan | SIM Sekolah ';
+		$data['judul']	= 'Jenis Tagihan';
 		$data['icon']	= $this->icon;
 
 	$this->template->views('Backend/'.$this->parents.'/v_'.$this->parents,$data);
@@ -68,30 +68,144 @@ class Transaksi extends CI_Controller {
 		echo json_encode($data);
 	}
 
-	function Simpan(){
+    function Simpan(){
+		$kelas_tagihan = filter_string($this->input->post('kelas',TRUE));
+		$tahun_ajaran = filter_string($this->input->post('tahun_ajaran',TRUE));
+		$nama_tagihan = filter_string($this->input->post('nama',TRUE));
+		$nominal = filter_string($this->input->post('nominal',TRUE));
+		$tenggat_waktu = filter_string($this->input->post('tenggat_waktu',TRUE));
+        
+        $bulan_awal = $this->input->post('bulan_awal',TRUE);
+        $bulan_akhir = $this->input->post('bulan_akhir',TRUE);
+		
         $insert = array(
                     'kode'		=> $this->input->post('kode',TRUE),
-                    'nama'		=> filter_string($this->input->post('nama',TRUE)),
-                    'nominal'	=> filter_string($this->input->post('nominal',TRUE)),
-                    'tenggat_waktu'	=> filter_string($this->input->post('tenggat_waktu',TRUE)),
-                    'tipe'		=> $this->input->post('tipe',TRUE)
+                    'nama'		=> $nama_tagihan,
+                    'nominal'	=> $nominal,
+                    'tenggat_waktu'	=> $tenggat_waktu,
+                    'tipe'		=> 'KM',
+                    'tahun_ajaran' => $tahun_ajaran,
+                    'kelas' => $kelas_tagihan
                 );
 
-        $insert = $this->M_General->insert($this->table,$insert);
+        $this->M_General->insert($this->table,$insert);
+
+        // Auto assign bills to students
+        if ($kelas_tagihan == 'Semua Kelas') {
+            $siswa = $this->db->query("SELECT id FROM siswa")->result();
+        } else {
+            // Join to match the text from select (e.g. "Kelas 1") to actual class name
+            $siswa = $this->db->query("SELECT s.id FROM siswa s JOIN kelas k ON s.kelas = k.id WHERE k.nama = '$kelas_tagihan'")->result();
+        }
+
+        if(!empty($siswa)){
+            $data_tagihan = array();
+            $is_spp = (strpos(strtoupper($nama_tagihan), 'SPP') !== false);
+            
+            if ($is_spp) {
+                // Generate range bulan
+                $all_months = array('Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember');
+                
+                $m1 = trim($this->input->post('bulan_awal', TRUE));
+                $m2 = trim($this->input->post('bulan_akhir', TRUE));
+
+                $start_idx = -1;
+                $end_idx = -1;
+                
+                foreach($all_months as $idx => $m) {
+                    if (strcasecmp($m, $m1) == 0) $start_idx = $idx;
+                    if (strcasecmp($m, $m2) == 0) $end_idx = $idx;
+                }
+
+                $bulan = array();
+                if ($start_idx != -1 && $end_idx != -1) {
+                    $curr = $start_idx;
+                    $count = 0;
+                    while($count < 12) {
+                        $bulan[] = $all_months[$curr];
+                        if ($curr == $end_idx) break;
+                        $curr = ($curr + 1) % 12;
+                        $count++;
+                    }
+                } else {
+                    // Fallback jika pencarian gagal, gunakan input mentah jika ada
+                    if ($m1 && $m2) {
+                         $bulan = array($m1, $m2); 
+                    } else {
+                         $bulan = array('Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni');
+                    }
+                }
+                
+                foreach($siswa as $s) {
+                    foreach ($bulan as $bln) {
+                        $data_tagihan[] = array(
+                            'id_siswa' => $s->id,
+                            'jenis_tagihan' => 'SPP - ' . $bln,
+                            'nominal' => $nominal,
+                            'tahun_ajaran' => $tahun_ajaran,
+                            'tenggat_waktu' => date('Y-m-d', strtotime(date('Y-m').'-10')), // Default tgl 10
+                            'status' => 'Belum Lunas'
+                        );
+                    }
+                }
+            } else {
+                foreach($siswa as $s) {
+                    $data_tagihan[] = array(
+                        'id_siswa' => $s->id,
+                        'jenis_tagihan' => ucwords($nama_tagihan),
+                        'nominal' => $nominal,
+                        'tahun_ajaran' => $tahun_ajaran,
+                        'tenggat_waktu' => $tenggat_waktu,
+                        'status' => 'Belum Lunas'
+                    );
+                }
+            }
+            
+            if (!empty($data_tagihan)) {
+                // Gunakan chunk insert jika data sangat banyak untuk menghindari limit memory/SQL
+                $chunks = array_chunk($data_tagihan, 100);
+                foreach ($chunks as $chunk) {
+                    $this->db->insert_batch('tagihan', $chunk);
+                }
+            }
+        }
+
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
 
 	function Ubah(){
+        $id = $this->input->post('id');
 		$nom = filter_string($this->input->post('nominal',TRUE));
 		$nam = filter_string($this->input->post('nama',TRUE));
 		$tenggat = filter_string($this->input->post('tenggat_waktu',TRUE));
-        $insert = array(
+		$tahun_ajaran = filter_string($this->input->post('tahun_ajaran',TRUE));
+		$kelas = filter_string($this->input->post('kelas',TRUE));
+
+        // Ambil data lama untuk perbandingan
+        $old = $this->db->get_where('pembayaran', ['id' => $id])->row();
+
+        $update_data = array(
                              'nominal'	=> $nom,
-                             'tenggat_waktu' => $tenggat
+                             'tenggat_waktu' => $tenggat,
+                             'tahun_ajaran' => $tahun_ajaran,
+                             'kelas' => $kelas
                 );
-        $insert = $this->M_General->update($this->table,$insert,'id',$this->input->post('id'));
-       // activity_log('Data Transaksi','Perubahan data dengan Kode: '.$this->input->post('kode').', Nama: '.$nam.', Nominal: '.$nom);
+        $this->M_General->update($this->table,$update_data,'id',$id);
+
+        // Jika nominal berubah, update juga tagihan siswa yang belum lunas
+        if ($old && $old->nominal != $nom) {
+            $this->db->where('status', 'Belum Lunas');
+            $this->db->where('tahun_ajaran', $old->tahun_ajaran);
+            
+            if (strpos(strtoupper($old->nama), 'SPP') !== false) {
+                $this->db->like('jenis_tagihan', 'SPP - ', 'after');
+            } else {
+                $this->db->where('jenis_tagihan', $old->nama);
+            }
+
+            $this->db->update('tagihan', ['nominal' => $nom]);
+        }
 
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));

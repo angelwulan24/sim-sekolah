@@ -96,16 +96,17 @@ class SPP extends CI_Controller {
 	function Simpan(){
 		$id = $this->input->post('id',TRUE);
 		$bln = filter_string($this->input->post('bulan',TRUE));
+		
 		$cek = $this->db->query("SELECT id FROM spp WHERE id_siswa = '$id' AND bulan = '$bln' ")->num_rows();
-
 		if ($cek > 0){
 			$data['status'] = FALSE;
     	}
     	else{
     		$total = filter_string($this->input->post('harga',TRUE));
+            $time = waktu();
     		$insert = array(
 	                    'id_siswa'	=> $id,
-	                    'time'	   => waktu(),
+	                    'time'	   => $time,
 	                    'bulan'		=> $bln,
 	                    'nominal'	=> $total
 	                );
@@ -114,6 +115,20 @@ class SPP extends CI_Controller {
 			$data['id_pembayaran'] = $this->db->insert_id();
 	        
 			$this->M_General->update_kas('kas_masuk',$total);
+			
+			// Send WhatsApp Notification
+			$this->load->library('Wa_gateway');
+			$this->wa_gateway->send_payment_confirmation($id, "Uang SPP - " . $bln, $total);
+
+            // SYNC: Update consolidated tagihan table
+            $month_name = explode('-', $bln)[0];
+            $this->db->where('id_siswa', $id);
+            $this->db->where('jenis_tagihan', 'SPP - ' . $month_name);
+            $this->db->update('tagihan', [
+                'status' => 'Lunas',
+                'waktu_bayar' => $time
+            ]);
+
 	        $data['status'] = TRUE;
     	}
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
@@ -140,17 +155,20 @@ class SPP extends CI_Controller {
 		
        // Header
        $pdf->Cell(3,5,'',0,1);
-       $pdf->Image(base_url().'/assets/dist/img/MI.png', 10, 10,33);
+       $pdf->Image(FCPATH.'assets/dist/img/MI.png', 10, 10,33);
        $pdf->Cell(3,-5,'',0,1);
        $pdf->SetFont('TIMES','B',14);
        $pdf->Cell(189, 5, 'KEMENTRIAN AGAMA REPUBLIK INDONESIA', 0, 1, 'C');
        $pdf->Cell(189, 7, 'KANTOR KEMENTRIAN AGAMA KABUPATEN PATI', 0, 1, 'C');
        $pdf->SetFont('TIMES','B',16);
        $pdf->Cell(192, 7, 'MADRASAH ALIYAH NEGERI PATI', 0, 1, 'C');
-       $pdf->SetFont('TIMES','',12);
-       $pdf->Cell(189, 5, 'Jl. Ratu kalinyamat Gg. Melati II, Kec. Tayu, Kabupaten Pati', 0, 1, 'C');
-       $pdf->Cell(189, 5, 'Telp.(020) 0000000,Fax(020)0000000', 0, 1, 'C');
-       $pdf->Cell(189, 5, 'E-mail : madrasahaliyah@gmail.com', 0, 1, 'C');
+       $pdf->SetFont('TIMES','B',12);
+       $pdf->Cell(189, 5, 'YAYASAN PENDIDIKAN ISLAM', 0, 1, 'C');
+       $pdf->SetFont('TIMES','B',16);
+       $pdf->Cell(189, 7, 'MADRASATUL QURAN DAAR EL-MUFLIHIN', 0, 1, 'C');
+       $pdf->SetFont('TIMES','',10);
+       $pdf->Cell(189, 5, 'Perum Cikande Permai Blok G7/01 RT. 06/4 Kec. Cikande Kab. Serang', 0, 1, 'C');
+       $pdf->Cell(189, 5, 'Telp.0823-1138-8825, email: midaarelmuflihin@gmail.com', 0, 1, 'C');
        $pdf->SetLineWidth(1);
        $pdf->Line(9, 46, 203, 46);
        $pdf->SetLineWidth(0);
@@ -191,17 +209,17 @@ class SPP extends CI_Controller {
 		$pdf->Cell(0, 8, 'Rp. '.number_format($spp->nominal, 0, ',', '.'), 0, 1);
 		
 		// Footer / Signature
-		$pdf->Ln(10);
-		$pdf->SetFont('TIMES','',10);
-		
-		$pdf->Cell(80); // Spacer
-		$pdf->Cell(0, 5, 'Pati, '.date('d F Y'), 0, 1, 'C');
-		$pdf->Cell(80);
-		$pdf->Cell(0, 5, 'Bendahara,', 0, 1, 'C');
-		
 		$pdf->Ln(15);
-		$pdf->Cell(80);
-		$pdf->Cell(0, 5, '('.$this->session->userdata('nama').')', 0, 1, 'C');
+		$pdf->SetFont('TIMES','',11);
+		$pdf->Cell(130); // Spacer
+		$pdf->Cell(60, 5, 'Cikande Permai, '.date('d F Y'), 0, 1, 'C');
+		$pdf->Cell(130);
+		$pdf->Cell(60, 5, 'Bendahara,', 0, 1, 'C');
+		
+		$pdf->Ln(20);
+		$pdf->Cell(130);
+		$pdf->SetFont('TIMES','B',11);
+		$pdf->Cell(60, 5, 'Nani Nuraeni S.Pd', 0, 1, 'C');
 		
 		$pdf->Output();
 	}

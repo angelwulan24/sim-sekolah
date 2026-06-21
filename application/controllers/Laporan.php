@@ -39,14 +39,41 @@ class Laporan extends CI_Controller {
 	}
 
 	function Cetak(){
-		 $awal = $this->input->post('awal');
-		 $akhir = $this->input->post('akhir');
+		if (ob_get_length() > 0) {
+			ob_clean();
+		}
+		ini_set('display_errors', '0');
 
-		 $this->db->where('tanggal >=',$awal);
-		 $this->db->where('tanggal <=',$akhir); // Changed to <= for correct range
-		 $a = $this->db->get('laporan')->result();
+		if (is_cli()) {
+			$_POST['jenis_cetak'] = 'bulan';
+			$_POST['print_bulan'] = '2026-04';
+		}
+		$jenis_cetak = $this->input->post('jenis_cetak');
 
-		 $this->mod->Cetak_periode($a,$awal,$akhir);
+		if ($jenis_cetak == 'bulan') {
+			$print_bulan = $this->input->post('print_bulan'); // format YYYY-MM
+			$awal = $print_bulan . '-01';
+			$akhir = date('Y-m-t', strtotime($awal)); // last day of month
+
+			$this->db->where('tanggal >=', $awal);
+			$this->db->where('tanggal <=', $akhir);
+		} elseif ($jenis_cetak == 'tahun') {
+			$print_tahun = $this->input->post('print_tahun'); // format YYYY
+			$awal = $print_tahun . '-01-01';
+			$akhir = $print_tahun . '-12-31';
+
+			$this->db->where('tanggal >=', $awal);
+			$this->db->where('tanggal <=', $akhir);
+		} else {
+			$awal = $this->input->post('awal');
+			$akhir = $this->input->post('akhir');
+
+			$this->db->where('tanggal >=', $awal);
+			$this->db->where('tanggal <=', $akhir);
+		}
+
+		$a = $this->db->get('laporan')->result();
+		$this->mod->Cetak_periode($a, $awal, $akhir);
 	}
 
 		function Detail($id){

@@ -34,10 +34,11 @@ class Gaji extends CI_Controller {
 		echo $this->mod->getAllData();
 	}
 
-		function getGaji(){
+	function getGaji(){
 		header('Content-Type:application/json');
 		$n = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 6")->row_array();
-		echo json_encode($n['nominal']);
+		$nominal = isset($n['nominal']) ? $n['nominal'] : 0;
+		echo json_encode($nominal);
 	}
 
 
@@ -57,6 +58,28 @@ class Gaji extends CI_Controller {
 
 	}
 
+	function Bayar() {
+		$this->breadcrumb->append_crumb('SIM Sekolah ',base_url());
+		$this->breadcrumb->append_crumb($this->parents,base_url('Gaji'));
+		$this->breadcrumb->append_crumb('Bayar Gaji',$this->parents);
+
+		$data['title']	= 'Form Pembayaran Gaji Guru | SIM Sekolah ';
+		$data['judul']	= 'Form Pembayaran Gaji Guru';
+		$data['icon']	= $this->icon;
+		
+		$data['guru']	= $this->db->query("SELECT * FROM guru ORDER BY status DESC, name ASC")->result();
+		$query_paid = $this->db->query("SELECT DISTINCT periode FROM gaji")->result();
+		$paid_months = array();
+		foreach($query_paid as $pm) {
+			$paid_months[] = $pm->periode;
+		}
+		$data['paid_months'] = $paid_months;
+		$n = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 6")->row_array();
+		$data['tarif_per_jam'] = isset($n['nominal']) ? $n['nominal'] : 0;
+
+		$this->template->views('Backend/'.$this->parents.'/v_Bayar',$data);
+	}
+
 	function Simpan(){
 
 		$bln = filter_string($this->input->post('bulan',TRUE));
@@ -64,7 +87,13 @@ class Gaji extends CI_Controller {
         $jam_arr = $this->input->post('jam');
 
         $n = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 6")->row_array();
-        $tarif_per_jam = $n['nominal'];
+        $tarif_per_jam = isset($n['nominal']) ? $n['nominal'] : 0;
+
+        $tarif_input = $this->input->post('tarif');
+        if(!empty($tarif_input) && $tarif_input != $tarif_per_jam) {
+            $this->db->query("UPDATE pembayaran SET nominal = ".$this->db->escape($tarif_input)." WHERE id = 6");
+            $tarif_per_jam = $tarif_input;
+        }
 
         $total_kas = 0;
         $success = false;

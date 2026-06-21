@@ -8,7 +8,7 @@
                 <i class="fa fa-info-circle"></i> Fitur ini digunakan untuk menaikkan seluruh siswa dari satu kelas ke kelas lain secara otomatis.
             </div>
             <div class="alert alert-warning">
-                <i class="fa fa-warning"></i> <b>PENTING:</b> Lakukan kenaikan kelas dari tingkat paling tinggi terlebih dahulu (misal: Kelas XII ke Lulus/Alumni, lalu Kelas XI ke Kelas XII, dst) untuk menghindari penumpukan data siswa di satu kelas.
+                <i class="fa fa-warning"></i> <b>PENTING:</b> Lakukan kenaikan kelas dari tingkat paling tinggi terlebih dahulu (misal: Kelas VI ke Alumni, lalu Kelas V ke Kelas VI, dst) untuk menghindari penumpukan data siswa di satu kelas.
             </div>
             <?=form_open($this->uri->segment(1).'/ProsesKenaikan', array('class' => 'form-horizontal'))?>
                 <div class="form-group">
@@ -16,8 +16,10 @@
                     <div class="col-sm-4">
                         <select name="dari_kelas" class="form-control select2" required>
                             <option value="">-- Pilih Kelas Asal --</option>
-                            <?php foreach ($kelas as $k) { ?>
-                                <option value="<?=$k->id?>"><?=$k->nama?></option>
+                            <?php foreach ($kelas as $k) { 
+                                $count = $this->db->get_where('siswa', array('kelas' => $k->id, 'status' => 'Aktif'))->num_rows();
+                            ?>
+                                <option value="<?=$k->id?>"><?=$k->nama?> (<?=$count?> Siswa)</option>
                             <?php } ?>
                         </select>
                     </div>
@@ -30,7 +32,7 @@
                             <?php foreach ($kelas as $k) { ?>
                                 <option value="<?=$k->id?>"><?=$k->nama?></option>
                             <?php } ?>
-                            <option value="lulus">LULUS (Alumni)</option>
+                            <option value="lulus">ALUMNI (Lulus)</option>
                         </select>
                     </div>
                 </div>

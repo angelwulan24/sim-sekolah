@@ -71,7 +71,7 @@
                                     <?php if ($this->session->userdata('role') != 2) { ?>
                                     <a class="btn btn-info btn-xs" data-toggle="modal" data-target="#kelas-data<?php echo $r->id ?>" href=""><i class="fa fa-building"></i> Kelas</a>
                                     <?php } ?>
-                                    <a class="btn btn-primary btn-xs" href="<?=base_url('Pendaftaran/cetak_bukti/'.$r->id)?>"><i class="fa fa-print"></i> Cetak</a>
+                                    <a class="btn btn-abu-tua btn-xs" href="<?=base_url('Pendaftaran/cetak_bukti/'.$r->id)?>"><i class="fa fa-print"></i> Cetak</a>
                                 <?php } ?>
                                 </center>
                            </td> 

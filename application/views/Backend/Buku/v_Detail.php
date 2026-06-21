@@ -136,7 +136,7 @@ $na = $this->db->query("SELECT name FROM siswa WHERE id = '$id'")->row_array();
                     "orderable": false,
                     "searchable": false,
                     "render": function(data, type, row) {
-                        return '<a href="<?=base_url('Buku/CetakBukti/')?>'+data+'" target="_blank" class="btn btn-default btn-xs"><i class="fa fa-print"></i> Cetak</a>';
+                        return '<a href="<?=base_url('Buku/CetakBukti/')?>'+data+'" target="_blank" class="btn btn-abu-tua btn-xs"><i class="fa fa-print"></i> Cetak</a>';
                     }
                 }
             ],
