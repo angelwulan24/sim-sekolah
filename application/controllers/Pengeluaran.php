@@ -20,13 +20,13 @@ class Pengeluaran extends CI_Controller {
 	public function index(){
 
 		$this->breadcrumb->append_crumb('SIM Sekolah ','Beranda');
-		$this->breadcrumb->append_crumb($this->parents.' Lainnya',$this->parents);
+		$this->breadcrumb->append_crumb($this->parents.' Uang',$this->parents);
 
 		$data['title']	= $this->parents.' Lainnya | SIM Sekolah ';
 		$data['judul']	= $this->parents.' Lainnya';
 		$data['icon']	= $this->icon;
 
-	$this->template->views('Backend/'.$this->parents.'/v_'.$this->parents,$data);
+		$this->template->views('Backend/'.$this->parents.'/v_'.$this->parents,$data);
 	}
 
 	function getData (){
@@ -45,7 +45,7 @@ class Pengeluaran extends CI_Controller {
 		echo $this->mod->getDetailData($id);
 	}
 
-		function Detail(){
+	function Detail(){
 		$this->breadcrumb->append_crumb('SIM Sekolah ',base_url());
 		$this->breadcrumb->append_crumb($this->parents,base_url('Pengeluaran'));
 		$this->breadcrumb->append_crumb('Detail Pengeluaran Lainnya',$this->parents);
@@ -53,37 +53,36 @@ class Pengeluaran extends CI_Controller {
 		$data['title']	= 'Detail '.$this->parents.' Lainnya | SIM Sekolah ';
 		$data['judul']	= 'Detail '.$this->parents.' Lainnya';
 		$data['icon']	= $this->icon;
-	$this->template->views('Backend/'.$this->parents.'/v_Detail',$data);
-
+		$this->template->views('Backend/'.$this->parents.'/v_Detail',$data);
 	}
 
 	function Simpan(){
 
-    		$total = filter_string($this->input->post('nominal',TRUE));
-    		$insert = array(
-	                    'nominal'	=> $total,
-	                    'sekarang'	=> sekarang(),
-	                    'time'	   => waktu(),
-	                    'keterangan'	=> filter_string($this->input->post('keterangan',TRUE))
-	                );
+		$total = filter_string($this->input->post('nominal',TRUE));
+		$insert = array(
+			'nominal_pengeluaran' => $total,
+			'sekarang'            => sekarang(),
+			'tgl_pengeluaran'     => date('Y-m-d'),
+			'ket_pengeluaran'     => filter_string($this->input->post('keterangan',TRUE))
+		);
 
-            $config['upload_path']	= './assets/images/';
-            $config['allowed_types']= 'gif|jpg|png|jpeg';
-            $config['max_size']		= 2048;
-            $config['encrypt_name']	= TRUE;
+		$config['upload_path']	= './assets/images/';
+		$config['allowed_types']= 'gif|jpg|png|jpeg';
+		$config['max_size']		= 2048;
+		$config['encrypt_name']	= TRUE;
 
-            $this->load->library('upload', $config);
-            
-            if($this->upload->do_upload('bukti')){
-                $uploadData = $this->upload->data();
-                $insert['bukti'] = $uploadData['file_name'];
-            }
+		$this->load->library('upload', $config);
+		
+		if($this->upload->do_upload('bukti')){
+			$uploadData = $this->upload->data();
+			$insert['bukti'] = $uploadData['file_name'];
+		}
 
-	        $insert = $this->M_General->insert($this->table,$insert);
-	           $this->M_General->update_kas('kas_keluar',$total);
-	        $data['status'] = TRUE;
+		$this->M_General->insert($this->table,$insert);
+		$this->M_General->update_kas('kas_keluar',$total);
+		$data['status'] = TRUE;
 
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+		$this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
 
 }

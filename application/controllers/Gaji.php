@@ -26,7 +26,7 @@ class Gaji extends CI_Controller {
 		$data['judul']	= 'Pembayaran '.$this->parents;
 		$data['icon']	= $this->icon;
 
-	$this->template->views('Backend/'.$this->parents.'/v_'.$this->parents,$data);
+	    $this->template->views('Backend/'.$this->parents.'/v_'.$this->parents,$data);
 	}
 
 	function getData (){
@@ -36,11 +36,9 @@ class Gaji extends CI_Controller {
 
 	function getGaji(){
 		header('Content-Type:application/json');
-		$n = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 6")->row_array();
-		$nominal = isset($n['nominal']) ? $n['nominal'] : 0;
+		$nominal = $this->get_tarif_gaji();
 		echo json_encode($nominal);
 	}
-
 
 	function Detail($id){
 
@@ -52,9 +50,10 @@ class Gaji extends CI_Controller {
 		$data['title']	= 'Detail Pembayaran '.$this->parents.' | SIM Sekolah ';
 		$data['judul']	= 'Detail Pembayaran '.$this->parents;
 		$data['icon']	= $this->icon;
-		$data['isi']	= $this->M_General->getByID('gaji','id_guru',$id,'DESC')->result();
+		$data['id']     = $id;
+		$data['isi']	= $this->db->query("SELECT *, nominal_gaji AS nominal FROM gaji WHERE NUPTK = '$id' ORDER BY id_gaji DESC")->result();
 
-	$this->template->views('Backend/'.$this->parents.'/v_Detail',$data);
+	    $this->template->views('Backend/'.$this->parents.'/v_Detail',$data);
 
 	}
 
@@ -67,15 +66,14 @@ class Gaji extends CI_Controller {
 		$data['judul']	= 'Form Pembayaran Gaji Guru';
 		$data['icon']	= $this->icon;
 		
-		$data['guru']	= $this->db->query("SELECT * FROM guru ORDER BY status DESC, name ASC")->result();
+		$data['guru']	= $this->db->query("SELECT NUPTK AS id, nama_guru AS name, NUPTK AS nip, jk_guru AS sex, bidang_studi AS bidang, status_guru AS status, foto_guru AS foto FROM guru ORDER BY status_guru DESC, nama_guru ASC")->result();
 		$query_paid = $this->db->query("SELECT DISTINCT periode FROM gaji")->result();
 		$paid_months = array();
 		foreach($query_paid as $pm) {
 			$paid_months[] = $pm->periode;
 		}
 		$data['paid_months'] = $paid_months;
-		$n = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 6")->row_array();
-		$data['tarif_per_jam'] = isset($n['nominal']) ? $n['nominal'] : 0;
+		$data['tarif_per_jam'] = $this->get_tarif_gaji();
 
 		$this->template->views('Backend/'.$this->parents.'/v_Bayar',$data);
 	}
@@ -86,12 +84,11 @@ class Gaji extends CI_Controller {
         $id_guru_arr = $this->input->post('id_guru');
         $jam_arr = $this->input->post('jam');
 
-        $n = $this->db->query("SELECT nominal FROM pembayaran WHERE id = 6")->row_array();
-        $tarif_per_jam = isset($n['nominal']) ? $n['nominal'] : 0;
+        $tarif_per_jam = $this->get_tarif_gaji();
 
         $tarif_input = $this->input->post('tarif');
         if(!empty($tarif_input) && $tarif_input != $tarif_per_jam) {
-            $this->db->query("UPDATE pembayaran SET nominal = ".$this->db->escape($tarif_input)." WHERE id = 6");
+            $this->update_tarif_gaji($tarif_input);
             $tarif_per_jam = $tarif_input;
         }
 
@@ -105,17 +102,17 @@ class Gaji extends CI_Controller {
 
                 if(empty($jam) || $jam <= 0) continue;
 
-                $cek = $this->db->query("SELECT id FROM gaji WHERE id_guru = '$id_gur' AND periode = '$bln' ")->num_rows();
+                $cek = $this->db->query("SELECT id_gaji FROM gaji WHERE NUPTK = '$id_gur' AND periode = '$bln' ")->num_rows();
                 if ($cek > 0) continue;
 
                 $total_gaji_guru = $jam * $tarif_per_jam;
 
                 $insert = array(
-                    'id_guru'	=> $id_gur,
+                    'NUPTK'	=> $id_gur,
                     'periode'	=> $bln,
-                    'time'	   => waktu(),
                     'jam'		=> $jam,
-                    'nominal'	=> $tarif_per_jam
+                    'nominal_gaji'	=> $tarif_per_jam,
+                    'tgl_gaji' => date('Y-m-d')
                 );
                 
                 $this->M_General->insert($this->table,$insert);
@@ -136,5 +133,38 @@ class Gaji extends CI_Controller {
 
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
+
+    private function get_tarif_gaji() {
+        $n = $this->db->get_where('jenis_tagihan', ['kode_tagihan' => 'GAJI'])->row_array();
+        if (empty($n)) {
+            $this->db->insert('jenis_tagihan', [
+                'kode_tagihan' => 'GAJI',
+                'nama_tagihan' => 'Tarif Gaji Guru',
+                'nominal_tagihan' => '15000',
+                'tenggat_waktu' => 'Setiap Bulan',
+                'tahun_ajaran' => 'Global',
+                'id_kelas' => NULL
+            ]);
+            return 15000;
+        }
+        return $n['nominal_tagihan'];
+    }
+
+    private function update_tarif_gaji($tarif) {
+        $n = $this->db->get_where('jenis_tagihan', ['kode_tagihan' => 'GAJI'])->row_array();
+        if (empty($n)) {
+            $this->db->insert('jenis_tagihan', [
+                'kode_tagihan' => 'GAJI',
+                'nama_tagihan' => 'Tarif Gaji Guru',
+                'nominal_tagihan' => $tarif,
+                'tenggat_waktu' => 'Setiap Bulan',
+                'tahun_ajaran' => 'Global',
+                'id_kelas' => NULL
+            ]);
+        } else {
+            $this->db->where('kode_tagihan', 'GAJI');
+            $this->db->update('jenis_tagihan', ['nominal_tagihan' => $tarif]);
+        }
+    }
 
 }

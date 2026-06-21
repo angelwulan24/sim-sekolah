@@ -21,14 +21,11 @@ class M_Pengeluaran  extends CI_Model {
 	}
 
 	function getDetailData($detail =''){
-		$this->datatables->select("id,DATE_FORMAT(s.tanggal,'%d-%m-%Y - %H:%m:%s WIB') AS Tgl,nominal,keterangan");
-		$this->datatables->from('pengeluaran as s');
+		$this->datatables->select("id_pengeluaran AS id,DATE_FORMAT(tanggal,'%d-%m-%Y - %H:%i:%s WIB') AS Tgl,nominal_pengeluaran AS nominal,ket_pengeluaran AS keterangan");
+		$this->datatables->from('pengeluaran');
 		$this->datatables->where('sekarang',$detail);
 		return $this->datatables->generate();
 	}
 	
 
 }
-
-/* End of file m_Menu_1.php */
-/* Location: ./application/models/m_Menu_1.php */
