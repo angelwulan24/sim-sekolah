@@ -259,33 +259,6 @@ INSERT INTO `siswa` VALUES (25,'Angelina Wulandari','11111111','Perempuan','Isla
 UNLOCK TABLES;
 
 --
--- Table structure for table `spp`
---
-
-DROP TABLE IF EXISTS `spp`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `spp` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_siswa` int(11) NOT NULL,
-  `time` datetime NOT NULL,
-  `bulan` varchar(50) NOT NULL,
-  `nominal` varchar(12) NOT NULL,
-  `metode_pembayaran` varchar(50) DEFAULT 'Loket',
-  PRIMARY KEY (`id`),
-  KEY `fk_spp_siswa` (`id_siswa`),
-  CONSTRAINT `fk_spp_siswa` FOREIGN KEY (`id_siswa`) REFERENCES `siswa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `spp`
---
-
-LOCK TABLES `spp` WRITE;
-/*!40000 ALTER TABLE `spp` DISABLE KEYS */;
-/*!40000 ALTER TABLE `spp` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `tagihan`
