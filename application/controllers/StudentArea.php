@@ -14,7 +14,7 @@ class StudentArea extends CI_Controller {
 	public function index(){
 		// Get logged in user
 		$user_id = $this->session->userdata('id');
-		$user = $this->db->get_where('users', ['id' => $user_id])->row();
+		$user = $this->db->get_where('users', ['id_users' => $user_id])->row();
         
         if(!$user) {
             $this->session->sess_destroy();
@@ -24,8 +24,8 @@ class StudentArea extends CI_Controller {
 		// NIS is now stored directly in the 'email' column for students (role 3)
 		$nis = $user->email;
 
-		// Get Student Data
-		$student = $this->db->get_where('siswa', ['nis' => $nis])->row();
+		// Get Student Data with aliases to support the view keys
+		$student = $this->db->query("SELECT s.*, s.nama_siswa AS name, s.nis_siswa AS nis, s.jk_siswa AS sex, s.telp_siswa AS telpon, s.tempat_lahirsiswa AS tempat, s.tgl_lahirsiswa AS tanggal, s.thn_ajaran AS tahun_ajaran, s.status_siswa AS status, k.nama_kelas AS kelas, s.foto_siswa AS foto, s.ortu_wali AS orangtua_wali FROM siswa s LEFT JOIN kelas k ON s.id_kelas = k.id_kelas WHERE s.nis_siswa = '$nis'")->row();
 
 		if(!$student){
 			echo "<div style='text-align:center; margin-top:50px; font-family:sans-serif;'>
@@ -48,14 +48,19 @@ class StudentArea extends CI_Controller {
 		$data['selected_tahun'] = $selected_tahun;
         
         // Generate academic years for filter (e.g. 2026/2027)
-        $tahun_list = $this->db->query("SELECT DISTINCT tahun_ajaran FROM tagihan WHERE id_siswa = '$student->id' ORDER BY tahun_ajaran DESC")->result();
+        $tahun_list = $this->db->query("SELECT DISTINCT j.tahun_ajaran FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan WHERE t.nis_siswa = '$student->nis_siswa' ORDER BY j.tahun_ajaran DESC")->result();
 		$data['tahun_list'] = $tahun_list;
 
+        $current_school_yr = current_school_year();
+
 		// 1. Tagihan Bulanan (SPP) dari database
-		$tagihan_db = $this->db->order_by('id', 'asc')->get_where('tagihan', [
-            'id_siswa' => $student->id, 
-            'tahun_ajaran' => $selected_tahun
-        ])->result();
+		$tagihan_db = $this->db->query("SELECT t.id_tagihan AS id, t.status, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, j.tenggat_waktu, j.tahun_ajaran 
+                                        FROM tagihan_siswa t
+                                        JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan
+                                        WHERE t.nis_siswa = '$student->nis_siswa' 
+                                          AND j.tahun_ajaran = '$selected_tahun'
+                                          AND NOT (t.status = 'Belum Lunas' AND j.nama_tagihan LIKE '%SPP%' AND j.tahun_ajaran != '$current_school_yr')
+                                        ORDER BY t.id_tagihan ASC")->result();
 
 		$spp_list = [];
 		foreach($tagihan_db as $t){
@@ -122,8 +127,8 @@ class StudentArea extends CI_Controller {
 		}
 
 		$user_id = $this->session->userdata('id');
-		$user = $this->db->get_where('users', ['id' => $user_id])->row();
-		$student = $this->db->get_where('siswa', ['nis' => $user->email])->row();
+		$user = $this->db->get_where('users', ['id_users' => $user_id])->row();
+		$student = $this->db->get_where('siswa', ['nis_siswa' => $user->email])->row();
 
 		$total_nominal = 0;
 		$midtrans_items = [];
@@ -140,10 +145,8 @@ class StudentArea extends CI_Controller {
 			];
 		}
 
-		// Order ID format: BLK-[STUDENT_ID]-[TIMESTAMP]
-		// We'll store the items in the order_id or metadata if possible.
-		// Since we need to update multiple rows on success, let's use a batch ID.
-		$order_id = 'BLK-' . $student->id . '-' . time();
+		// Order ID format: BLK-[STUDENT_NIS]-[TIMESTAMP]
+		$order_id = 'BLK-' . $student->nis_siswa . '-' . time();
 
 		$params = [
 			'transaction_details' => [
@@ -151,9 +154,9 @@ class StudentArea extends CI_Controller {
 				'gross_amount' => (int)$total_nominal,
 			],
 			'customer_details' => [
-				'first_name' => $student->name,
+				'first_name' => $student->nama_siswa,
 				'email' => $user->email . '@mi-daarel-muflihin.sch.id',
-				'phone' => $student->telpon ? $student->telpon : '0800000000',
+				'phone' => $student->telp_siswa ? $student->telp_siswa : '0800000000',
 			],
 			'item_details' => $midtrans_items,
 			'custom_field1' => implode(',', $tagihan_ids)
@@ -164,8 +167,6 @@ class StudentArea extends CI_Controller {
 	}
 
 	public function get_token(){
-        // This is now redundant but kept for legacy if needed, 
-        // though JS now calls get_token_bulk with a single item array.
         $this->get_token_bulk();
 	}
 
@@ -235,25 +236,26 @@ class StudentArea extends CI_Controller {
 	}
 
 	private function _process_single_tagihan($tagihan_id, $time){
-		$tagihan = $this->db->get_where('tagihan', ['id' => $tagihan_id])->row();
+		$tagihan = $this->db->query("SELECT t.id_tagihan, t.nis_siswa, t.status, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan WHERE t.id_tagihan = '$tagihan_id'")->row();
 		if($tagihan && $tagihan->status != 'Lunas'){
 			// Update Tagihan
-			$this->db->where('id', $tagihan_id);
-			$this->db->update('tagihan', ['status' => 'Lunas', 'waktu_bayar' => $time]);
+			$this->db->where('id_tagihan', $tagihan_id);
+			$this->db->update('tagihan_siswa', ['status' => 'Lunas', 'tgl_pembayaran' => $time]);
 
 			$this->M_General->update_kas('kas_masuk', $tagihan->nominal);
 
             // Send WhatsApp Notification (Triggered for both SPP and Other Bills)
-            $this->wa_gateway->send_payment_confirmation($tagihan->id_siswa, $tagihan->jenis_tagihan, $tagihan->nominal, 'Midtrans / Transfer Online');
+            $this->wa_gateway->send_payment_confirmation($tagihan->nis_siswa, $tagihan->jenis_tagihan, $tagihan->nominal, 'Midtrans / Transfer Online');
 		}
 	}
 	public function print_tagihan($id){
 		$this->load->library('pdf');
 		$tagihan = $this->db->query("
-			SELECT t.*, si.name, si.nis 
-			FROM tagihan t
-			JOIN siswa si ON t.id_siswa = si.id 
-			WHERE t.id = '$id'
+			SELECT t.id_tagihan AS id, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, si.nama_siswa AS name, si.nis_siswa AS nis 
+			FROM tagihan_siswa t
+			JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan
+			JOIN siswa si ON t.nis_siswa = si.nis_siswa 
+			WHERE t.id_tagihan = '$id'
 		")->row();
 
 		if(!$tagihan) {

@@ -22,31 +22,16 @@ class Tunggakan extends CI_Controller {
 		$data['judul']	= 'Informasi Tunggakan';
 		$data['icon']	= $this->icon;
 
-        // Mendapatkan referensi nominal dari tabel Master Pembayaran
-        $nom_spp_row = $this->db->get_where('pembayaran', ['nama' => 'Uang SPP'])->row();
-        $nom_spp = $nom_spp_row ? $nom_spp_row->nominal : 0;
-        $spp_tenggat_val = $nom_spp_row ? $nom_spp_row->tenggat_waktu : null;
-        $spp_tenggat = is_numeric($spp_tenggat_val) ? (int)$spp_tenggat_val : 0;
-
-        $nom_ujian_row = $this->db->get_where('pembayaran', ['nama' => 'Uang Ujian'])->row();
-        $nom_ujian = $nom_ujian_row ? $nom_ujian_row->nominal : 0;
-
-        $nom_buku_row = $this->db->get_where('pembayaran', ['nama' => 'Uang Buku'])->row();
-        $nom_buku = $nom_buku_row ? $nom_buku_row->nominal : 0;
-
-        $nom_baju_row = $this->db->get_where('pembayaran', ['nama' => 'Uang Baju'])->row();
-        $nom_baju = $nom_baju_row ? $nom_baju_row->nominal : 0;
-
 		$id_kelas = $this->input->get('id_kelas');
 		$data['id_kelas'] = $id_kelas;
-		$data['kelas'] = $this->db->get('kelas')->result();
+		$data['kelas'] = $this->db->query("SELECT id_kelas AS id, nama_kelas AS nama FROM kelas")->result();
 
-		$this->db->select('siswa.*, kelas.nama as nama_kelas');
+		$this->db->select('siswa.nis_siswa AS id, siswa.nama_siswa AS name, siswa.telp_siswa AS telpon, kelas.nama_kelas');
 		$this->db->from('siswa');
-		$this->db->join('kelas', 'siswa.kelas = kelas.id', 'left');
-		$this->db->where('siswa.status', 'Aktif');
+		$this->db->join('kelas', 'siswa.id_kelas = kelas.id_kelas', 'left');
+		$this->db->where('siswa.status_siswa', 'Aktif');
 		if(!empty($id_kelas)) {
-			$this->db->where('siswa.kelas', $id_kelas);
+			$this->db->where('siswa.id_kelas', $id_kelas);
 		}
 		$siswa = $this->db->get()->result();
 		
@@ -57,7 +42,7 @@ class Tunggakan extends CI_Controller {
 
         $months_array = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
-        $tahun_ajaran_sekarang = (string)$year; // Disinkronkan dengan input StudentArea/Buku
+        $current_year_setting = current_school_year();
 
 		$tunggakan_list = [];
 
@@ -65,8 +50,12 @@ class Tunggakan extends CI_Controller {
             $tunggakan_items = [];
             $total_tunggakan = 0;
 
-            // Ambil semua tagihan yang belum lunas untuk siswa ini
-            $tagihan_db = $this->db->get_where('tagihan', ['id_siswa' => $s->id, 'status' => 'Belum Lunas'])->result();
+            // Ambil semua tagihan yang belum lunas untuk siswa ini, saring SPP tahun ajaran lama
+            $tagihan_db = $this->db->query("SELECT t.id_tagihan AS id, t.status, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, j.tenggat_waktu, j.tahun_ajaran 
+                                            FROM tagihan_siswa t
+                                            JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan
+                                            WHERE t.nis_siswa = '$s->id' AND t.status = 'Belum Lunas'
+                                              AND NOT (j.nama_tagihan LIKE '%SPP%' AND j.tahun_ajaran != '$current_year_setting')")->result();
 
             $current_month = (int)date('m');
             $current_year = (int)date('Y');
@@ -131,12 +120,12 @@ class Tunggakan extends CI_Controller {
         $rincian_raw = $this->input->post('rincian'); // Formatted string from JS (items separated by |)
         $total = $this->input->post('total');
 
-        $siswa = $this->db->get_where('siswa', ['id' => $id_siswa])->row();
+        $siswa = $this->db->get_where('siswa', ['nis_siswa' => $id_siswa])->row();
 
-        if ($siswa && !empty($siswa->telpon)) {
-            $phone = $siswa->telpon;
+        if ($siswa && !empty($siswa->telp_siswa)) {
+            $phone = $siswa->telp_siswa;
             $msg = "Assalamu’alaikum warahmatullahi wabarakatuh.\n\n";
-            $msg .= "Yth. Bapak/Ibu Orang Tua/Wali dari ananda *" . $siswa->name . "*,\n\n";
+            $msg .= "Yth. Bapak/Ibu Orang Tua/Wali dari ananda *" . $siswa->nama_siswa . "*,\n\n";
             $msg .= "Dengan hormat, kami dari pihak sekolah bermaksud menyampaikan informasi terkait rincian tagihan administrasi yang telah mendekati jatuh tempo/masih tertunggak, berdasarkan data pada sistem kami sebagai berikut:\n\n";
             
             $items = explode('|', $rincian_raw);
@@ -177,12 +166,12 @@ class Tunggakan extends CI_Controller {
             $rincian_raw = $data['rincian'];
             $total = $data['total'];
 
-            $siswa = $this->db->get_where('siswa', ['id' => $id_siswa])->row();
+            $siswa = $this->db->get_where('siswa', ['nis_siswa' => $id_siswa])->row();
 
-            if ($siswa && !empty($siswa->telpon)) {
-                $phone = $siswa->telpon;
+            if ($siswa && !empty($siswa->telp_siswa)) {
+                $phone = $siswa->telp_siswa;
                 $msg = "Assalamu’alaikum warahmatullahi wabarakatuh.\n\n";
-                $msg .= "Yth. Bapak/Ibu Orang Tua/Wali dari ananda *" . $siswa->name . "*,\n\n";
+                $msg .= "Yth. Bapak/Ibu Orang Tua/Wali dari ananda *" . $siswa->nama_siswa . "*,\n\n";
                 $msg .= "Dengan hormat, kami dari pihak sekolah bermaksud menyampaikan informasi terkait rincian tagihan administrasi yang telah mendekati jatuh tempo/masih tertunggak, berdasarkan data pada sistem kami sebagai berikut:\n\n";
                 
                 $items = explode('|', $rincian_raw);
