@@ -16,25 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `gaji`
---
-
-DROP TABLE IF EXISTS `gaji`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `gaji` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_guru` tinyint(4) NOT NULL,
-  `periode` varchar(20) NOT NULL,
-  `jam` varchar(4) NOT NULL,
-  `nominal` varchar(12) NOT NULL,
-  `time` date NOT NULL,
-  `tanggal` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `guru`
 --
 
@@ -69,6 +50,81 @@ CREATE TABLE `kelas` (
   `keterangan` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `gaji`
+--
+
+DROP TABLE IF EXISTS `gaji`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `gaji` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_guru` int(11) NOT NULL,
+  `periode` varchar(20) NOT NULL,
+  `jam` varchar(4) NOT NULL,
+  `nominal` varchar(12) NOT NULL,
+  `time` date NOT NULL,
+  `tanggal` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_gaji_guru` (`id_guru`),
+  CONSTRAINT `fk_gaji_guru` FOREIGN KEY (`id_guru`) REFERENCES `guru` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `siswa`
+--
+
+DROP TABLE IF EXISTS `siswa`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `siswa` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `nis` varchar(15) NOT NULL,
+  `sex` varchar(15) DEFAULT NULL,
+  `agama` varchar(20) DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'Aktif',
+  `orangtua_wali` varchar(50) NOT NULL,
+  `tempat` varchar(20) NOT NULL,
+  `tanggal` date NOT NULL,
+  `alamat` varchar(100) NOT NULL,
+  `telpon` varchar(20) DEFAULT '',
+  `kelas` int(11) NOT NULL,
+  `metode_pembayaran` varchar(50) DEFAULT 'Loket',
+  `foto` varchar(255) DEFAULT NULL,
+  `tanggal_masuk` date DEFAULT NULL,
+  `tahun_ajaran` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_siswa_kelas` (`kelas`),
+  CONSTRAINT `fk_siswa_kelas` FOREIGN KEY (`kelas`) REFERENCES `kelas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tagihan`
+--
+
+DROP TABLE IF EXISTS `tagihan`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tagihan` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `kode_transaksi` varchar(50) DEFAULT NULL,
+  `id_siswa` int(11) DEFAULT NULL,
+  `jenis_tagihan` varchar(100) DEFAULT NULL,
+  `nominal` varchar(20) DEFAULT NULL,
+  `tahun_ajaran` varchar(50) DEFAULT NULL,
+  `tenggat_waktu` date DEFAULT NULL,
+  `status` enum('Belum Lunas','Lunas') DEFAULT 'Belum Lunas',
+  `waktu_bayar` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_siswa_tagihan` (`id_siswa`,`status`),
+  KEY `idx_jenis_tagihan` (`jenis_tagihan`),
+  CONSTRAINT `fk_tagihan_siswa` FOREIGN KEY (`id_siswa`) REFERENCES `siswa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=446 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -147,77 +203,6 @@ CREATE TABLE `pengeluaran` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `siswa`
---
-
-DROP TABLE IF EXISTS `siswa`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `siswa` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(50) NOT NULL,
-  `nis` varchar(15) NOT NULL,
-  `sex` varchar(15) DEFAULT NULL,
-  `agama` varchar(20) DEFAULT NULL,
-  `status` varchar(50) NOT NULL DEFAULT 'Aktif',
-  `orangtua_wali` varchar(50) NOT NULL,
-  `tempat` varchar(20) NOT NULL,
-  `tanggal` date NOT NULL,
-  `alamat` varchar(100) NOT NULL,
-  `telpon` varchar(20) DEFAULT '',
-  `kelas` tinyint(4) NOT NULL,
-  `metode_pembayaran` varchar(50) DEFAULT 'Loket',
-  `foto` varchar(255) DEFAULT NULL,
-  `tanggal_masuk` date DEFAULT NULL,
-  `tahun_ajaran` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `spp`
---
-
-DROP TABLE IF EXISTS `spp`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `spp` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_siswa` int(11) NOT NULL,
-  `time` datetime NOT NULL,
-  `bulan` varchar(50) NOT NULL,
-  `nominal` varchar(12) NOT NULL,
-  `metode_pembayaran` varchar(50) DEFAULT 'Loket',
-  PRIMARY KEY (`id`),
-  KEY `fk_spp_siswa` (`id_siswa`),
-  CONSTRAINT `fk_spp_siswa` FOREIGN KEY (`id_siswa`) REFERENCES `siswa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tagihan`
---
-
-DROP TABLE IF EXISTS `tagihan`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tagihan` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `kode_transaksi` varchar(50) DEFAULT NULL,
-  `id_siswa` int(11) DEFAULT NULL,
-  `jenis_tagihan` varchar(100) DEFAULT NULL,
-  `nominal` varchar(20) DEFAULT NULL,
-  `tahun_ajaran` varchar(50) DEFAULT NULL,
-  `tenggat_waktu` date DEFAULT NULL,
-  `status` enum('Belum Lunas','Lunas') DEFAULT 'Belum Lunas',
-  `waktu_bayar` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_siswa_tagihan` (`id_siswa`,`status`),
-  KEY `idx_jenis_tagihan` (`jenis_tagihan`)
-) ENGINE=InnoDB AUTO_INCREMENT=446 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `users`
 --
 
@@ -282,5 +267,3 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2026-05-18 12:16:19
