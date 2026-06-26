@@ -55,7 +55,7 @@
                 </div>
                 <div class="form-group">
                     <label class="control-label"> Tahun Ajaran</label>
-                    <div><input type="text" value="" required="" placeholder="Cth: 2023/2024" autocomplete="off" name="tahun_ajaran" class="form-control"></div>
+                    <div><input type="text" readonly="" value="<?=current_school_year()?>" required="" placeholder="Cth: 2023/2024" autocomplete="off" name="tahun_ajaran" class="form-control"></div>
                 </div>
                 <div class="form-group">
                     <label class="control-label"> Kelas</label>
@@ -313,9 +313,10 @@
     function Tambah(){
         label = 'simpan';
         $('#form')[0].reset();
+        $('[name="tahun_ajaran"]').val('<?=current_school_year()?>');
         $('#input-tenggat').attr('type', 'date').prop('readonly', false);
         $('.form-group').removeClass('has-error');
-        $('.help-block').empty(); 
+        $('.help-block').empty();  
         
         $.ajax({
             url:"<?=base_url($this->uri->segment(1).'/buat_kode/')?>KM",
