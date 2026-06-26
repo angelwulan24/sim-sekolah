@@ -125,12 +125,27 @@ class Transaksi extends CI_Controller {
                 $current_kode = $prefix . '-' . str_pad($start_num, 4, '0', STR_PAD_LEFT);
                 $start_num++;
 
+                // Map Indonesian month name to number (1-12)
+                $m_idx = array_search($bln, $all_months);
+                $m_num = ($m_idx !== false) ? ($m_idx + 1) : 1;
+
+                // Determine correct year from tahun_ajaran (e.g., "2025/2026")
+                $years = explode('/', $tahun_ajaran);
+                if (count($years) == 2) {
+                    $t_year = ($m_num >= 7) ? (int)$years[0] : (int)$years[1];
+                } else {
+                    $t_year = !empty($tahun_ajaran) ? (int)$tahun_ajaran : (int)date('Y');
+                }
+
+                // Format deadline date to the 14th day of the month and year
+                $tenggat_spp = sprintf('%04d-%02d-14', $t_year, $m_num);
+
                 // Insert fee type
                 $fee_type = array(
                     'kode_tagihan'    => $current_kode,
                     'nama_tagihan'    => 'SPP - ' . $bln,
                     'nominal_tagihan' => $nominal,
-                    'tenggat_waktu'   => 'Setiap Bulan',
+                    'tenggat_waktu'   => $tenggat_spp,
                     'tahun_ajaran'    => $tahun_ajaran,
                     'id_kelas'        => $id_kelas
                 );
