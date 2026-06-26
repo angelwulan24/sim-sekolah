@@ -172,13 +172,22 @@ class StudentArea extends CI_Controller {
 
 	public function finish_payment(){
 		$order_id = $this->input->post('order_id');
+		error_log($order_id);
 		if(!$order_id){
 			echo json_encode(['error' => 'Order ID is required']);
 			return;
 		}
 
-		$this->load->library('MidtransGateway');
-		$status = $this->midtransgateway->status($order_id);
+		try {
+
+			$this->load->library('MidtransGateway');
+			$status = $this->midtransgateway->status($order_id);
+
+		} catch (Exception $e) {
+			error_log($e);
+			echo json_encode(['error' => $e->getMessage()]);
+			return;
+		}
 
 		if(isset($status['transaction_status'])){
 			$trans_status = $status['transaction_status'];
@@ -212,26 +221,30 @@ class StudentArea extends CI_Controller {
 	}
 
 	private function _payment_success($order_id, $gross_amount){
-		$this->load->library('MidtransGateway');
-		$status = $this->midtransgateway->status($order_id);
-		$time = date('Y-m-d H:i:s');
+		try {
+			$this->load->library('MidtransGateway');
+			$status = $this->midtransgateway->status($order_id);
+			$time = date('Y-m-d H:i:s');
 
-		// 1. Check custom_field1 (Our primary way for bulk payments)
-		if(isset($status['custom_field1']) && !empty($status['custom_field1'])){
-			$tagihan_ids = explode(',', $status['custom_field1']);
-			foreach($tagihan_ids as $tagihan_id){
-				$this->_process_single_tagihan($tagihan_id, $time);
-			}
-		} 
-		// 2. Fallback to item_details (if provided)
-		elseif(isset($status['item_details'])){
-			foreach($status['item_details'] as $item){
-				$parts = explode('-', $item['id']);
-				if(count($parts) >= 2){
-					$tagihan_id = $parts[1];
+			// 1. Check custom_field1 (Our primary way for bulk payments)
+			if(isset($status['custom_field1']) && !empty($status['custom_field1'])){
+				$tagihan_ids = explode(',', $status['custom_field1']);
+				foreach($tagihan_ids as $tagihan_id){
 					$this->_process_single_tagihan($tagihan_id, $time);
 				}
+			} 
+			// 2. Fallback to item_details (if provided)
+			elseif(isset($status['item_details'])){
+				foreach($status['item_details'] as $item){
+					$parts = explode('-', $item['id']);
+					if(count($parts) >= 2){
+						$tagihan_id = $parts[1];
+						$this->_process_single_tagihan($tagihan_id, $time);
+					}
+				}
 			}
+		} catch (\Throwable $th) {
+			//throw $th;
 		}
 	}
 

@@ -256,15 +256,23 @@ class Siswa extends CI_Controller {
             if ($is_spp) {
                 // If student's entry date or tag deadline is empty, default to assigning it
                 if (!empty($tgl_masuk) && !empty($tag->tenggat_waktu)) {
-                    $entry_year = (int)date('Y', strtotime($tgl_masuk));
-                    $entry_month = (int)date('m', strtotime($tgl_masuk));
-                    $tag_year = (int)date('Y', strtotime($tag->tenggat_waktu));
-                    $tag_month = (int)date('m', strtotime($tag->tenggat_waktu));
+                    // $entry_year = (int)date('Y', strtotime($tgl_masuk));
+                    // $entry_month = (int)date('m', strtotime($tgl_masuk));
+                    // $entry_day = (int)date('d', strtotime($tgl_masuk));
+                    // $tag_year = (int)date('Y', strtotime($tag->tenggat_waktu));
+                    // $tag_month = (int)date('m', strtotime($tag->tenggat_waktu));
+                    // $tag_day = (int)date('d', strtotime($tag->tenggat_waktu));
 
-                    $entry_val = $entry_year * 12 + $entry_month;
-                    $tag_val = $tag_year * 12 + $tag_month;
+                    $entry_date = new DateTimeImmutable($tgl_masuk);
+                    $tag_date = new DateTimeImmutable($tag->tenggat_waktu);
 
-                    if ($tag_val < $entry_val) {
+                    // $entry_val = $entry_year * 12 + $entry_month;
+                    // $tag_val = $tag_year * 12 + $tag_month;
+
+                    // error_log('comparing ' . $tag->tenggat_waktu . ' < ' . $tgl_masuk);
+
+                    if ($tag_date < $entry_date) {
+                        // error_log('skipping ' . $tag_year . " - " . $tag_month . " - " . $tag_day);
                         // Skip SPP for months that have already passed
                         continue;
                     }

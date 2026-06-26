@@ -1,78 +1,84 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Transaksi extends CI_Controller {
+class Transaksi extends CI_Controller
+{
 
-	private $parents = 'Transaksi';
-	private $icon	 = 'fa fa-money';
-	var $table 		 = 'jenis_tagihan';
+    private $parents = 'Transaksi';
+    private $icon     = 'fa fa-money';
+    var $table          = 'jenis_tagihan';
 
-	function __construct(){
-		parent::__construct();
+    function __construct()
+    {
+        parent::__construct();
 
-		is_login();
-		get_breadcrumb();
-		$this->load->model('M_'.$this->parents,'mod');
-		$this->load->library('form_validation');
-		$this->load->library('Datatables'); 
-	}
+        is_login();
+        get_breadcrumb();
+        $this->load->model('M_' . $this->parents, 'mod');
+        $this->load->library('form_validation');
+        $this->load->library('Datatables');
+    }
 
-	public function index(){
+    public function index()
+    {
 
-		$this->breadcrumb->append_crumb('SIM Sekolah ','Beranda');
-		$this->breadcrumb->append_crumb('Jenis Tagihan',$this->parents);
+        $this->breadcrumb->append_crumb('SIM Sekolah ', 'Beranda');
+        $this->breadcrumb->append_crumb('Jenis Tagihan', $this->parents);
 
-		$data['title']	= 'Jenis Tagihan | SIM Sekolah ';
-		$data['judul']	= 'Jenis Tagihan';
-		$data['icon']	= $this->icon;
+        $data['title']    = 'Jenis Tagihan | SIM Sekolah ';
+        $data['judul']    = 'Jenis Tagihan';
+        $data['icon']    = $this->icon;
 
-	$this->template->views('Backend/'.$this->parents.'/v_'.$this->parents,$data);
-	}
+        $this->template->views('Backend/' . $this->parents . '/v_' . $this->parents, $data);
+    }
 
-	function getData (){
-		header('Content-Type:application/json');
-		echo $this->mod->getAllData();
-	}
+    function getData()
+    {
+        header('Content-Type:application/json');
+        echo $this->mod->getAllData();
+    }
 
-	function buat_kode($tipe){
+    function buat_kode($tipe)
+    {
 
-		$this->db->select('RIGHT(jenis_tagihan.kode_tagihan,4) as Kode',FALSE);
-		$this->db->order_by('kode_tagihan','DESC');
-		$this->db->limit(1);
+        $this->db->select('RIGHT(jenis_tagihan.kode_tagihan,4) as Kode', FALSE);
+        $this->db->order_by('kode_tagihan', 'DESC');
+        $this->db->limit(1);
 
-		$q = $this->db->get('jenis_tagihan');
+        $q = $this->db->get('jenis_tagihan');
 
-		if($q->num_rows() <> 0){
+        if ($q->num_rows() <> 0) {
 
-			$data = $q->row();
+            $data = $q->row();
 
-			$kode = intval($data->Kode) + 1;
-		}
-		else {
+            $kode = intval($data->Kode) + 1;
+        } else {
 
-			$kode = 1;
-		}
+            $kode = 1;
+        }
 
-		$kodemax = str_pad($kode,4,"0",STR_PAD_LEFT);
-		$kodejadi = $tipe."-".$kodemax;
+        $kodemax = str_pad($kode, 4, "0", STR_PAD_LEFT);
+        $kodejadi = $tipe . "-" . $kodemax;
 
-		echo json_encode ($kodejadi);
-	}
+        echo json_encode($kodejadi);
+    }
 
 
-	public function edit($id){
-		$data = $this->M_General->getByID($this->table,'kode_tagihan',$id,'kode_tagihan')->row();
-		echo json_encode($data);
-	}
+    public function edit($id)
+    {
+        $data = $this->M_General->getByID($this->table, 'kode_tagihan', $id, 'kode_tagihan')->row();
+        echo json_encode($data);
+    }
 
-	function Simpan(){
-		$kelas_tagihan = $this->input->post('kelas',TRUE);
-		$id_kelas = ($kelas_tagihan == 'Semua') ? NULL : $kelas_tagihan;
-		$tahun_ajaran = filter_string($this->input->post('tahun_ajaran',TRUE));
-		$nama_tagihan = filter_string($this->input->post('nama',TRUE));
-		$nominal = filter_string($this->input->post('nominal',TRUE));
-		$tenggat_waktu = filter_string($this->input->post('tenggat_waktu',TRUE));
-		$kode_base = $this->input->post('kode',TRUE);
+    function Simpan()
+    {
+        $kelas_tagihan = $this->input->post('kelas', TRUE);
+        $id_kelas = ($kelas_tagihan == 'Semua') ? NULL : $kelas_tagihan;
+        $tahun_ajaran = filter_string($this->input->post('tahun_ajaran', TRUE));
+        $nama_tagihan = filter_string($this->input->post('nama', TRUE));
+        $nominal = filter_string($this->input->post('nominal', TRUE));
+        $tenggat_waktu = filter_string($this->input->post('tenggat_waktu', TRUE));
+        $kode_base = $this->input->post('kode', TRUE);
 
         // Fetch students
         if ($id_kelas === NULL) {
@@ -82,18 +88,18 @@ class Transaksi extends CI_Controller {
         }
 
         $is_spp = (strpos(strtoupper($nama_tagihan), 'SPP') !== false);
-        
+
         if ($is_spp) {
             // Generate monthly range
             $all_months = array('Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember');
-            
+
             $m1 = trim($this->input->post('bulan_awal', TRUE));
             $m2 = trim($this->input->post('bulan_akhir', TRUE));
 
             $start_idx = -1;
             $end_idx = -1;
-            
-            foreach($all_months as $idx => $m) {
+
+            foreach ($all_months as $idx => $m) {
                 if (strcasecmp($m, $m1) == 0) $start_idx = $idx;
                 if (strcasecmp($m, $m2) == 0) $end_idx = $idx;
             }
@@ -102,7 +108,7 @@ class Transaksi extends CI_Controller {
             if ($start_idx != -1 && $end_idx != -1) {
                 $curr = $start_idx;
                 $count = 0;
-                while($count < 12) {
+                while ($count < 12) {
                     $bulan[] = $all_months[$curr];
                     if ($curr == $end_idx) break;
                     $curr = ($curr + 1) % 12;
@@ -110,12 +116,12 @@ class Transaksi extends CI_Controller {
                 }
             } else {
                 if ($m1 && $m2) {
-                     $bulan = array($m1, $m2); 
+                    $bulan = array($m1, $m2);
                 } else {
-                     $bulan = array('Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni');
+                    $bulan = array('Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni');
                 }
             }
-            
+
             // For each month, generate a separate jenis_tagihan and assign to students
             preg_match('/([A-Z]+)-([0-9]+)/', $kode_base, $matches);
             $prefix = isset($matches[1]) ? $matches[1] : 'KM';
@@ -159,7 +165,7 @@ class Transaksi extends CI_Controller {
                             'nis_siswa'     => $s->nis_siswa,
                             'kode_tagihan'  => $current_kode,
                             'status'        => 'Belum Lunas',
-                            'tgl_pembayaran'=> NULL
+                            'tgl_pembayaran' => NULL
                         );
                     }
                     $chunks = array_chunk($data_tagihan, 100);
@@ -187,7 +193,7 @@ class Transaksi extends CI_Controller {
                         'nis_siswa'     => $s->nis_siswa,
                         'kode_tagihan'  => $kode_base,
                         'status'        => 'Belum Lunas',
-                        'tgl_pembayaran'=> NULL
+                        'tgl_pembayaran' => NULL
                     );
                 }
                 $chunks = array_chunk($data_tagihan, 100);
@@ -199,31 +205,33 @@ class Transaksi extends CI_Controller {
 
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
-	}
+    }
 
-	function Ubah(){
+    function Ubah()
+    {
         $id = $this->input->post('id');
-		$nom = filter_string($this->input->post('nominal',TRUE));
-		$tenggat = filter_string($this->input->post('tenggat_waktu',TRUE));
-		$tahun_ajaran = filter_string($this->input->post('tahun_ajaran',TRUE));
-		$kelas_input = filter_string($this->input->post('kelas',TRUE));
-		$id_kelas = ($kelas_input == 'Semua') ? NULL : $kelas_input;
+        $nom = filter_string($this->input->post('nominal', TRUE));
+        $tenggat = filter_string($this->input->post('tenggat_waktu', TRUE));
+        $tahun_ajaran = filter_string($this->input->post('tahun_ajaran', TRUE));
+        $kelas_input = filter_string($this->input->post('kelas', TRUE));
+        $id_kelas = ($kelas_input == 'Semua') ? NULL : $kelas_input;
 
         $update_data = array(
-                             'nominal_tagihan'	=> $nom,
-                             'tenggat_waktu' => $tenggat,
-                             'tahun_ajaran' => $tahun_ajaran,
-                             'id_kelas' => $id_kelas
-                );
-        $this->M_General->update($this->table,$update_data,'kode_tagihan',$id);
+            'nominal_tagihan'    => $nom,
+            'tenggat_waktu' => $tenggat,
+            'tahun_ajaran' => $tahun_ajaran,
+            'id_kelas' => $id_kelas
+        );
+        $this->M_General->update($this->table, $update_data, 'kode_tagihan', $id);
 
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
-	}
-	
-	function Hapus(){
-        $this->M_General->delete($this->table,'kode_tagihan',$this->input->post('id'));
+    }
+
+    function Hapus()
+    {
+        $this->M_General->delete($this->table, 'kode_tagihan', $this->input->post('id'));
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
-	}
+    }
 }

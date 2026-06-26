@@ -101,11 +101,7 @@
                             <td><?=$s->tahun_ajaran ? $s->tahun_ajaran : '-'?></td>
                             <td>Rp. <?=number_format($s->nominal,0,',','.')?></td>
                             <td>
-                                <?php 
-                                    // SPP deadline is usually the 14th
-                                    $bulan_spp = str_replace("SPP - ", "", $s->jenis_tagihan);
-                                    echo "14 " . $bulan_spp . " " . explode('/', $s->tahun_ajaran)[0];
-                                ?>
+                                <?=!empty($s->tenggat_waktu) ? date('d M Y', strtotime($s->tenggat_waktu)) : '-'?>
                             </td>
                             <td>
                                 <?php if($s->status == 'Lunas') { ?>

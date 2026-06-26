@@ -61,37 +61,19 @@ class Tunggakan extends CI_Controller {
             $current_year = (int)date('Y');
             $current_val = $current_year * 12 + $current_month;
 
+            // var_dump();
+
             foreach($tagihan_db as $t) {
-                $is_spp = (strpos(strtoupper($t->jenis_tagihan), 'SPP') !== false);
                 $show = false;
 
-                if ($is_spp) {
-                    $m_name = str_replace('SPP - ', '', $t->jenis_tagihan);
-                    $m_idx = array_search($m_name, $months_array);
-                    if ($m_idx !== false) {
-                        $t_month = $m_idx + 1;
-                        $years = explode('/', $t->tahun_ajaran);
-                        if (count($years) == 2) {
-                            $t_year = ($t_month >= 7) ? (int)$years[0] : (int)$years[1];
-                        } else {
-                            $t_year = (int)$t->tahun_ajaran;
-                        }
-                        
-                        $t_val = $t_year * 12 + $t_month;
-                        if ($t_val <= $current_val) {
-                            $show = true;
-                        }
-                    }
+                if (empty($t->tenggat_waktu)) {
+                    $show = true; // No deadline = show immediately
                 } else {
-                    if (empty($t->tenggat_waktu)) {
-                        $show = true; // No deadline = show immediately
-                    } else {
-                        $t_year = (int)date('Y', strtotime($t->tenggat_waktu));
-                        $t_month = (int)date('m', strtotime($t->tenggat_waktu));
-                        $t_val = $t_year * 12 + $t_month;
-                        if ($t_val <= $current_val) {
-                            $show = true;
-                        }
+                    $t_year = (int)date('Y', strtotime($t->tenggat_waktu));
+                    $t_month = (int)date('m', strtotime($t->tenggat_waktu));
+                    $t_val = $t_year * 12 + $t_month;
+                    if ($t_val <= $current_val) {
+                        $show = true;
                     }
                 }
 
@@ -109,6 +91,7 @@ class Tunggakan extends CI_Controller {
 		}
 
         $data['tunggakan'] = $tunggakan_list;
+
 
 		$this->template->views('Backend/'.$this->parents.'/v_'.$this->parents,$data);
 	}
