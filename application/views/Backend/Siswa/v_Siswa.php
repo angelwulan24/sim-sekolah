@@ -20,7 +20,7 @@
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <ul class="dropdown-menu" role="menu">
-                        <li><a href="<?=base_url('excel/form.xlsx')?>">Format Data</a></li>
+                        <li><a href="<?=base_url('excel/form.xlsx?v=' . filemtime('excel/form.xlsx'))?>">Format Data</a></li>
                     </ul>
                 </div>
 
