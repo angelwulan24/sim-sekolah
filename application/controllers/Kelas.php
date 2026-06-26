@@ -122,6 +122,26 @@ class Kelas extends CI_Controller {
 		
 		if (!empty($dari) && !empty($ke) && $dari != $ke) {
 			if ($ke == 'lulus') {
+                // Delete previous alumni
+                $alumni_siswa = $this->db->get_where('siswa', array('status_siswa' => 'Alumni'))->result();
+                if (!empty($alumni_siswa)) {
+                    $alumni_user_ids = array();
+                    foreach ($alumni_siswa as $al) {
+                        if (!empty($al->id_users)) {
+                            $alumni_user_ids[] = $al->id_users;
+                        }
+                        if (!empty($al->foto_siswa) && file_exists('./assets/images/siswa/' . $al->foto_siswa)) {
+                            unlink('./assets/images/siswa/' . $al->foto_siswa);
+                        }
+                    }
+                    if (!empty($alumni_user_ids)) {
+                        $this->db->where_in('id_users', $alumni_user_ids);
+                        $this->db->delete('users');
+                    }
+                    $this->db->where('status_siswa', 'Alumni');
+                    $this->db->delete('siswa');
+                }
+
 				$data = array(
 					'status_siswa' => 'Alumni',
 					'id_kelas'     => NULL
