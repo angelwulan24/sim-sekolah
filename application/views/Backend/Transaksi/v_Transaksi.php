@@ -55,7 +55,20 @@
                 </div>
                 <div class="form-group">
                     <label class="control-label"> Tahun Ajaran</label>
-                    <div><input type="text" readonly="" value="<?=current_school_year()?>" required="" placeholder="Cth: 2023/2024" autocomplete="off" name="tahun_ajaran" class="form-control"></div>
+                    <div>
+                        <select name="tahun_ajaran" required="" class="form-control">
+                            <?php
+                            $current_sy = current_school_year();
+                            $years = explode('/', $current_sy);
+                            $start_year = (int)$years[0];
+                            for ($i = 0; $i < 5; $i++) {
+                                $y = $start_year + $i;
+                                $val = $y . '/' . ($y + 1);
+                                echo '<option value="' . $val . '">' . $val . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="control-label"> Kelas</label>
