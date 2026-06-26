@@ -63,17 +63,20 @@ class Siswa extends CI_Controller {
                 // Create User Account with NIS as username
                 $id_users = $this->_create_account($row['B'], $row['A'], $row['D']);
 
-				// Kita push (add) array data ke variabel data
 				array_push($data, array(
 					'nama_siswa'=>$row['A'],
 					'nis_siswa'=>$row['B'],
-					'tempat_lahirsiswa'=>$row['C'],
-					'tgl_lahirsiswa'=>$row['D'],
-					'jk_siswa'=>$row['E'],
-					'ortu_wali'=>$row['F'],
-					'alamat_ssiwa'=>$row['G'],
-					'status_siswa'=>$row['H'],
-					'id_kelas'=>$row['I'],
+					'jk_siswa'=>$row['C'],
+					'agama_siswa'=>$row['D'],
+					'tempat_lahirsiswa'=>$row['E'],
+					'tgl_lahirsiswa'=>$row['F'],
+					'ortu_wali'=>$row['G'],
+					'telp_siswa'=>$row['H'],
+					'alamat_ssiwa'=>$row['I'],
+                    'tgl_masuk'=>$row['J'],
+                    'thn_ajaran'=>$row['K'],
+                    'id_kelas'=>$row['L'],
+                    'status_siswa'=>$row['M'],
 					'id_users'=>$id_users
 				));
 			}
@@ -81,6 +84,15 @@ class Siswa extends CI_Controller {
 			$numrow++;
 		}
 		$this->M_General->insert_multiple($data);
+		
+		foreach ($data as $siswa_data) {
+		    $this->_assign_existing_bills(
+		        $siswa_data['nis_siswa'],
+		        $siswa_data['id_kelas'],
+		        $siswa_data['thn_ajaran'],
+		        $siswa_data['tgl_masuk']
+		    );
+		}
 		
         $data['status'] = TRUE;
         $this->M_General->delete('siswa','id_kelas','0');
@@ -126,6 +138,7 @@ class Siswa extends CI_Controller {
         $insert['id_users'] = $id_users;
 
         $this->M_General->insert($this->table,$insert);
+        $this->_assign_existing_bills($insert['nis_siswa'], $insert['id_kelas'], $insert['thn_ajaran'], $insert['tgl_masuk']);
 
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
@@ -215,6 +228,70 @@ class Siswa extends CI_Controller {
             return $this->db->insert_id();
         } else {
             return $user['id_users'];
+        }
+    }
+
+    private function _assign_existing_bills($nis_siswa, $id_kelas, $thn_ajaran, $tgl_masuk) {
+        if (empty($thn_ajaran)) {
+            return;
+        }
+
+        // Query all jenis_tagihan matching the academic year and class (or all classes)
+        $this->db->group_start();
+        $this->db->where('id_kelas', NULL);
+        if (!empty($id_kelas)) {
+            $this->db->or_where('id_kelas', $id_kelas);
+        }
+        $this->db->group_end();
+        $this->db->where('tahun_ajaran', $thn_ajaran);
+        $jenis_tagihan = $this->db->get('jenis_tagihan')->result();
+
+        if (empty($jenis_tagihan)) {
+            return;
+        }
+
+        $data_tagihan = array();
+        foreach ($jenis_tagihan as $tag) {
+            $is_spp = (strpos(strtoupper($tag->nama_tagihan), 'SPP') !== false);
+            if ($is_spp) {
+                // If student's entry date or tag deadline is empty, default to assigning it
+                if (!empty($tgl_masuk) && !empty($tag->tenggat_waktu)) {
+                    $entry_year = (int)date('Y', strtotime($tgl_masuk));
+                    $entry_month = (int)date('m', strtotime($tgl_masuk));
+                    $tag_year = (int)date('Y', strtotime($tag->tenggat_waktu));
+                    $tag_month = (int)date('m', strtotime($tag->tenggat_waktu));
+
+                    $entry_val = $entry_year * 12 + $entry_month;
+                    $tag_val = $tag_year * 12 + $tag_month;
+
+                    if ($tag_val < $entry_val) {
+                        // Skip SPP for months that have already passed
+                        continue;
+                    }
+                }
+            }
+
+            // Check if this student already has this bill assigned (to avoid duplicate assignment)
+            $check = $this->db->get_where('tagihan_siswa', array(
+                'nis_siswa' => $nis_siswa,
+                'kode_tagihan' => $tag->kode_tagihan
+            ))->row();
+
+            if (!$check) {
+                $data_tagihan[] = array(
+                    'nis_siswa'      => $nis_siswa,
+                    'kode_tagihan'   => $tag->kode_tagihan,
+                    'status'         => 'Belum Lunas',
+                    'tgl_pembayaran' => NULL
+                );
+            }
+        }
+
+        if (!empty($data_tagihan)) {
+            $chunks = array_chunk($data_tagihan, 100);
+            foreach ($chunks as $chunk) {
+                $this->db->insert_batch('tagihan_siswa', $chunk);
+            }
         }
     }
 }
