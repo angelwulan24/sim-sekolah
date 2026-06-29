@@ -51,51 +51,70 @@ class Siswa extends CI_Controller {
 		$upload = $this->M_General->upload_file($this->filename);
 	
 		if ($upload['status'] == true){  
-		include APPPATH.'third_party/PHPExcel/PHPExcel.php';
-		$excelreader = new PHPExcel_Reader_Excel2007();
-		$loadexcel = $excelreader->load('excel/'.$this->filename.'.xlsx');
-		$sheet = $loadexcel->getActiveSheet()->toArray(null, true, true ,true);
-		
-		$data = array();
-		$numrow = 1;
-		foreach($sheet as $row){
-			if($numrow > 1){
-                // Create User Account with NIS as username
-                $id_users = $this->_create_account($row['B'], $row['A'], $row['D']);
+			$sheet = $this->_read_excel('./excel/'.$this->filename.'.xlsx');
+			
+			$data = array();
+			$numrow = 1;
+			foreach($sheet as $row){
+				if($numrow > 1){
+					// Skip if both NIS and Nama are empty
+					if (empty($row['B']) && empty($row['A'])) {
+						continue;
+					}
 
-				array_push($data, array(
-					'nama_siswa'=>$row['A'],
-					'nis_siswa'=>$row['B'],
-					'jk_siswa'=>$row['C'],
-					'agama_siswa'=>$row['D'],
-					'tempat_lahirsiswa'=>$row['E'],
-					'tgl_lahirsiswa'=>$row['F'],
-					'ortu_wali'=>$row['G'],
-					'telp_siswa'=>$row['H'],
-					'alamat_ssiwa'=>$row['I'],
-                    'tgl_masuk'=>$row['J'],
-                    'thn_ajaran'=>$row['K'],
-                    'id_kelas'=>$row['L'],
-                    'status_siswa'=>$row['M'],
-					'id_users'=>$id_users
-				));
+					// Parse dates
+					$tgl_lahir = $this->_parse_date($row['F']);
+					if (empty($tgl_lahir)) {
+						$tgl_lahir = '2000-01-01'; // Safe default
+					}
+					
+					$tgl_masuk = $this->_parse_date($row['J']);
+					if (empty($tgl_masuk)) {
+						$tgl_masuk = date('Y-m-d'); // Default to current date
+					}
+
+					// Create User Account with NIS as username
+					$id_users = $this->_create_account($row['B'], $row['A'], $tgl_lahir);
+
+					// Kita push (add) array data ke variabel data
+					array_push($data, array(
+						'nama_siswa'        => $row['A'],
+						'nis_siswa'         => $row['B'],
+						'jk_siswa'          => $row['C'],
+						'agama_siswa'       => $row['D'],
+						'tempat_lahirsiswa' => $row['E'],
+						'tgl_lahirsiswa'    => $tgl_lahir,
+						'ortu_wali'         => $row['G'],
+						'telp_siswa'        => $row['H'],
+						'alamat_ssiwa'      => $row['I'],
+						'tgl_masuk'         => $tgl_masuk,
+						'thn_ajaran'        => $row['K'],
+						'id_kelas'          => $row['L'],
+						'status_siswa'      => $row['M'],
+						'id_users'          => $id_users
+					));
+				}
+				
+				$numrow++;
+			}
+			if (!empty($data)) {
+				$this->M_General->insert_multiple($data);
+
+				// Assign existing bills to each imported student
+				foreach ($data as $siswa_data) {
+					if (isset($siswa_data['nis_siswa'])) {
+						$this->_assign_existing_bills(
+							$siswa_data['nis_siswa'],
+							$siswa_data['id_kelas'],
+							$siswa_data['thn_ajaran'],
+							$siswa_data['tgl_masuk']
+						);
+					}
+				}
 			}
 			
-			$numrow++;
-		}
-		$this->M_General->insert_multiple($data);
-		
-		foreach ($data as $siswa_data) {
-		    $this->_assign_existing_bills(
-		        $siswa_data['nis_siswa'],
-		        $siswa_data['id_kelas'],
-		        $siswa_data['thn_ajaran'],
-		        $siswa_data['tgl_masuk']
-		    );
-		}
-		
-        $data['status'] = TRUE;
-        $this->M_General->delete('siswa','id_kelas','0');
+			$data['status'] = TRUE;
+			$this->M_General->delete('siswa','id_kelas','0');
     	}
     	else{
     		$data['status'] = FALSE;
@@ -256,23 +275,10 @@ class Siswa extends CI_Controller {
             if ($is_spp) {
                 // If student's entry date or tag deadline is empty, default to assigning it
                 if (!empty($tgl_masuk) && !empty($tag->tenggat_waktu)) {
-                    // $entry_year = (int)date('Y', strtotime($tgl_masuk));
-                    // $entry_month = (int)date('m', strtotime($tgl_masuk));
-                    // $entry_day = (int)date('d', strtotime($tgl_masuk));
-                    // $tag_year = (int)date('Y', strtotime($tag->tenggat_waktu));
-                    // $tag_month = (int)date('m', strtotime($tag->tenggat_waktu));
-                    // $tag_day = (int)date('d', strtotime($tag->tenggat_waktu));
-
                     $entry_date = new DateTimeImmutable($tgl_masuk);
                     $tag_date = new DateTimeImmutable($tag->tenggat_waktu);
 
-                    // $entry_val = $entry_year * 12 + $entry_month;
-                    // $tag_val = $tag_year * 12 + $tag_month;
-
-                    // error_log('comparing ' . $tag->tenggat_waktu . ' < ' . $tgl_masuk);
-
                     if ($tag_date < $entry_date) {
-                        // error_log('skipping ' . $tag_year . " - " . $tag_month . " - " . $tag_day);
                         // Skip SPP for months that have already passed
                         continue;
                     }
@@ -301,5 +307,101 @@ class Siswa extends CI_Controller {
                 $this->db->insert_batch('tagihan_siswa', $chunk);
             }
         }
+    }
+
+    // Native ZIP/XML Excel reader compatible with PHP 8.0+
+    private function _read_excel($filepath) {
+        $zip = new ZipArchive();
+        if ($zip->open($filepath) !== TRUE) {
+            return array();
+        }
+        
+        $sharedStrings = array();
+        $sharedStringsXML = $zip->getFromName('xl/sharedStrings.xml');
+        if ($sharedStringsXML !== false) {
+            $xml = simplexml_load_string($sharedStringsXML);
+            foreach ($xml->si as $val) {
+                if (isset($val->t)) {
+                    $sharedStrings[] = (string)$val->t;
+                } else if (isset($val->r)) {
+                    $text = '';
+                    foreach ($val->r as $r) {
+                        $text .= (string)$r->t;
+                    }
+                    $sharedStrings[] = $text;
+                } else {
+                    $sharedStrings[] = '';
+                }
+            }
+        }
+        
+        $sheetXML = $zip->getFromName('xl/worksheets/sheet1.xml');
+        if (!$sheetXML) {
+            $zip->close();
+            return array();
+        }
+        
+        $xml = simplexml_load_string($sheetXML);
+        $rows = array();
+        foreach ($xml->sheetData->row as $row) {
+            $rowIndex = (int)$row['r'];
+            $rowData = array();
+            foreach ($row->c as $cell) {
+                $cellRef = (string)$cell['r'];
+                preg_match('/^[A-Z]+/', $cellRef, $matches);
+                $colLetter = $matches[0];
+                
+                $type = (string)$cell['t'];
+                $val = (string)$cell->v;
+                if ($type === 's') {
+                    $rowData[$colLetter] = isset($sharedStrings[(int)$val]) ? $sharedStrings[(int)$val] : '';
+                } else {
+                    $rowData[$colLetter] = $val;
+                }
+            }
+            // Ensure all columns from A to M are initialized
+            foreach (range('A', 'M') as $col) {
+                if (!isset($rowData[$col])) {
+                    $rowData[$col] = '';
+                }
+            }
+            $rows[$rowIndex] = $rowData;
+        }
+        $zip->close();
+        return $rows;
+    }
+
+    // Parse different Excel date types and formats into YYYY-MM-DD
+    private function _parse_date($value) {
+        $value = trim($value);
+        if (empty($value)) {
+            return null;
+        }
+        
+        // 1. If numeric (Excel serial date number)
+        if (is_numeric($value)) {
+            $unixTimestamp = ($value - 25569) * 86400;
+            return date('Y-m-d', $unixTimestamp);
+        }
+        
+        // 2. Try parsing DD-MM-YYYY string format
+        $date = DateTime::createFromFormat('d-m-Y', $value);
+        if ($date !== false) {
+            return $date->format('Y-m-d');
+        }
+        
+        // 3. Try parsing YYYY-MM-DD string format (fallback)
+        $dateFallback = DateTime::createFromFormat('Y-m-d', $value);
+        if ($dateFallback !== false) {
+            return $dateFallback->format('Y-m-d');
+        }
+        
+        // 4. Default raw conversion if strtotime works
+        $time = strtotime($value);
+        if ($time !== false) {
+            return date('Y-m-d', $time);
+        }
+        
+        return null;
     }
 }
