@@ -4,16 +4,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class M_Pengeluaran  extends CI_Model {
 
 	function getAllData($filter = array()){
-		$this->datatables->select("id,sekarang,DATE_FORMAT(s.tanggal,'%d-%m-%Y') AS Tgl, s.keterangan, s.nominal AS Total, s.bukti");
-		$this->datatables->from('v_pengeluaran_gabungan as s');
+		// Query langsung dari pengeluaran (gaji sudah terintegrasi via FK, tidak perlu UNION lagi)
+		$this->datatables->select("id_pengeluaran AS id, DATE_FORMAT(tgl_pengeluaran,'%d-%m-%Y') AS Tgl, ket_pengeluaran AS keterangan, nominal_pengeluaran AS Total, bukti");
+		$this->datatables->from('pengeluaran');
 
 		if(!empty($filter['jenis']) && !empty($filter['tanggal'])){
             if($filter['jenis'] == 'hari'){
-                $this->datatables->where('DATE(s.tanggal)', $filter['tanggal']);
+                $this->datatables->where('DATE(tgl_pengeluaran)', $filter['tanggal']);
             } elseif($filter['jenis'] == 'bulan'){
-                $this->datatables->where("DATE_FORMAT(s.tanggal, '%Y-%m') = ", $filter['tanggal']);
+                $this->datatables->where("DATE_FORMAT(tgl_pengeluaran, '%Y-%m') = ", $filter['tanggal']);
             } elseif($filter['jenis'] == 'tahun'){
-                $this->datatables->where("YEAR(s.tanggal)", $filter['tanggal']);
+                $this->datatables->where("YEAR(tgl_pengeluaran)", $filter['tanggal']);
             }
 		}
 
@@ -21,9 +22,12 @@ class M_Pengeluaran  extends CI_Model {
 	}
 
 	function getDetailData($detail =''){
-		$this->datatables->select("id_pengeluaran AS id,DATE_FORMAT(tanggal,'%d-%m-%Y - %H:%i:%s WIB') AS Tgl,nominal_pengeluaran AS nominal,ket_pengeluaran AS keterangan");
+		// Filter by DATE(tgl_pengeluaran) instead of deprecated sekarang field
+		$this->datatables->select("id_pengeluaran AS id, DATE_FORMAT(tgl_pengeluaran,'%d-%m-%Y') AS Tgl, nominal_pengeluaran AS nominal, ket_pengeluaran AS keterangan");
 		$this->datatables->from('pengeluaran');
-		$this->datatables->where('sekarang',$detail);
+		if (!empty($detail)) {
+			$this->datatables->where('DATE(tgl_pengeluaran)', $detail);
+		}
 		return $this->datatables->generate();
 	}
 	

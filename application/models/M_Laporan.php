@@ -4,20 +4,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class M_Laporan extends CI_Model {
 
 	function getAllData($filter = array()){
-		$this->datatables->select("id,saldo_awal,DATE_FORMAT(tanggal,'%d-%m-%Y') as tanggal,kas_masuk,kas_keluar, (saldo_awal + kas_masuk - kas_keluar) as saldo_akhir");
-		$this->datatables->from('laporan');
+		// Query dari v_laporan - agregat dinamis dari tabel pemasukan, tagihan_siswa, dan pengeluaran
+		// Tidak ada lagi tabel laporan - semua dihitung real-time
+		$this->datatables->select("DATE_FORMAT(tanggal,'%d-%m-%Y') as tanggal, kas_masuk, kas_keluar, tanggal AS id");
+		$this->datatables->from('v_laporan');
 
 		if(!empty($filter['jenis']) && !empty($filter['tanggal'])){
-            if($filter['jenis'] == 'hari'){
-                $this->datatables->where('DATE(tanggal)', $filter['tanggal']);
-            } elseif($filter['jenis'] == 'bulan'){
+            if($filter['jenis'] == 'bulan'){
                 $this->datatables->where("DATE_FORMAT(tanggal, '%Y-%m') = ", $filter['tanggal']);
             } elseif($filter['jenis'] == 'tahun'){
                 $this->datatables->where("YEAR(tanggal)", $filter['tanggal']);
             }
 		}
 
-		$this->datatables->add_column('view','<center><a href="javascript:void(0)" onclick="Detail($1)" class="btn btn-warning btn-xs"><i class="fa fa-eye"></i> Detail</a> </center> ','id');
+		$this->datatables->add_column('view','<center><a href="javascript:void(0)" onclick="Detail(\'$1\')" class="btn btn-warning btn-xs"><i class="fa fa-eye"></i> Detail</a> </center> ','id');
 		return $this->datatables->generate();
 	}
 	
@@ -60,11 +60,9 @@ class M_Laporan extends CI_Model {
         $pdf->SetFont('TIMES','B',10);
         $pdf->SetFillColor(240, 240, 240);
         $pdf->Cell(10, 8, 'No', 1, 0, 'C', true);
-        $pdf->Cell(35, 8, 'Tanggal', 1, 0, 'C', true);
-        $pdf->Cell(37, 8, 'Saldo Awal', 1, 0, 'C', true);
-        $pdf->Cell(37, 8, 'Kas Masuk', 1, 0, 'C', true);
-        $pdf->Cell(37, 8, 'Kas Keluar', 1, 0, 'C', true);
-        $pdf->Cell(34, 8, 'Saldo Akhir', 1, 1, 'C', true);
+        $pdf->Cell(40, 8, 'Tanggal', 1, 0, 'C', true);
+        $pdf->Cell(70, 8, 'Kas Masuk', 1, 0, 'C', true);
+        $pdf->Cell(70, 8, 'Kas Keluar', 1, 1, 'C', true);
 
         // Content
         $pdf->SetFont('TIMES','',10);
@@ -73,14 +71,10 @@ class M_Laporan extends CI_Model {
         $total_keluar = 0;
 
         foreach($data as $row){
-            $saldo_akhir = $row->saldo_awal + $row->kas_masuk - $row->kas_keluar;
-            
             $pdf->Cell(10, 8, $no++, 1, 0, 'C');
-            $pdf->Cell(35, 8, date('d-m-Y', strtotime($row->tanggal)), 1, 0, 'C');
-            $pdf->Cell(37, 8, rupiah($row->saldo_awal), 1, 0, 'R');
-            $pdf->Cell(37, 8, rupiah($row->kas_masuk), 1, 0, 'R');
-            $pdf->Cell(37, 8, rupiah($row->kas_keluar), 1, 0, 'R');
-            $pdf->Cell(34, 8, rupiah($saldo_akhir), 1, 1, 'R');
+            $pdf->Cell(40, 8, date('d-m-Y', strtotime($row->tanggal)), 1, 0, 'C');
+            $pdf->Cell(70, 8, rupiah($row->kas_masuk), 1, 0, 'R');
+            $pdf->Cell(70, 8, rupiah($row->kas_keluar), 1, 1, 'R');
             
             $total_masuk += $row->kas_masuk;
             $total_keluar += $row->kas_keluar;
@@ -88,10 +82,9 @@ class M_Laporan extends CI_Model {
 
         // Summary
         $pdf->SetFont('TIMES','B',10);
-        $pdf->Cell(82, 8, 'TOTAL', 1, 0, 'C', true);
-        $pdf->Cell(37, 8, rupiah($total_masuk), 1, 0, 'R', true);
-        $pdf->Cell(37, 8, rupiah($total_keluar), 1, 0, 'R', true);
-        $pdf->Cell(34, 8, '-', 1, 1, 'C', true);
+        $pdf->Cell(50, 8, 'TOTAL', 1, 0, 'C', true);
+        $pdf->Cell(70, 8, rupiah($total_masuk), 1, 0, 'R', true);
+        $pdf->Cell(70, 8, rupiah($total_keluar), 1, 1, 'R', true);
 
         $pdf->Ln(15);
         $pdf->SetFont('TIMES', '', 11);

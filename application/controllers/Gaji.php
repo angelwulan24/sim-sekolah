@@ -92,7 +92,6 @@ class Gaji extends CI_Controller {
             $tarif_per_jam = $tarif_input;
         }
 
-        $total_kas = 0;
         $success = false;
 
         if(!empty($id_guru_arr)) {
@@ -107,22 +106,31 @@ class Gaji extends CI_Controller {
 
                 $total_gaji_guru = $jam * $tarif_per_jam;
 
-                $insert = array(
-                    'NUPTK'	=> $id_gur,
-                    'periode'	=> $bln,
-                    'jam'		=> $jam,
-                    'nominal_gaji'	=> $tarif_per_jam,
-                    'tgl_gaji' => date('Y-m-d')
+                // Get guru name for keterangan
+                $guru = $this->db->get_where('guru', ['NUPTK' => $id_gur])->row();
+                $nama_guru = $guru ? $guru->nama_guru : $id_gur;
+
+                // Insert to pengeluaran FIRST (gaji berelasi ke pengeluaran)
+                $pen_insert = array(
+                    'nominal_pengeluaran' => $total_gaji_guru,
+                    'tgl_pengeluaran'     => date('Y-m-d'),
+                    'ket_pengeluaran'     => 'Pembayaran Gaji: ' . $nama_guru . ' (' . $bln . ')'
                 );
-                
-                $this->M_General->insert($this->table,$insert);
-                $total_kas += $total_gaji_guru;
+                $this->M_General->insert('pengeluaran', $pen_insert);
+                $id_pengeluaran = $this->db->insert_id();
+
+                // Insert gaji with FK to pengeluaran
+                $insert = array(
+                    'NUPTK'          => $id_gur,
+                    'periode'        => $bln,
+                    'jam'            => $jam,
+                    'nominal_gaji'   => $tarif_per_jam,
+                    'tgl_gaji'       => date('Y-m-d'),
+                    'id_pengeluaran' => $id_pengeluaran
+                );
+                $this->M_General->insert($this->table, $insert);
                 $success = true;
             }
-        }
-
-        if($total_kas > 0) {
-            $this->M_General->update_kas('kas_keluar',$total_kas);
         }
         
         if($success) {

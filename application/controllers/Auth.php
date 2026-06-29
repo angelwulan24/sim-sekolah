@@ -45,7 +45,6 @@ class Auth extends CI_Controller {
 					'role'	=> $user['role']
 				);
 				$this->session->set_userdata( $data );
-				$this->M_General->cek_laporan();
 				if($user['role'] == 3){
 					redirect('StudentArea','refresh');
 				} else {

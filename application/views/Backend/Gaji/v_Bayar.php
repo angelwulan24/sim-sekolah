@@ -20,16 +20,55 @@
                             <label>Pilih Gaji pada Bulan</label>
                             <?php 
                                $t = Date('Y'); 
-                               $b = array('Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember');
+                               $b = array('Juli','Agustus','September','Oktober','November','Desember','Januari','Februari','Maret','April','Mei','Juni');
                             ?>
                             <select name="bulan" required class="form-control" data-placeholder="-- Pilih Bulan --">
                                 <option value="">-- Pilih Bulan --</option>
-                                <?php foreach ($b as $bulan_nama) { 
-                                    $periode = $bulan_nama.'-'.$t;
-                                    if (!in_array($periode, $paid_months)) {
-                                        echo '<option value="'.$periode.'">'.$periode.'</option>';
+                                <?php 
+                                    $current_month_index = date('n') - 1;
+                                    // foreach ($b as $key => $bulan_nama) {
+                                        
+                                    //     // Handle specific Y/Y transition
+                                    //     $next_year = $t - 2;
+                                    //     if ($key >= 6) { // Jika saat ini semester genap (Jan-Juni), cek apakah sudah semester genap tahun ajaran berikutnya
+                                    //         $next_year = $t-1;
+                                    //     }
+
+                                    //     $periode = $bulan_nama.'-'.$next_year;
+
+                                    //     if (!in_array($periode, $paid_months)) {
+                                    //         echo '<option value="'.$periode.'">'.$periode.'</option>';
+                                    //     }
+
+                                    //     // if ($key <= $current_month_index) { // Hanya tampilkan bulan berjalan dan sebelumnya
+                                    //     //     $periode = $bulan_nama.'-'.$t;
+                                    //     //     if (!in_array($periode, $paid_months)) {
+                                    //     //         echo '<option value="'.$periode.'">'.$periode.'</option>';
+                                    //     //     }
+                                    //     // }
+                                    // }
+                                    foreach ($b as $key => $bulan_nama) {
+                                        
+                                        // Handle specific Y/Y transition
+                                        $next_year = $t - 1;
+                                        if ($key >= 6) { // Jika saat ini semester genap (Jan-Juni), cek apakah sudah semester genap tahun ajaran berikutnya
+                                            $next_year = $t;
+                                        }
+
+                                        $periode = $bulan_nama.'-'.$next_year;
+
+                                        if (!in_array($periode, $paid_months)) {
+                                            echo '<option value="'.$periode.'">'.$periode.'</option>';
+                                        }
+
+                                        // if ($key <= $current_month_index) { // Hanya tampilkan bulan berjalan dan sebelumnya
+                                        //     $periode = $bulan_nama.'-'.$t;
+                                        //     if (!in_array($periode, $paid_months)) {
+                                        //         echo '<option value="'.$periode.'">'.$periode.'</option>';
+                                        //     }
+                                        // }
                                     }
-                                } ?>
+                                ?>
                             </select>
                         </div>
                         <div class="col-md-6">

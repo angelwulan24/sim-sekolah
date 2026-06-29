@@ -44,10 +44,6 @@ class Laporan extends CI_Controller {
 		}
 		ini_set('display_errors', '0');
 
-		if (is_cli()) {
-			$_POST['jenis_cetak'] = 'bulan';
-			$_POST['print_bulan'] = '2026-04';
-		}
 		$jenis_cetak = $this->input->post('jenis_cetak');
 
 		if ($jenis_cetak == 'bulan') {
@@ -72,7 +68,8 @@ class Laporan extends CI_Controller {
 			$this->db->where('tanggal <=', $akhir);
 		}
 
-		$a = $this->db->get('laporan')->result();
+		// Query from v_laporan (dynamic aggregate) instead of deleted laporan table
+		$a = $this->db->get('v_laporan')->result();
 		$this->mod->Cetak_periode($a, $awal, $akhir);
 	}
 
@@ -86,6 +83,7 @@ class Laporan extends CI_Controller {
 		$data['title']	= 'Detail '.$this->parents.' Kas | SIM Sekolah ';
 		$data['judul']	= 'Detail '.$this->parents.' Kas';
 		$data['icon']	= $this->icon;
+		// $id is now a date string (Y-m-d)
 		$data['isi']	= $this->M_General->get_laporan($id);
 
 	$this->template->views('Backend/v_Detail',$data);

@@ -92,21 +92,18 @@ CREATE TABLE `siswa` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Table structure for table `gaji`
+-- Table structure for table `pemasukan`
+-- (field `sekarang` dihapus - tidak digunakan lagi)
 --
 
-DROP TABLE IF EXISTS `gaji`;
-CREATE TABLE `gaji` (
-  `id_gaji` int(11) NOT NULL AUTO_INCREMENT,
-  `NUPTK` varchar(20) NOT NULL,
-  `periode` varchar(20) NOT NULL,
-  `jam` varchar(4) NOT NULL,
-  `nominal_gaji` varchar(12) NOT NULL,
-  `tgl_gaji` date NOT NULL,
+DROP TABLE IF EXISTS `pemasukan`;
+CREATE TABLE `pemasukan` (
+  `id_pemasukan` int(11) NOT NULL AUTO_INCREMENT,
+  `tgl_pemasukan` date NOT NULL,
+  `ket_pemasukan` varchar(100) NOT NULL,
+  `nominal_pemasukan` varchar(12) NOT NULL,
   `tanggal` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id_gaji`),
-  KEY `fk_gaji_guru` (`NUPTK`),
-  CONSTRAINT `fk_gaji_guru` FOREIGN KEY (`NUPTK`) REFERENCES `guru` (`NUPTK`) ON DELETE CASCADE ON UPDATE CASCADE
+  PRIMARY KEY (`id_pemasukan`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -124,21 +121,6 @@ CREATE TABLE `jenis_tagihan` (
   PRIMARY KEY (`kode_tagihan`),
   KEY `fk_jenis_tagihan_kelas` (`id_kelas`),
   CONSTRAINT `fk_jenis_tagihan_kelas` FOREIGN KEY (`id_kelas`) REFERENCES `kelas` (`id_kelas`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Table structure for table `pemasukan`
---
-
-DROP TABLE IF EXISTS `pemasukan`;
-CREATE TABLE `pemasukan` (
-  `id_pemasukan` int(11) NOT NULL AUTO_INCREMENT,
-  `sekarang` varchar(15) NOT NULL,
-  `tgl_pemasukan` date NOT NULL,
-  `ket_pemasukan` varchar(100) NOT NULL,
-  `nominal_pemasukan` varchar(12) NOT NULL,
-  `tanggal` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id_pemasukan`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -164,13 +146,13 @@ CREATE TABLE `tagihan_siswa` (
 
 --
 -- Table structure for table `pengeluaran`
+-- (field `sekarang` dihapus - tidak digunakan lagi)
 --
 
 DROP TABLE IF EXISTS `pengeluaran`;
 CREATE TABLE `pengeluaran` (
   `id_pengeluaran` int(11) NOT NULL AUTO_INCREMENT,
   `nominal_pengeluaran` varchar(12) NOT NULL,
-  `sekarang` varchar(10) NOT NULL,
   `tgl_pengeluaran` date NOT NULL,
   `ket_pengeluaran` text NOT NULL,
   `tanggal` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -179,21 +161,47 @@ CREATE TABLE `pengeluaran` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Table structure for table `laporan`
+-- Table structure for table `gaji`
+-- (ditambah id_pengeluaran - FK ke pengeluaran)
+-- Setiap pembayaran gaji guru kini membuat record di tabel pengeluaran,
+-- dan gaji.id_pengeluaran menunjuk ke record pengeluaran tersebut.
 --
 
-DROP TABLE IF EXISTS `laporan`;
-CREATE TABLE `laporan` (
+DROP TABLE IF EXISTS `gaji`;
+CREATE TABLE `gaji` (
+  `id_gaji` int(11) NOT NULL AUTO_INCREMENT,
+  `NUPTK` varchar(20) NOT NULL,
+  `periode` varchar(20) NOT NULL,
+  `jam` varchar(4) NOT NULL,
+  `nominal_gaji` varchar(12) NOT NULL,
+  `tgl_gaji` date NOT NULL,
+  `tanggal` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `id_pengeluaran` int(11) DEFAULT NULL COMMENT 'FK ke pengeluaran - setiap gaji memiliki record pengeluaran terkait',
+  PRIMARY KEY (`id_gaji`),
+  KEY `fk_gaji_guru` (`NUPTK`),
+  KEY `fk_gaji_pengeluaran` (`id_pengeluaran`),
+  CONSTRAINT `fk_gaji_guru` FOREIGN KEY (`NUPTK`) REFERENCES `guru` (`NUPTK`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_gaji_pengeluaran` FOREIGN KEY (`id_pengeluaran`) REFERENCES `pengeluaran` (`id_pengeluaran`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `kas_awal`
+-- Menyimpan saldo pembuka kas sekolah.
+-- Tabel laporan dihapus - keuangan kini dihitung dinamis dari tabel sumber.
+--
+
+DROP TABLE IF EXISTS `kas_awal`;
+CREATE TABLE `kas_awal` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `saldo_awal` varchar(15) NOT NULL DEFAULT '0',
-  `kas_masuk` varchar(15) DEFAULT '0',
-  `kas_keluar` varchar(15) NOT NULL DEFAULT '0',
+  `saldo_awal` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `keterangan` varchar(100) DEFAULT NULL,
   `tanggal` date NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Temporary table structure for view `v_pengeluaran_gabungan`
+-- View: v_pengeluaran_gabungan
+-- Disederhanakan - tidak lagi memerlukan UNION karena gaji kini memiliki FK ke pengeluaran
 --
 
 DROP TABLE IF EXISTS `v_pengeluaran_gabungan`;
@@ -202,7 +210,6 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 /*!50001 CREATE TABLE `v_pengeluaran_gabungan` (
   `id` tinyint NOT NULL,
-  `sekarang` tinyint NOT NULL,
   `tanggal` tinyint NOT NULL,
   `keterangan` tinyint NOT NULL,
   `nominal` tinyint NOT NULL,
@@ -219,15 +226,36 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET @saved_cs_client          = @@character_set_client */;
 /*!50001 SET @saved_cs_results         = @@character_set_results */;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = cp850 */;
-/*!50001 SET character_set_results     = cp850 */;
-/*!50001 SET collation_connection      = cp850_general_ci */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `v_pengeluaran_gabungan` AS select `pengeluaran`.`id_pengeluaran` AS `id`,`pengeluaran`.`sekarang` AS `sekarang`,`pengeluaran`.`tanggal` AS `tanggal`,`pengeluaran`.`ket_pengeluaran` AS `keterangan`,`pengeluaran`.`nominal_pengeluaran` AS `nominal`,`pengeluaran`.`bukti` AS `bukti` from `pengeluaran` union all select `g`.`id_gaji` AS `id`,`g`.`periode` AS `sekarang`,`g`.`tanggal` AS `tanggal`,concat('Pembayaran Gaji Guru: ',`u`.`nama_guru`,' (',`g`.`periode`,')') AS `keterangan`,(`g`.`jam` * `g`.`nominal_gaji`) AS `nominal`,'' AS `bukti` from (`gaji` `g` join `guru` `u` on(`g`.`NUPTK` = `u`.`NUPTK`)) */;
+/*!50001 VIEW `v_pengeluaran_gabungan` AS select `p`.`id_pengeluaran` AS `id`,DATE_FORMAT(`p`.`tgl_pengeluaran`,'%Y-%m-%d') AS `tanggal`,`p`.`ket_pengeluaran` AS `keterangan`,CAST(`p`.`nominal_pengeluaran` AS decimal(15,2)) AS `nominal`,`p`.`bukti` AS `bukti` from `pengeluaran` `p` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- View: v_laporan
+-- Agregat dinamis dari tabel pemasukan, tagihan_siswa, dan pengeluaran.
+-- Menggantikan tabel laporan yang dihapus.
+--
+
+/*!50001 DROP VIEW IF EXISTS `v_laporan`*/;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `v_laporan` AS
+select tanggal, SUM(kas_masuk) AS kas_masuk, SUM(kas_keluar) AS kas_keluar
+from (
+    select DATE(`tgl_pemasukan`) AS tanggal, CAST(`nominal_pemasukan` AS decimal(15,2)) AS kas_masuk, 0 AS kas_keluar from `pemasukan`
+    union all
+    select DATE(`ts`.`tgl_pembayaran`) AS tanggal, CAST(`j`.`nominal_tagihan` AS decimal(15,2)) AS kas_masuk, 0 AS kas_keluar from (`tagihan_siswa` `ts` join `jenis_tagihan` `j` on(`ts`.`kode_tagihan` = `j`.`kode_tagihan`)) where `ts`.`status` = 'Lunas' and `ts`.`tgl_pembayaran` is not null
+    union all
+    select DATE(`tgl_pengeluaran`) AS tanggal, 0 AS kas_masuk, CAST(`nominal_pengeluaran` AS decimal(15,2)) AS kas_keluar from `pengeluaran`
+) AS agg
+group by tanggal */;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

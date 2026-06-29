@@ -1,25 +1,35 @@
 <?php 
 // 1. Data Keuangan Hari Ini
 $today = date('Y-m-d');
-$g = $this->db->query("SELECT saldo_awal, kas_masuk, kas_keluar FROM laporan WHERE tanggal = '$today'")->row_array();
 
-if (!$g) {
-    $g = ['saldo_awal' => 0, 'kas_masuk' => 0, 'kas_keluar' => 0];
-    $last = $this->db->query("SELECT (saldo_awal + kas_masuk - kas_keluar) as saldo FROM laporan ORDER BY tanggal DESC LIMIT 1")->row();
-    if ($last) $g['saldo_awal'] = $last->saldo;
-}
+// Kas masuk hari ini: pemasukan lainnya + tagihan siswa lunas
+$pemasukan_today = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pemasukan AS DECIMAL(15,2))), 0) AS total FROM pemasukan WHERE tgl_pemasukan = '$today'")->row()->total ?? 0;
+$tagihan_today = $this->db->query("SELECT COALESCE(SUM(CAST(j.nominal_tagihan AS DECIMAL(15,2))), 0) AS total FROM tagihan_siswa ts JOIN jenis_tagihan j ON ts.kode_tagihan = j.kode_tagihan WHERE ts.status = 'Lunas' AND DATE(ts.tgl_pembayaran) = '$today'")->row()->total ?? 0;
+$kas_masuk_today = $pemasukan_today + $tagihan_today;
 
-// 2. Saldo Akhir
-$total_data = $this->db->query("SELECT SUM(kas_masuk) as total_masuk, SUM(kas_keluar) as total_keluar FROM laporan")->row();
-$sisa_dana = ($total_data->total_masuk ?? 0) - ($total_data->total_keluar ?? 0);
+// Kas keluar hari ini: semua pengeluaran (termasuk gaji yang sudah masuk via FK)
+$kas_keluar_today = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pengeluaran AS DECIMAL(15,2))), 0) AS total FROM pengeluaran WHERE tgl_pengeluaran = '$today'")->row()->total ?? 0;
+
+// Saldo awal dari tabel kas_awal
+$kas_awal_row = $this->db->query("SELECT saldo_awal FROM kas_awal ORDER BY id ASC LIMIT 1")->row();
+$saldo_awal_global = $kas_awal_row ? $kas_awal_row->saldo_awal : 0;
+
+// Total semua pemasukan dan pengeluaran (saldo akhir kumulatif)
+$total_masuk_all = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pemasukan AS DECIMAL(15,2))), 0) AS total FROM pemasukan")->row()->total ?? 0;
+$total_tagihan_all = $this->db->query("SELECT COALESCE(SUM(CAST(j.nominal_tagihan AS DECIMAL(15,2))), 0) AS total FROM tagihan_siswa ts JOIN jenis_tagihan j ON ts.kode_tagihan = j.kode_tagihan WHERE ts.status = 'Lunas'")->row()->total ?? 0;
+$total_keluar_all = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pengeluaran AS DECIMAL(15,2))), 0) AS total FROM pengeluaran")->row()->total ?? 0;
+$sisa_dana = $saldo_awal_global + $total_masuk_all + $total_tagihan_all - $total_keluar_all;
+
+// Untuk card tampilan hari ini, ambil kas masuk & keluar
+$g = ['saldo_awal' => $saldo_awal_global, 'kas_masuk' => $kas_masuk_today, 'kas_keluar' => $kas_keluar_today];
 
 // 3. Statistik Sekolah
 $count_guru  = $this->M_General->countAll('guru');
 $count_siswa = $this->M_General->countAll('siswa');
 $count_kelas = $this->M_General->countAll('kelas');
 
-// 4. Data Grafik (7 Hari Terakhir)
-$chart_data = $this->db->query("SELECT DATE_FORMAT(tanggal, '%d %b') as tgl, kas_masuk, kas_keluar FROM laporan ORDER BY tanggal DESC LIMIT 7")->result();
+// 4. Data Grafik (7 Hari Terakhir) - dari v_laporan (aggregate view)
+$chart_data = $this->db->query("SELECT DATE_FORMAT(tanggal, '%d %b') as tgl, kas_masuk, kas_keluar FROM v_laporan ORDER BY tanggal DESC LIMIT 7")->result();
 $chart_labels = []; $chart_masuk = []; $chart_keluar = [];
 foreach(array_reverse($chart_data) as $row) {
     $chart_labels[] = $row->tgl;

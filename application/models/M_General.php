@@ -90,57 +90,20 @@ class M_General extends CI_Model{
     }
 
     function cek_laporan(){
-        date_default_timezone_set('Asia/Jakarta');
-        $this->db->where('tanggal',date('Y-m-d'));
-        $cek = $this->db->get('laporan')->num_rows();
-        if ($cek > 0){
+        // Tabel laporan telah dihapus - fungsi ini dipertahankan untuk kompatibilitas
         return;
-        }
-        else{
-            $sql = $this->db->query("SELECT kas_masuk,kas_keluar,saldo_awal FROM laporan ORDER BY tanggal DESC LIMIT 1")->row_array();
-            if(!empty($sql)){
-                $kas_awal = $sql['saldo_awal'] + $sql['kas_masuk'] - $sql['kas_keluar'];
-                $this->db->insert('laporan',array('tanggal'=>date('Y-m-d'),'saldo_awal'=>$kas_awal));
-            }
-            else{
-                $this->db->insert('laporan',array('tanggal'=>date('Y-m-d')));
-            }
-        return;
-        }
     }
 
     function update_kas($tipe,$nominal){
-        // Ensure there is a laporan row for today
-        $this->cek_laporan();
-
-        // Calculate dynamic kas_masuk for today
-        $today = date('Y-m-d');
-        
-        $pemasukan_today = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pemasukan AS DECIMAL(15,2))), 0) AS total FROM pemasukan WHERE tgl_pemasukan = '$today'")->row()->total;
-        $tagihan_today = $this->db->query("SELECT COALESCE(SUM(CAST(j.nominal_tagihan AS DECIMAL(15,2))), 0) AS total 
-                                            FROM tagihan_siswa AS t 
-                                            JOIN jenis_tagihan AS j ON t.kode_tagihan = j.kode_tagihan 
-                                            WHERE t.status = 'Lunas' AND DATE(t.tgl_pembayaran) = '$today'")->row()->total;
-        $kas_masuk_new = $pemasukan_today + $tagihan_today;
-
-        // Calculate dynamic kas_keluar for today
-        $pengeluaran_today = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pengeluaran AS DECIMAL(15,2))), 0) AS total FROM pengeluaran WHERE tgl_pengeluaran = '$today'")->row()->total;
-        $gaji_today = $this->db->query("SELECT COALESCE(SUM(CAST(jam AS DECIMAL(10,2)) * CAST(nominal_gaji AS DECIMAL(15,2))), 0) AS total FROM gaji WHERE tgl_gaji = '$today'")->row()->total;
-        $kas_keluar_new = $pengeluaran_today + $gaji_today;
-
-        // Update the laporan record for today
-        $this->db->where('tanggal', $today);
-        $this->db->update('laporan', array(
-            'kas_masuk' => $kas_masuk_new,
-            'kas_keluar' => $kas_keluar_new
-        ));
+        // Tabel laporan telah dihapus.
+        // Data keuangan kini dihitung dinamis langsung dari tabel pemasukan, tagihan_siswa, dan pengeluaran.
         return;
     }
 
     function get_Laporan($id){
 
-        $r = $this->db->query("SELECT tanggal FROM laporan where id = '$id'")->row_array();
-        $t = $r['tanggal'];
+        // $id adalah date string (Y-m-d) sejak tabel laporan dihapus
+        $t = $id;
 
         // Ambil SEMUA tagihan dari tabel tagihan_siswa yang dibayar pada tanggal $t
         $all_tagihan = $this->db->query("SELECT s.nama_siswa AS name, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal 
@@ -171,12 +134,13 @@ class M_General extends CI_Model{
             }
         }
 
-        $pemasukan = $this->db->query("SELECT nominal_pemasukan AS nominal, ket_pemasukan AS keterangan FROM pemasukan WHERE tgl_pemasukan = '$t'")->result();
+        $pemasukan = $this->db->query("SELECT nominal_pemasukan AS nominal, ket_pemasukan AS keterangan FROM pemasukan WHERE DATE(tgl_pemasukan) = '$t'")->result();
         // Gabungkan tagihan kustom ke pemasukan lainnya agar muncul di laporan
         $pemasukan = array_merge($pemasukan, $lainnya_tagihan);
 
         $gaji     = $this->db->query("SELECT u.nama_guru AS name, g.periode, (g.jam * g.nominal_gaji) as gaji FROM gaji AS g JOIN guru AS u ON g.NUPTK = u.NUPTK WHERE g.tgl_gaji = '$t'")->result();
-        $pengeluaran = $this->db->query("SELECT nominal_pengeluaran AS nominal, ket_pengeluaran AS keterangan FROM pengeluaran WHERE tgl_pengeluaran = '$t'")->result();
+        $pengeluaran = $this->db->query("SELECT nominal_pengeluaran AS nominal, ket_pengeluaran AS keterangan FROM pengeluaran p WHERE DATE(tgl_pengeluaran) = '$t' AND NOT EXISTS (SELECT 1 FROM gaji g WHERE g.id_pengeluaran = p.id_pengeluaran)")->result();
+
 
         return array('baju'=>$baju,'gaji'=>$gaji,'pemasukan'=>$pemasukan,'pendaftaran'=>$pendaftaran,'pengeluaran'=>$pengeluaran,'buku'=>$buku,'spp'=>$spp,'ujian'=>$ujian,'tanggal'=>$t);
 

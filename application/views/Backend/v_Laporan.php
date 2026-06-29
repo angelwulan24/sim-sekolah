@@ -40,10 +40,8 @@
                         <tr>
                             <th style="width: 10px;">No</th>
                             <th>Tanggal</th>
-                            <th>Saldo Awal</th>
                             <th>Kas Masuk</th>
                             <th>Kas Keluar</th>
-                            <th>Saldo Akhir</th>
                             <th width="100">Aksi</th>
                         </tr>
                     </thead>
@@ -192,19 +190,11 @@
                     "data": "tanggal"
                 },
                 {
-                    "data": "saldo_awal",
-                    render: $.fn.dataTable.render.number('.', ',', '')
-                },
-                {
                     "data": "kas_masuk",
                     render: $.fn.dataTable.render.number('.', ',', '')
                 },
                 {
                     "data": "kas_keluar",
-                    render: $.fn.dataTable.render.number('.', ',', '')
-                },
-                {
-                    "data": "saldo_akhir",
                     render: $.fn.dataTable.render.number('.', ',', '')
                 },
                 {
