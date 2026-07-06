@@ -12,6 +12,7 @@
                       <th>Tanggal</th>
                       <th>Nominal</th>
                       <th>Keterangan</th>
+                      <th width="120">Aksi</th>
 			            </tr>
 		            </thead>
 		            <tbody>
@@ -111,7 +112,12 @@
                 },
                 {"data": "Tgl"},
                 {"data": "Total",render: $.fn.dataTable.render.number('.',',','')},
-                {"data": "keterangan"}
+                {"data": "keterangan"},
+                {
+                    "data": "view",
+                    "orderable": false,
+                    "searchable": false
+                }
             ],
             order: [[0, 'asc']],
             rowId: function(a){
@@ -156,6 +162,9 @@
 				if (label == 'simpan'){
 				 	url = '<?=base_url($this->uri->segment(1).'/Simpan')?>';
 				 	method = 'Tambah';
+				} else {
+				 	url = '<?=base_url($this->uri->segment(1).'/Ubah')?>';
+				 	method = 'Ubah';
 				}
 				var isi = new FormData($('#form')[0]);
 				$.ajax({
@@ -197,6 +206,56 @@
 		$('.help-block').empty(); 
 		$('#modal-form').appendTo("body").modal('show');
 		$('.modal-title').text('Tambah Data');
+	}
+
+	function Ubah(id){
+		label = 'ubah';
+		$('#form')[0].reset();
+		$('.form-group').removeClass('has-error');
+		$('.help-block').empty();
+
+		$.ajax({
+			url: "<?=base_url($this->uri->segment(1).'/edit/')?>"+id,
+			type:"GET",
+			dataType:"JSON",
+			success:function(data){
+				$('[name="id"]').val(data.id_pemasukan);
+				$('[name="nominal"]').val(data.nominal_pemasukan);
+				$('[name="keterangan"]').val(data.ket_pemasukan);
+				$('#modal-form').appendTo("body").modal('show');
+				$('.modal-title').text('Ubah Data');
+			},
+			error: function (jqXHR, textStatus, errorThrown){
+				sweet('Oops...','Data tidak dapat diambil','error');
+			}
+		});
+	}
+
+	function Hapus(id){
+		Swal({
+			title: 'Ingin menghapus data?',
+			type: 'question',
+			showCancelButton: true,
+			confirmButtonColor: '#3085d6',
+			cancelButtonColor: '#d33',
+			confirmButtonText: 'Ya',
+			cancelButtonText: 'Batal'
+		}).then((result) => {
+			if(result.value) {
+				$.ajax({
+					url : "<?=base_url($this->uri->segment(1).'/Hapus')?>/"+id,
+					type: "POST",
+					dataType: "JSON",
+					success: function(data){
+						reload();
+						sweet('Dihapus !','Berhasil Hapus Data','success');
+					},
+					error: function (jqXHR, textStatus, errorThrown){
+						sweet('Oops...','Gagal Hapus Data','error');
+					}
+				});
+			}
+		});
 	}
 
 </script>

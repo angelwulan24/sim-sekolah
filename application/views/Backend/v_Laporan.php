@@ -282,26 +282,40 @@
                 }
             }
 
-            // Success alert using SweetAlert2
+            // Confirmation popup using SweetAlert
             Swal({
-                title: 'Berhasil!',
-                text: 'Laporan sedang dicetak dan akan terbuka di tab baru.',
-                type: 'success',
-                timer: 2000,
-                showConfirmButton: false
+                title: 'Konfirmasi Cetak Laporan',
+                text: 'Apakah Anda yakin ingin mencetak laporan ini?',
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Cetak',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.value) {
+                    // Success alert using SweetAlert2
+                    Swal({
+                        title: 'Berhasil!',
+                        text: 'Laporan sedang dicetak dan akan terbuka di tab baru.',
+                        type: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    // Programmatic native submit to bypass any library intercept
+                    var form = $('#form-print')[0];
+                    if (form) {
+                        form.submit();
+                    } else {
+                        Swal({ title: 'Error', text: 'Form #form-print tidak ditemukan!', type: 'error' });
+                    }
+
+                    setTimeout(function() {
+                        $('#modal-print').modal('hide');
+                    }, 500);
+                }
             });
-
-            // Programmatic native submit to bypass any library intercept
-            var form = $('#form-print')[0];
-            if (form) {
-                form.submit();
-            } else {
-                Swal({ title: 'Error', text: 'Form #form-print tidak ditemukan!', type: 'error' });
-            }
-
-            setTimeout(function() {
-                $('#modal-print').modal('hide');
-            }, 500);
         });
 
     });

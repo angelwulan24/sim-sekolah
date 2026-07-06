@@ -49,6 +49,7 @@
                       <th>Keterangan</th>
                       <th>Nominal Pengeluaran</th>
                       <th>Bukti</th>
+                      <th width="120">Aksi</th>
 			            </tr>
 		            </thead>
 		            <tbody>
@@ -174,6 +175,17 @@
                             return '-';
                         }
                     }
+                },
+                {
+                    "data": "id",
+                    "orderable": false,
+                    "searchable": false,
+                    "render": function(data, type, row) {
+                        if (row.id_gaji) {
+                            return '';
+                        }
+                        return '<center><a href="javascript:void(0)" onclick="Ubah(\''+data+'\')" class="btn btn-warning btn-xs"><i class="fa fa-pencil"></i> Ubah</a> <a href="javascript:void(0)" onclick="Hapus(\''+data+'\')" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i> Hapus</a></center>';
+                    }
                 }
             ],
             order: [[1, 'DESC']],
@@ -213,29 +225,63 @@
 				else error.insertAfter(element.parent());
 			},
 			submitHandler: function (form) {
-				$('#simpan').text('Menyimpan...');
-				$('#simpan').attr('disabled',true);
-				var url,method;
-				if (label == 'simpan'){
-				 	url = '<?=base_url($this->uri->segment(1).'/Simpan')?>';
-				 	method = 'Tambah';
+				if (label === 'ubah') {
+					$('#simpan').text('Menyimpan...');
+					$('#simpan').attr('disabled',true);
+					var url = '<?=base_url($this->uri->segment(1).'/Ubah')?>';
+					var method = 'Ubah';
+					var isi = new FormData($('#form')[0]);
+					$.ajax({
+						url: url,
+						type:"POST",
+						data: isi,
+						contentType:false,
+						processData:false,
+						dataType:"JSON",
+						success:function(data){
+							$('#modal-form').modal('hide');
+							reload();
+							sweet('Di '+method,'Berhasil '+method+' Data','success');
+							$('#simpan').text('Simpan');
+							$('#simpan').attr('disabled',false);
+						}
+					});
+				} else {
+					var textConfirm = 'Apakah Anda yakin ingin menambah data ini?';
+					Swal({
+						title: 'Konfirmasi',
+						text: textConfirm,
+						type: 'question',
+						showCancelButton: true,
+						confirmButtonColor: '#3085d6',
+						cancelButtonColor: '#d33',
+						confirmButtonText: 'Ya, Simpan',
+						cancelButtonText: 'Batal'
+					}).then((result) => {
+						if (result.value) {
+							$('#simpan').text('Menyimpan...');
+							$('#simpan').attr('disabled',true);
+							var url = '<?=base_url($this->uri->segment(1).'/Simpan')?>';
+							var method = 'Tambah';
+							var isi = new FormData($('#form')[0]);
+							$.ajax({
+								url: url,
+								type:"POST",
+								data: isi,
+								contentType:false,
+								processData:false,
+								dataType:"JSON",
+								success:function(data){
+									$('#modal-form').modal('hide');
+									reload();
+									sweet('Di '+method,'Berhasil '+method+' Data','success');
+									$('#simpan').text('Simpan');
+									$('#simpan').attr('disabled',false);
+								}
+							});
+						}
+					});
 				}
-				var isi = new FormData($('#form')[0]);
-				$.ajax({
-					url: url,
-					type:"POST",
-					data: isi,
-					contentType:false,
-					processData:false,
-					dataType:"JSON",
-					success:function(data){
-						$('#modal-form').modal('hide');
-						reload();
-						sweet('Di '+method,'Berhasil '+method+' Data','success');
-						$('#simpan').text('Simpan');
-		 				$('#simpan').attr('disabled',false);
-					}
-				});
 			},
 			invalidHandler: function (form) {}
 		});
@@ -265,6 +311,64 @@
 		$('.help-block').empty(); 
 		$('#modal-form').appendTo("body").modal('show');
 		$('.modal-title').text('Tambah Data Pengeluaran');
+	}
+
+	function Ubah(id){
+		label = 'ubah';
+		$('#form')[0].reset();
+		$('.form-group').removeClass('has-error');
+		$('.help-block').empty();
+
+		$.ajax({
+			url: "<?=base_url($this->uri->segment(1).'/edit/')?>"+id,
+			type:"GET",
+			dataType:"JSON",
+			success:function(data){
+				if(data.error) {
+					sweet('Gagal', data.error, 'error');
+					return;
+				}
+				$('[name="id"]').val(data.id_pengeluaran);
+				$('[name="nominal"]').val(data.nominal_pengeluaran);
+				$('[name="keterangan"]').val(data.ket_pengeluaran);
+				$('#modal-form').appendTo("body").modal('show');
+				$('.modal-title').text('Ubah Data Pengeluaran');
+			},
+			error: function (jqXHR, textStatus, errorThrown){
+				sweet('Oops...','Data tidak dapat diambil','error');
+			}
+		});
+	}
+
+	function Hapus(id){
+		Swal({
+			title: 'Ingin menghapus data?',
+			type: 'question',
+			showCancelButton: true,
+			confirmButtonColor: '#3085d6',
+			cancelButtonColor: '#d33',
+			confirmButtonText: 'Ya',
+			cancelButtonText: 'Batal'
+		}).then((result) => {
+			if(result.value) {
+				$.ajax({
+					url : "<?=base_url($this->uri->segment(1).'/Hapus')?>/"+id,
+					type: "POST",
+					dataType: "JSON",
+					success: function(data){
+						if(data.status) {
+							reload();
+							sweet('Dihapus !','Berhasil Hapus Data','success');
+						} else {
+							sweet('Gagal !', data.error ? data.error : 'Gagal Hapus Data', 'error');
+						}
+					},
+					error: function (jqXHR, textStatus, errorThrown){
+						sweet('Oops...','Gagal Hapus Data','error');
+					}
+				});
+			}
+		});
 	}
 
     $('#jenis_filter').change(function(){

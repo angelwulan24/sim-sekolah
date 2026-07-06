@@ -68,4 +68,26 @@ class Lainnya extends CI_Controller {
 		$this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
 
+	public function edit($id){
+		$data = $this->M_General->getByID($this->table,'id_pemasukan',$id,'DESC')->row();
+		echo json_encode($data);
+	}
+
+	function Ubah(){
+		$id = $this->input->post('id');
+		$update = array(
+			'nominal_pemasukan' => filter_string($this->input->post('nominal',TRUE)),
+			'ket_pemasukan'     => filter_string($this->input->post('keterangan',TRUE))
+		);
+		$this->M_General->update($this->table,$update,'id_pemasukan',$id);
+		$data['status'] = TRUE;
+		$this->output->set_content_type('application/json')->set_output(json_encode($data));
+	}
+
+	function Hapus($id){
+		$this->M_General->delete($this->table,'id_pemasukan',$id);
+		$data['status'] = TRUE;
+		$this->output->set_content_type('application/json')->set_output(json_encode($data));
+	}
+
 }

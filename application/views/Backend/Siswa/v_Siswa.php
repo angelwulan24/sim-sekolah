@@ -348,31 +348,45 @@
 				else error.insertAfter(element.parent());
 			},
 			submitHandler: function (form) {
-				$('#simpan').text('Menyimpan...');
-				$('#simpan').attr('disabled',true);
-				var url,method;
-				if (label == 'simpan'){
-				 	url = '<?=base_url($this->uri->segment(1).'/Simpan')?>';
-				 	method = 'Tambah';
-				}
-				else {
-				 	url = '<?=base_url($this->uri->segment(1).'/Ubah')?>';
-				 	method = 'Ubah';
-				}
-				var isi = new FormData($('#form')[0]);
-				$.ajax({
-					url: url,
-					type:"POST",
-					data: isi,
-					contentType:false,
-					processData:false,
-					dataType:"JSON",
-					success:function(data){
-						$('#modal-form').modal('hide');
-						reload();
-						sweet('Di '+method,'Berhasil '+method+' Data','success');
-						$('#simpan').text('Simpan');
-		 				$('#simpan').attr('disabled',false);
+				var textConfirm = label == 'simpan' ? 'Apakah Anda yakin ingin menambah data ini?' : 'Apakah Anda yakin ingin mengubah data ini?';
+				Swal({
+					title: 'Konfirmasi',
+					text: textConfirm,
+					type: 'question',
+					showCancelButton: true,
+					confirmButtonColor: '#3085d6',
+					cancelButtonColor: '#d33',
+					confirmButtonText: 'Ya, Simpan',
+					cancelButtonText: 'Batal'
+				}).then((result) => {
+					if (result.value) {
+						$('#simpan').text('Menyimpan...');
+						$('#simpan').attr('disabled',true);
+						var url,method;
+						if (label == 'simpan'){
+							url = '<?=base_url($this->uri->segment(1).'/Simpan')?>';
+							method = 'Tambah';
+						}
+						else {
+							url = '<?=base_url($this->uri->segment(1).'/Ubah')?>';
+							method = 'Ubah';
+						}
+						var isi = new FormData($('#form')[0]);
+						$.ajax({
+							url: url,
+							type:"POST",
+							data: isi,
+							contentType:false,
+							processData:false,
+							dataType:"JSON",
+							success:function(data){
+								$('#modal-form').modal('hide');
+								reload();
+								sweet('Di '+method,'Berhasil '+method+' Data','success');
+								$('#simpan').text('Simpan');
+								$('#simpan').attr('disabled',false);
+							}
+						});
 					}
 				});
 			},

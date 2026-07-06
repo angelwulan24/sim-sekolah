@@ -143,29 +143,43 @@
 				else error.insertAfter(element.parent());
 			},
 			submitHandler: function (form) {
-				$('#simpan').text('Menyimpan...');
-				$('#simpan').attr('disabled',true);
-				var url,method;
-				if (label == 'simpan'){
-				 	url = '<?=base_url($this->uri->segment(1).'/Simpan')?>';
-				 	method = 'Tambah';
-				}
-				var isi = $('#form').serialize();
-				$.ajax({
-					url: url,
-					type:"POST",
-					data: isi,
-					dataType:"JSON",
-					success:function(data){
-						$('#modal-form').modal('hide');
-						$('#simpan').text('Simpan');
-		 				$('#simpan').attr('disabled',false);
-						if(data.status){
-                        reload();
-						sweet('Sukses','Pembayaran Gaji Berhasil','success');
-                        }else{
-                            sweet('Gagal','Pembayaran Gaji Sudah dilakukan','error');
-                        }
+				var textConfirm = label == 'simpan' ? 'Apakah Anda yakin ingin menambah data ini?' : 'Apakah Anda yakin ingin mengubah data ini?';
+				Swal({
+					title: 'Konfirmasi',
+					text: textConfirm,
+					type: 'question',
+					showCancelButton: true,
+					confirmButtonColor: '#3085d6',
+					cancelButtonColor: '#d33',
+					confirmButtonText: 'Ya, Simpan',
+					cancelButtonText: 'Batal'
+				}).then((result) => {
+					if (result.value) {
+						$('#simpan').text('Menyimpan...');
+						$('#simpan').attr('disabled',true);
+						var url,method;
+						if (label == 'simpan'){
+							url = '<?=base_url($this->uri->segment(1).'/Simpan')?>';
+							method = 'Tambah';
+						}
+						var isi = $('#form').serialize();
+						$.ajax({
+							url: url,
+							type:"POST",
+							data: isi,
+							dataType:"JSON",
+							success:function(data){
+								$('#modal-form').modal('hide');
+								$('#simpan').text('Simpan');
+								$('#simpan').attr('disabled',false);
+								if(data.status){
+								reload();
+								sweet('Sukses','Pembayaran Gaji Berhasil','success');
+								}else{
+									sweet('Gagal','Pembayaran Gaji Sudah dilakukan','error');
+								}
+							}
+						});
 					}
 				});
 			},

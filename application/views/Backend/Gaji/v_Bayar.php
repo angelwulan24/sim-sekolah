@@ -108,7 +108,7 @@
                             
                             <div class="col-md-7">
                                 <div class="row" style="margin-top: 15px;">
-                                    <div class="col-md-6">
+                                    <div class="col-md-6 form-group-jam">
                                         <?php if(!$is_berhenti): ?>
                                             <input type="hidden" name="id_guru[]" value="<?=$g->id?>">
                                             <label style="font-size: 13px;">Jumlah Jam</label>
@@ -140,7 +140,7 @@
 <script type="text/javascript">
     $(document).ready(function() {
         // Otomatis hitung total saat jam atau tarif diketik
-        $(document).on('keyup input', '.jam-input, #tarif', function() {
+        $(document).on('keyup input change', '.jam-input, #tarif', function() {
             var tarif = $('#tarif').val() || 0;
             
             // Loop semua input jam untuk memperbarui total
@@ -150,40 +150,97 @@
                 var index = $(this).data('index');
                 $('#total_' + index).val(total);
             });
+
+            // Clear validation error when user types/changes input
+            if ($(this).hasClass('jam-input')) {
+                var val = $(this).val();
+                if (val !== '' && val !== null) {
+                    $(this).closest('.form-group-jam').removeClass('has-error');
+                    $(this).parent().find('.help-block-jam').remove();
+                }
+            }
         });
 
         $('#form-bayar').submit(function(e){
             e.preventDefault();
-            $('#btn-simpan').text('Menyimpan...');
-            $('#btn-simpan').attr('disabled',true);
-            
-            var isi = $(this).serialize();
-            $.ajax({
-                url: "<?=base_url($this->uri->segment(1).'/Simpan')?>",
-                type: "POST",
-                data: isi,
-                dataType: "JSON",
-                success: function(data){
-                    if(data.status){
-                        Swal({
-                            title: 'Sukses',
-                            text: 'Pembayaran Gaji Guru Berhasil! Semua data yang diisi telah disimpan.',
-                            type: 'success',
-                            showConfirmButton: false,
-                            timer: 2000
-                        });
-                        setTimeout(function(){
-                            window.location.href = "<?=base_url('Pengeluaran')?>";
-                        }, 2000);
-                    }else{
-                        $('#btn-simpan').text('Bayarkan Gaji');
-                        $('#btn-simpan').attr('disabled',false);
-                        Swal({
-                            title: 'Gagal',
-                            text: 'Gagal menyimpan / tidak ada jam yang diinput.',
-                            type: 'error'
-                        });
+            var form = $(this);
+
+            var empty_jam = false;
+            $('.jam-input').each(function() {
+                var val = $(this).val();
+                if (val === '' || val === null || val === undefined) {
+                    empty_jam = true;
+                    $(this).closest('.form-group-jam').addClass('has-error');
+                    if ($(this).parent().find('.help-block-jam').length === 0) {
+                        $(this).after('<span class="help-block help-block-jam" style="color: #dd4b39; display: block; margin-top: 5px;">Jam kerja harus diisi</span>');
                     }
+                } else {
+                    $(this).closest('.form-group-jam').removeClass('has-error');
+                    $(this).parent().find('.help-block-jam').remove();
+                }
+            });
+
+            if (empty_jam) {
+                Swal({
+                    title: 'Peringatan',
+                    text: 'Ada jam kerja guru yang belum diisi. Harap isi seluruh jam kerja guru aktif.',
+                    type: 'warning'
+                });
+                return false;
+            }
+            
+            Swal({
+                title: 'Konfirmasi Pembayaran Gaji',
+                text: 'Apakah Anda yakin ingin menyimpan dan membayarkan gaji guru untuk periode ini?',
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Bayarkan',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.value) {
+                    $('#btn-simpan').text('Menyimpan...');
+                    $('#btn-simpan').attr('disabled',true);
+                    
+                    var isi = form.serialize();
+                    $.ajax({
+                        url: "<?=base_url($this->uri->segment(1).'/Simpan')?>",
+                        type: "POST",
+                        data: isi,
+                        dataType: "JSON",
+                        success: function(data){
+                            if(data.status){
+                                Swal({
+                                    title: 'Sukses',
+                                    text: 'Pembayaran Gaji Guru Berhasil! Semua data yang diisi telah disimpan.',
+                                    type: 'success',
+                                    showConfirmButton: false,
+                                    timer: 2000
+                                });
+                                setTimeout(function(){
+                                    window.location.href = "<?=base_url('Pengeluaran')?>";
+                                }, 2000);
+                            }else{
+                                $('#btn-simpan').text('Bayarkan Gaji');
+                                $('#btn-simpan').attr('disabled',false);
+                                Swal({
+                                    title: 'Gagal',
+                                    text: 'Gagal menyimpan / tidak ada jam yang diinput.',
+                                    type: 'error'
+                                });
+                            }
+                        },
+                        error: function(){
+                            $('#btn-simpan').text('Bayarkan Gaji');
+                            $('#btn-simpan').attr('disabled',false);
+                            Swal({
+                                title: 'Gagal',
+                                text: 'Terjadi kesalahan pada server.',
+                                type: 'error'
+                            });
+                        }
+                    });
                 }
             });
         });

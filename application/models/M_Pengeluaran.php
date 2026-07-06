@@ -4,17 +4,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class M_Pengeluaran  extends CI_Model {
 
 	function getAllData($filter = array()){
-		// Query langsung dari pengeluaran (gaji sudah terintegrasi via FK, tidak perlu UNION lagi)
-		$this->datatables->select("id_pengeluaran AS id, DATE_FORMAT(tgl_pengeluaran,'%d-%m-%Y') AS Tgl, ket_pengeluaran AS keterangan, nominal_pengeluaran AS Total, bukti");
-		$this->datatables->from('pengeluaran');
+		$this->datatables->select("p.id_pengeluaran AS id, DATE_FORMAT(p.tgl_pengeluaran,'%d-%m-%Y') AS Tgl, p.ket_pengeluaran AS keterangan, p.nominal_pengeluaran AS Total, p.bukti, g.id_gaji");
+		$this->datatables->from('pengeluaran p');
+		$this->datatables->join('gaji g', 'p.id_pengeluaran = g.id_pengeluaran', 'left');
 
 		if(!empty($filter['jenis']) && !empty($filter['tanggal'])){
             if($filter['jenis'] == 'hari'){
-                $this->datatables->where('DATE(tgl_pengeluaran)', $filter['tanggal']);
+                $this->datatables->where('DATE(p.tgl_pengeluaran)', $filter['tanggal']);
             } elseif($filter['jenis'] == 'bulan'){
-                $this->datatables->where("DATE_FORMAT(tgl_pengeluaran, '%Y-%m') = ", $filter['tanggal']);
+                $this->datatables->where("DATE_FORMAT(p.tgl_pengeluaran, '%Y-%m') = ", $filter['tanggal']);
             } elseif($filter['jenis'] == 'tahun'){
-                $this->datatables->where("YEAR(tgl_pengeluaran)", $filter['tanggal']);
+                $this->datatables->where("YEAR(p.tgl_pengeluaran)", $filter['tanggal']);
             }
 		}
 

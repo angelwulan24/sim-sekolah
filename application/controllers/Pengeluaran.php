@@ -83,4 +83,62 @@ class Pengeluaran extends CI_Controller {
 		$this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}
 
+	public function edit($id){
+		$is_gaji = $this->db->get_where('gaji', ['id_pengeluaran' => $id])->num_rows() > 0;
+		if ($is_gaji) {
+			echo json_encode(['error' => 'Pembayaran Gaji tidak dapat diubah / diedit secara manual.']);
+			return;
+		}
+		$data = $this->M_General->getByID($this->table,'id_pengeluaran',$id,'DESC')->row();
+		echo json_encode($data);
+	}
+
+	function Ubah(){
+		$id = $this->input->post('id');
+		$is_gaji = $this->db->get_where('gaji', ['id_pengeluaran' => $id])->num_rows() > 0;
+		if ($is_gaji) {
+			$data['status'] = FALSE;
+			$data['error'] = 'Pembayaran Gaji tidak dapat diubah secara manual.';
+			$this->output->set_content_type('application/json')->set_output(json_encode($data));
+			return;
+		}
+
+		$update = array(
+			'nominal_pengeluaran' => filter_string($this->input->post('nominal',TRUE)),
+			'ket_pengeluaran'     => filter_string($this->input->post('keterangan',TRUE))
+		);
+
+		if(!empty($_FILES['bukti']['name'])){
+			$config['upload_path']	= './assets/images/';
+			$config['allowed_types']= 'gif|jpg|png|jpeg';
+			$config['max_size']		= 2048;
+			$config['encrypt_name']	= TRUE;
+
+			$this->load->library('upload', $config);
+			$this->upload->initialize($config);
+			
+			if($this->upload->do_upload('bukti')){
+				$uploadData = $this->upload->data();
+				$update['bukti'] = $uploadData['file_name'];
+			}
+		}
+
+		$this->M_General->update($this->table,$update,'id_pengeluaran',$id);
+		$data['status'] = TRUE;
+		$this->output->set_content_type('application/json')->set_output(json_encode($data));
+	}
+
+	function Hapus($id){
+		$is_gaji = $this->db->get_where('gaji', ['id_pengeluaran' => $id])->num_rows() > 0;
+		if ($is_gaji) {
+			$data['status'] = FALSE;
+			$data['error'] = 'Pembayaran Gaji tidak dapat dihapus secara manual.';
+			$this->output->set_content_type('application/json')->set_output(json_encode($data));
+			return;
+		}
+		$this->M_General->delete($this->table,'id_pengeluaran',$id);
+		$data['status'] = TRUE;
+		$this->output->set_content_type('application/json')->set_output(json_encode($data));
+	}
+
 }

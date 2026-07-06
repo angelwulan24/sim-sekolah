@@ -5,10 +5,12 @@ class M_Lainnya extends CI_Model {
 
 	function getAllData(){
 		$this->db->query("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))");
-		// Hapus sekarang dari SELECT - tidak ada lagi di tabel pemasukan
-		$this->datatables->select("MIN(id_pemasukan) AS id, DATE_FORMAT(tgl_pemasukan,'%d-%m-%Y') AS Tgl, Sum(CAST(nominal_pemasukan AS DECIMAL(15,2))) AS Total, GROUP_CONCAT(ket_pemasukan SEPARATOR ', ') AS keterangan");
+		$this->datatables->select("id_pemasukan AS id, DATE_FORMAT(tgl_pemasukan,'%d-%m-%Y') AS Tgl, nominal_pemasukan AS Total, ket_pemasukan AS keterangan");
 		$this->datatables->from('pemasukan');
-		$this->datatables->group_by("tgl_pemasukan");
+		
+		$btn = '<center><a href="javascript:void(0)" onclick="Ubah(\'$1\')" class="btn btn-warning btn-xs"><i class="fa fa-pencil"></i> Ubah</a> <a href="javascript:void(0)" onclick="Hapus(\'$1\')" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i> Hapus</a></center>';
+		$this->datatables->add_column('view', $btn, 'id');
+		
 		return $this->datatables->generate();
 	}
 

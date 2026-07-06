@@ -1,6 +1,6 @@
 <div style="margin-bottom: 10px;" class="col-xs-12">
   <div class="pull-right">
-       <a href="<?=base_url('Laporan/Cetak_detail/'.$this->uri->segment(3))?>" class="btn btn-info"><i class="fa fa-print"></i> Cetak</a>  
+       <a href="<?=base_url('Laporan/Cetak_detail/'.$this->uri->segment(3))?>" class="btn btn-info btn-print-laporan"><i class="fa fa-print"></i> Cetak</a>  
   </div>
 </div>
 
@@ -312,3 +312,27 @@ if (!empty($isi['pengeluaran'])) {
             </div>
             <!-- /.box -->
           </div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+    $(document).on('click', '.btn-print-laporan', function(e){
+        e.preventDefault();
+        var url = $(this).attr('href');
+        Swal({
+            title: 'Cetak Laporan',
+            text: 'Apakah Anda yakin ingin mencetak laporan detail ini?',
+            type: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Cetak',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if(result.value) {
+                window.open(url, '_blank');
+            }
+        });
+    });
+});
+</script>

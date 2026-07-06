@@ -182,31 +182,45 @@
 				else error.insertAfter(element.parent());
 			},
 			submitHandler: function (form) {
-				$('#simpan').text('Menyimpan...');
-				$('#simpan').attr('disabled',true);
-				var url,method;
-				if (label == 'simpan'){
-				 	url = '<?=base_url($this->uri->segment(1).'/Simpan')?>';
-				 	method = 'Tambah';
-				}
-				else {
-				 	url = '<?=base_url($this->uri->segment(1).'/Ubah')?>';
-				 	method = 'Ubah';
-				}
-				var isi = new FormData($('#form')[0]);
-				$.ajax({
-					url: url,
-					type:"POST",
-					data: isi,
-					contentType:false,
-					processData:false,
-					dataType:"JSON",
-					success:function(data){
-						$('#modal-form').modal('hide');
-						reload();
-						sweet('Di '+method,'Berhasil '+method+' Data','success');
-						$('#simpan').text('Simpan');
-		 				$('#simpan').attr('disabled',false);
+				var textConfirm = label == 'simpan' ? 'Apakah Anda yakin ingin menambah data ini?' : 'Apakah Anda yakin ingin mengubah data ini?';
+				Swal({
+					title: 'Konfirmasi',
+					text: textConfirm,
+					type: 'question',
+					showCancelButton: true,
+					confirmButtonColor: '#3085d6',
+					cancelButtonColor: '#d33',
+					confirmButtonText: 'Ya, Simpan',
+					cancelButtonText: 'Batal'
+				}).then((result) => {
+					if (result.value) {
+						$('#simpan').text('Menyimpan...');
+						$('#simpan').attr('disabled',true);
+						var url,method;
+						if (label == 'simpan'){
+							url = '<?=base_url($this->uri->segment(1).'/Simpan')?>';
+							method = 'Tambah';
+						}
+						else {
+							url = '<?=base_url($this->uri->segment(1).'/Ubah')?>';
+							method = 'Ubah';
+						}
+						var isi = new FormData($('#form')[0]);
+						$.ajax({
+							url: url,
+							type:"POST",
+							data: isi,
+							contentType:false,
+							processData:false,
+							dataType:"JSON",
+							success:function(data){
+								$('#modal-form').modal('hide');
+								reload();
+								sweet('Di '+method,'Berhasil '+method+' Data','success');
+								$('#simpan').text('Simpan');
+								$('#simpan').attr('disabled',false);
+							}
+						});
 					}
 				});
 			},
@@ -262,6 +276,38 @@
             error: function (jqXHR, textStatus, errorThrown){
                 sweet('Oops...','Data tidak dapat diambil','error');
             }
+		});
+	}
+
+	function Hapus(id){
+		Swal({
+			title: 'Ingin menghapus data?',
+			text: 'Data kelas akan dihapus permanen dari sistem.',
+			type: 'question',
+			showCancelButton: true,
+			confirmButtonColor: '#3085d6',
+			cancelButtonColor: '#d33',
+			confirmButtonText: 'Ya',
+			cancelButtonText: 'Batal'
+		}).then((result) => {
+			if(result.value) {
+				$.ajax({
+					url : "<?=base_url($this->uri->segment(1).'/Hapus')?>/"+id,
+					type: "POST",
+					dataType: "JSON",
+					success: function(data){
+						if (data.status) {
+							reload();
+							sweet('Dihapus !','Berhasil Hapus Data Kelas','success');
+						} else {
+							sweet('Gagal !', data.error ? data.error : 'Gagal Hapus Data Kelas','error');
+						}
+					},
+					error: function (jqXHR, textStatus, errorThrown){
+						sweet('Oops...','Gagal Hapus Data Kelas','error');
+					}
+				});
+			}
 		});
 	}
 </script>

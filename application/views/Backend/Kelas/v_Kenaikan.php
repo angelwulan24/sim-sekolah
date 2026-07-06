@@ -38,7 +38,7 @@
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-primary" onclick="return confirm('Apakah anda yakin ingin memproses kenaikan kelas ini? Data yang sudah diubah tidak dapat dikembalikan secara otomatis.')">Proses Kenaikan</button>
+                        <button type="submit" class="btn btn-primary">Proses Kenaikan</button>
                     </div>
                 </div>
             <?=form_close()?>
@@ -49,5 +49,24 @@
 <script>
     $(document).ready(function() {
         $('.select2').select2();
+
+        $('form').submit(function(e) {
+            e.preventDefault();
+            var form = this;
+            Swal({
+                title: 'Konfirmasi Kenaikan Kelas',
+                text: 'Apakah anda yakin ingin memproses kenaikan kelas ini? Data yang sudah diubah tidak dapat dikembalikan secara otomatis.',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Proses',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.value) {
+                    form.submit();
+                }
+            });
+        });
     });
 </script>

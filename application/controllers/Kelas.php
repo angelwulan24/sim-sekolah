@@ -167,4 +167,20 @@ class Kelas extends CI_Controller {
 		
 		redirect('Kelas/Kenaikan');
 	}
+
+	function Hapus($id){
+		// Check if class has students
+		$siswa_count = $this->db->get_where('siswa', array('id_kelas' => $id))->num_rows();
+		if ($siswa_count > 0) {
+			$data['status'] = FALSE;
+			$data['error'] = 'Kelas tidak dapat dihapus karena masih memiliki siswa aktif.';
+			$this->output->set_content_type('application/json')->set_output(json_encode($data));
+			return;
+		}
+		
+		$this->M_General->delete($this->table,'id_kelas',$id);
+		$data['status'] = TRUE;
+		$this->output->set_content_type('application/json')->set_output(json_encode($data));
+	}
+
 }

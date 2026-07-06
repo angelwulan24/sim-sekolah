@@ -109,7 +109,7 @@
                                             <?php 
                                                 $print_url = base_url('StudentArea/print_tagihan/'.$tb->tagihan_id);
                                             ?>
-                                            <a href="<?= $print_url ?>" target="_blank" class="btn btn-abu-tua btn-xs btn-flat"><i class="fa fa-print"></i> Cetak Bukti</a>
+                                            <a href="<?= $print_url ?>" target="_blank" class="btn btn-abu-tua btn-xs btn-flat btn-print-tagihan"><i class="fa fa-print"></i> Cetak Bukti</a>
                                         <?php else: ?>
                                             <button class="btn btn-warning btn-xs btn-flat shadow pay-button" 
                                                     data-jenis="<?= $tb->jenis ?>" 
@@ -176,7 +176,7 @@
                                 </td>
                                 <td style="vertical-align:middle;">
                                     <?php if($tl->status == 'Lunas'): ?>
-                                        <a href="<?= base_url('StudentArea/print_tagihan/'.$tl->tagihan_id) ?>" target="_blank" class="btn btn-abu-tua btn-xs btn-flat"><i class="fa fa-print"></i> Cetak Bukti</a>
+                                        <a href="<?= base_url('StudentArea/print_tagihan/'.$tl->tagihan_id) ?>" target="_blank" class="btn btn-abu-tua btn-xs btn-flat btn-print-tagihan"><i class="fa fa-print"></i> Cetak Bukti</a>
                                     <?php else: ?>
                                         <button class="btn btn-warning btn-xs btn-flat shadow pay-button" 
                                                 data-jenis="<?= $tl->jenis ?>" 
@@ -285,52 +285,66 @@
         if (items.length === 0) return;
         
         var btn = $(this);
-        btn.html('<i class="fa fa-spinner fa-spin"></i> Memproses...').attr('disabled', true);
         
-        $.ajax({
-            url: '<?= base_url('StudentArea/get_token_bulk') ?>',
-            type: 'POST',
-            data: { items: JSON.stringify(items) },
-            dataType: 'json',
-            success: function(response){
-                btn.html('<i class="fa fa-shopping-cart"></i> Bayar Sekarang').attr('disabled', false);
+        Swal({
+            title: 'Konfirmasi Pembayaran',
+            text: 'Apakah Anda yakin ingin membayar tagihan yang dipilih?',
+            type: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Bayar',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if(result.value) {
+                btn.html('<i class="fa fa-spinner fa-spin"></i> Memproses...').attr('disabled', true);
                 
-                if(response.error){
-                    Swal({ title: 'Gagal', text: response.error, type: 'error' });
-                    return;
-                }
-                
-                if(response.token){
-                    snap.pay(response.token, {
-                        onSuccess: function(result){
-                            console.log('Payment success, verifying...', result);
-                            $.ajax({
-                                url: '<?= base_url('StudentArea/finish_payment') ?>',
-                                type: 'POST',
-                                data: { order_id: result.order_id },
-                                dataType: 'json',
-                                success: function(val){
-                                    Swal({ title: 'Sukses', text: 'Pembayaran Berhasil Diverifikasi!', type: 'success' })
+                $.ajax({
+                    url: '<?= base_url('StudentArea/get_token_bulk') ?>',
+                    type: 'POST',
+                    data: { items: JSON.stringify(items) },
+                    dataType: 'json',
+                    success: function(response){
+                        btn.html('<i class="fa fa-shopping-cart"></i> Bayar Sekarang').attr('disabled', false);
+                        
+                        if(response.error){
+                            Swal({ title: 'Gagal', text: response.error, type: 'error' });
+                            return;
+                        }
+                        
+                        if(response.token){
+                            snap.pay(response.token, {
+                                onSuccess: function(result){
+                                    console.log('Payment success, verifying...', result);
+                                    $.ajax({
+                                        url: '<?= base_url('StudentArea/finish_payment') ?>',
+                                        type: 'POST',
+                                        data: { order_id: result.order_id },
+                                        dataType: 'json',
+                                        success: function(val){
+                                            Swal({ title: 'Sukses', text: 'Pembayaran Berhasil Diverifikasi!', type: 'success' })
+                                            .then(() => { location.reload(); });
+                                        },
+                                        error: function(){
+                                            location.reload();
+                                        }
+                                    });
+                                },
+                                onPending: function(result){
+                                    Swal({ title: 'Menunggu', text: 'Silakan selesaikan pembayaran.', type: 'info' })
                                     .then(() => { location.reload(); });
                                 },
-                                error: function(){
-                                    location.reload();
+                                onError: function(result){
+                                    Swal({ title: 'Error', text: 'Pembayaran Gagal!', type: 'error' });
                                 }
                             });
-                        },
-                        onPending: function(result){
-                            Swal({ title: 'Menunggu', text: 'Silakan selesaikan pembayaran.', type: 'info' })
-                            .then(() => { location.reload(); });
-                        },
-                        onError: function(result){
-                            Swal({ title: 'Error', text: 'Pembayaran Gagal!', type: 'error' });
                         }
-                    });
-                }
-            },
-            error: function(){
-                btn.html('<i class="fa fa-shopping-cart"></i> Bayar Sekarang').attr('disabled', false);
-                Swal({ title: 'Error', text: 'Terjadi kesalahan sistem.', type: 'error' });
+                    },
+                    error: function(){
+                        btn.html('<i class="fa fa-shopping-cart"></i> Bayar Sekarang').attr('disabled', false);
+                        Swal({ title: 'Error', text: 'Terjadi kesalahan sistem.', type: 'error' });
+                    }
+                });
             }
         });
     });
@@ -351,28 +365,61 @@
             return;
         }
 
-        btn.html('<i class="fa fa-spinner fa-spin"></i>').attr('disabled', true);
-        
-        $.ajax({
-            url: '<?= base_url('StudentArea/get_token_bulk') ?>', // Using bulk endpoint for consistency
-            type: 'POST',
-            data: { items: JSON.stringify(item) },
-            dataType: 'json',
-            success: function(response){
-                btn.html('<i class="fa fa-money"></i> Bayar').attr('disabled', false);
-                if(response.token){
-                    snap.pay(response.token, {
-                        onSuccess: function(result){
-                            $.ajax({
-                                url: '<?= base_url('StudentArea/finish_payment') ?>',
-                                type: 'POST',
-                                data: { order_id: result.order_id },
-                                success: function(){ location.reload(); },
-                                error: function(){ location.reload(); }
+        Swal({
+            title: 'Konfirmasi Pembayaran',
+            text: 'Apakah Anda yakin ingin membayar tagihan ini?',
+            type: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Bayar',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if(result.value) {
+                btn.html('<i class="fa fa-spinner fa-spin"></i>').attr('disabled', true);
+                
+                $.ajax({
+                    url: '<?= base_url('StudentArea/get_token_bulk') ?>', // Using bulk endpoint for consistency
+                    type: 'POST',
+                    data: { items: JSON.stringify(item) },
+                    dataType: 'json',
+                    success: function(response){
+                        btn.html('<i class="fa fa-money"></i> Bayar').attr('disabled', false);
+                        if(response.token){
+                            snap.pay(response.token, {
+                                onSuccess: function(result){
+                                    $.ajax({
+                                        url: '<?= base_url('StudentArea/finish_payment') ?>',
+                                        type: 'POST',
+                                        data: { order_id: result.order_id },
+                                        success: function(){ location.reload(); },
+                                        error: function(){ location.reload(); }
+                                    });
+                                }
                             });
                         }
-                    });
-                }
+                    }
+                });
+            }
+        });
+    });
+
+    // Print Receipt confirmation
+    $(document).on('click', '.btn-print-tagihan', function(e){
+        e.preventDefault();
+        var url = $(this).attr('href');
+        Swal({
+            title: 'Cetak Bukti',
+            text: 'Apakah Anda yakin ingin mencetak bukti pembayaran ini?',
+            type: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Cetak',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if(result.value) {
+                window.open(url, '_blank');
             }
         });
     });
