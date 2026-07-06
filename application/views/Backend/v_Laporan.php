@@ -40,8 +40,8 @@
                         <tr>
                             <th style="width: 10px;">No</th>
                             <th>Tanggal</th>
-                            <th>Kas Masuk</th>
-                            <th>Kas Keluar</th>
+                            <th>Pemasukan</th>
+                            <th>Pengeluaran</th>
                             <th width="100">Aksi</th>
                         </tr>
                     </thead>

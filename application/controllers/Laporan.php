@@ -20,10 +20,10 @@ class Laporan extends CI_Controller {
 	public function index(){
 
 		$this->breadcrumb->append_crumb('SIM Sekolah','Beranda');
-		$this->breadcrumb->append_crumb($this->parents.' Kas',$this->parents);
+		$this->breadcrumb->append_crumb($this->parents,$this->parents);
 
-		$data['title']	= $this->parents.' Kas | SIM Sekolah';
-		$data['judul']	= $this->parents.' Kas';
+		$data['title']	= $this->parents.' | SIM Sekolah';
+		$data['judul']	= $this->parents;
 		$data['icon']	= $this->icon;
 
 	$this->template->views('/Backend/v_'.$this->parents,$data);
@@ -77,11 +77,11 @@ class Laporan extends CI_Controller {
 
 		$this->load->helper('data');
 		$this->breadcrumb->append_crumb('SIM Sekolah ',base_url());
-		$this->breadcrumb->append_crumb($this->parents.' Kas',base_url('Laporan'));
-		$this->breadcrumb->append_crumb('Detail Laporan Kas',$this->parents);
+		$this->breadcrumb->append_crumb($this->parents,base_url('Laporan'));
+		$this->breadcrumb->append_crumb('Detail Laporan',$this->parents);
 
-		$data['title']	= 'Detail '.$this->parents.' Kas | SIM Sekolah ';
-		$data['judul']	= 'Detail '.$this->parents.' Kas';
+		$data['title']	= 'Detail '.$this->parents.' | SIM Sekolah ';
+		$data['judul']	= 'Detail '.$this->parents;
 		$data['icon']	= $this->icon;
 		// $id is now a date string (Y-m-d)
 		$data['isi']	= $this->M_General->get_laporan($id);

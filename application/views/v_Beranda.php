@@ -154,7 +154,7 @@ foreach(array_reverse($chart_data) as $row) {
         <div class="finance-card">
             <div class="icon-box bg-pemasukan"><i class="fa fa-download"></i></div>
             <div class="content-box">
-                <span class="title">KAS MASUK</span>
+                <span class="title">PEMASUKAN</span>
                 <span class="amount">Rp <?= number_format($g['kas_masuk'], 0, ',', '.') ?></span>
             </div>
         </div>
@@ -164,7 +164,7 @@ foreach(array_reverse($chart_data) as $row) {
         <div class="finance-card">
             <div class="icon-box bg-pengeluaran"><i class="fa fa-upload"></i></div>
             <div class="content-box">
-                <span class="title">KAS KELUAR</span>
+                <span class="title">PENGELUARAN</span>
                 <span class="amount">Rp <?= number_format($g['kas_keluar'], 0, ',', '.') ?></span>
             </div>
         </div>

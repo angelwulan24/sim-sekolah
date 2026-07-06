@@ -9,7 +9,7 @@
         <div class="box-header">
             <div class="row">
                 <div class="col-md-6">
-                    <h3 class="box-title">Laporan Kas Masuk Sekolah</h3>
+                    <h3 class="box-title">Laporan Pemasukan Sekolah</h3>
                  </div>
                  <div class="col-md-6 text-right">
                     <h4 class="text-primary"><b>Tanggal Laporan: <?= tgl_indo($isi['tanggal']) ?></b></h4>
@@ -214,7 +214,7 @@ if (!empty($isi['spp'])) { ?>
         <div class="box-header">
             <div class="row">
                 <div class="col-md-6">
-                    <h3 class="box-title">Laporan Kas Keluar Sekolah</h3>
+                    <h3 class="box-title">Laporan Pengeluaran Sekolah</h3>
                 </div>
             </div>
         </div>

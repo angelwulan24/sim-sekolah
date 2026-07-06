@@ -53,7 +53,7 @@ class M_Laporan extends CI_Model {
 
         $pdf->Ln(8);
         $pdf->SetFont('TIMES','B',12);
-        $pdf->Cell(190, 7, 'Laporan Kas Masuk dan Keluar Periode : '.tanggal($awal,'bulan').' - '.tanggal($akhir,'bulan'), 0, 1, 'C');
+        $pdf->Cell(190, 7, 'Laporan Pemasukan dan Pengeluaran Periode : '.tanggal($awal,'bulan').' - '.tanggal($akhir,'bulan'), 0, 1, 'C');
         $pdf->Ln(5);
 
         // Header Table
@@ -61,8 +61,8 @@ class M_Laporan extends CI_Model {
         $pdf->SetFillColor(240, 240, 240);
         $pdf->Cell(10, 8, 'No', 1, 0, 'C', true);
         $pdf->Cell(40, 8, 'Tanggal', 1, 0, 'C', true);
-        $pdf->Cell(70, 8, 'Kas Masuk', 1, 0, 'C', true);
-        $pdf->Cell(70, 8, 'Kas Keluar', 1, 1, 'C', true);
+        $pdf->Cell(70, 8, 'Pemasukan', 1, 0, 'C', true);
+        $pdf->Cell(70, 8, 'Pengeluaran', 1, 1, 'C', true);
 
         // Content
         $pdf->SetFont('TIMES','',10);

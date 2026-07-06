@@ -48,7 +48,7 @@ class Cetak extends CI_Controller{
       
       $pdf->Ln(8);
       $pdf->SetFont('TIMES','B',12);
-      $pdf->Cell(190, 7, 'Laporan Kas Masuk dan Keluar Pertanggal : '.tanggal($tgl,'bulan'), 0, 1, 'L');
+      $pdf->Cell(190, 7, 'Laporan Pemasukan dan Pengeluaran Pertanggal : '.tanggal($tgl,'bulan'), 0, 1, 'L');
       
       $pdf->Ln(5);
       $pdf->SetFont('TIMES','B',11);
@@ -58,7 +58,7 @@ class Cetak extends CI_Controller{
       
       $pdf->Ln(2);
       $pdf->SetFont('TIMES','B',11);
-      $pdf->Cell(190, 7, '- Kas Masuk', 0, 1);
+      $pdf->Cell(190, 7, '- Pemasukan', 0, 1);
       
       $pdf->SetFont('TIMES','B',10);
       $pdf->SetFillColor(240, 240, 240);
@@ -104,7 +104,7 @@ class Cetak extends CI_Controller{
       
       $pdf->Ln(5);
       $pdf->SetFont('TIMES','B',11);
-      $pdf->Cell(190, 7, '- Kas Keluar', 0, 1);
+      $pdf->Cell(190, 7, '- Pengeluaran', 0, 1);
       
       $pdf->SetFont('TIMES','B',10);
       $pdf->Cell(10, 7, 'No', 1, 0, 'C', true);
@@ -185,7 +185,7 @@ class Cetak extends CI_Controller{
 
         $pdf->Ln(8);
         $pdf->SetFont('TIMES','',12);
-        $pdf->Cell(190, 7, 'Laporan Kas Masuk dan Keluar Periode : '.tanggal($awal_tgl,'bulan').' - '.tanggal($akhir_tgl,'bulan'), 0, 1);
+        $pdf->Cell(190, 7, 'Laporan Pemasukan dan Pengeluaran Periode : '.tanggal($awal_tgl,'bulan').' - '.tanggal($akhir_tgl,'bulan'), 0, 1);
 
         $pdf->Ln(5);
         $pdf->SetFont('TIMES','B',10);
@@ -193,8 +193,8 @@ class Cetak extends CI_Controller{
         $pdf->Cell(10, 8, 'No', 1, 0, 'C', true);
         $pdf->Cell(35, 8, 'Tanggal', 1, 0, 'C', true);
         $pdf->Cell(37, 8, 'Saldo Awal', 1, 0, 'C', true);
-        $pdf->Cell(37, 8, 'Kas Masuk', 1, 0, 'C', true);
-        $pdf->Cell(37, 8, 'Kas Keluar', 1, 0, 'C', true);
+        $pdf->Cell(37, 8, 'Pemasukan', 1, 0, 'C', true);
+        $pdf->Cell(37, 8, 'Pengeluaran', 1, 0, 'C', true);
         $pdf->Cell(34, 8, 'Saldo Akhir', 1, 1, 'C', true);
         
         $pdf->SetFont('TIMES','',10);
