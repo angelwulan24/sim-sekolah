@@ -53,28 +53,14 @@ class Wa_gateway {
      */
     public function send_payment_confirmation($id_siswa, $item_name, $nominal, $method = 'Loket Sekolah')
     {
-        // Try to find by ID first
-        $siswa = $this->CI->db->get_where('siswa', ['id' => $id_siswa])->row();
-        
-        // If not found, try finding by NIS (sometimes ID and NIS are mixed in params)
-        if (!$siswa) {
-            $siswa = $this->CI->db->get_where('siswa', ['nis' => $id_siswa])->row();
-        }
+        // Find siswa by nis_siswa
+        $siswa = $this->CI->db->get_where('siswa', ['nis_siswa' => $id_siswa])->row();
 
-
-
-        $phone = ($siswa) ? $siswa->telpon : '';
-        $name = ($siswa) ? ((isset($siswa->name)) ? $siswa->name : $siswa->siswa) : 'N/A';
-
-        // Fallback to Users table if phone is empty
-        if (empty($phone) && $siswa) {
-            $user = $this->CI->db->get_where('users', ['email' => $siswa->nis])->row();
-            // In this app, users might not have phone column, but let's check
-            // Most likely it's only in siswa table.
-        }
+        $phone = ($siswa) ? $siswa->telp_siswa : '';
+        $name = ($siswa) ? $siswa->nama_siswa : 'N/A';
 
         // Debug Log to file
-        $log = date('Y-m-d H:i:s') . " | Attempting Send | ID/NIS: " . $id_siswa . " | Name: " . $name . " | Target Telp: " . $phone . "\n";
+        $log = date('Y-m-d H:i:s') . " | Attempting Send | NIS: " . $id_siswa . " | Name: " . $name . " | Target Telp: " . $phone . "\n";
         
         if (!empty($phone)) {
             $msg = "Assalamu’alaikum warahmatullahi wabarakatuh.\n\n";

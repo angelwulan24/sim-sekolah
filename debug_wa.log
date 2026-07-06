@@ -2,3 +2,11 @@
 API Response: {"status":true,"message":"Success"}
 2026-06-17 14:58:18 | Attempting Send | ID/NIS: 25 | Name: Angelina Wulandari | Target Telp: 085216165214
 API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-06 23:54:33 | Attempting Send | NIS: 22222222 | Name: Anggara | Target Telp: 0813992056478
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-06 23:54:35 | Attempting Send | NIS: 22222222 | Name: Anggara | Target Telp: 0813992056478
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-07 01:04:27 | Attempting Send | NIS: 33333333 | Name: Bagus Dwi Atmaja | Target Telp: 081399205647
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-07 01:04:29 | Attempting Send | NIS: 33333333 | Name: Bagus Dwi Atmaja | Target Telp: 081399205647
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}

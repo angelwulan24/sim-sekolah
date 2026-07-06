@@ -263,11 +263,14 @@ class StudentArea extends CI_Controller {
 	}
 	public function print_tagihan($id){
 		$this->load->library('pdf');
+		$this->load->helper('data');
+		
 		$tagihan = $this->db->query("
-			SELECT t.id_tagihan AS id, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, si.nama_siswa AS name, si.nis_siswa AS nis 
+			SELECT t.id_tagihan AS id, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, si.nama_siswa AS name, si.nis_siswa AS nis, k.nama_kelas, t.tgl_pembayaran
 			FROM tagihan_siswa t
 			JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan
 			JOIN siswa si ON t.nis_siswa = si.nis_siswa 
+			LEFT JOIN kelas k ON si.id_kelas = k.id_kelas
 			WHERE t.id_tagihan = '$id'
 		")->row();
 
@@ -276,76 +279,126 @@ class StudentArea extends CI_Controller {
 			return;
 		}
 
-		$pdf = new FPDF('P','mm','A4');
+		$t_first = $tagihan;
+		$tagihan_list = [$tagihan];
+
+		$pdf = new FPDF('L', 'mm', 'A5');
+        $pdf->SetMargins(10, 8, 10);
+        $pdf->SetAutoPageBreak(false);
 		$pdf->AddPage();
 		
-       // Header
-       $pdf->Cell(3,5,'',0,1);
-       $pdf->Image(FCPATH.'assets/dist/img/MI.png', 10, 10,33);
-       $pdf->Cell(3,-5,'',0,1);
-       $pdf->SetFont('TIMES','B',14);
-       $pdf->Cell(189, 5, 'KEMENTRIAN AGAMA REPUBLIK INDONESIA', 0, 1, 'C');
-       $pdf->Cell(189, 7, 'KANTOR KEMENTRIAN AGAMA KABUPATEN PATI', 0, 1, 'C');
-       $pdf->SetFont('TIMES','B',16);
-       $pdf->Cell(192, 7, 'MADRASAH ALIYAH NEGERI PATI', 0, 1, 'C');
-       $pdf->SetFont('TIMES','B',12);
-       $pdf->Cell(189, 5, 'YAYASAN PENDIDIKAN ISLAM', 0, 1, 'C');
-       $pdf->SetFont('TIMES','B',16);
-       $pdf->Cell(189, 7, 'MADRASATUL QURAN DAAR EL-MUFLIHIN', 0, 1, 'C');
-       $pdf->SetFont('TIMES','',10);
-       $pdf->Cell(189, 5, 'Perum Cikande Permai Blok G7/01 RT. 06/4 Kec. Cikande Kab. Serang', 0, 1, 'C');
-       $pdf->Cell(189, 5, 'Telp.0823-1138-8825, email: midaarelmuflihin@gmail.com', 0, 1, 'C');
-       $pdf->SetLineWidth(1);
-       $pdf->Line(9, 46, 203, 46);
-       $pdf->SetLineWidth(0);
-       $pdf->Line(9, 47, 203, 47);
-		
-		$pdf->Cell(3,8,'',0,1);
-		
-		// Content
-		$pdf->SetFont('TIMES','B',11);
-		$pdf->Cell(0, 5, 'BUKTI PEMBAYARAN TAGIHAN', 0, 1, 'C');
-		$pdf->Ln(5);
-		
-		$pdf->SetFont('TIMES','',10);
-		$pdf->Cell(40, 6, 'No. Transaksi', 0, 0);
-		$pdf->Cell(5, 6, ':', 0, 0);
-		$pdf->Cell(0, 6, 'TAG-'.$tagihan->id, 0, 1);
-		
-		$pdf->Cell(40, 6, 'Tanggal Bayar', 0, 0);
-		$pdf->Cell(5, 6, ':', 0, 0);
-		$pdf->Cell(0, 6, $tagihan->waktu_bayar ? date('d-m-Y H:i', strtotime($tagihan->waktu_bayar)) : '-', 0, 1);
-		
-		$pdf->Cell(40, 6, 'Nama Siswa', 0, 0);
-		$pdf->Cell(5, 6, ':', 0, 0);
-		$pdf->Cell(0, 6, $tagihan->name, 0, 1);
-		
-		$pdf->Cell(40, 6, 'NIS', 0, 0);
-		$pdf->Cell(5, 6, ':', 0, 0);
-		$pdf->Cell(0, 6, $tagihan->nis, 0, 1);
-		
-		$pdf->Cell(40, 6, 'Jenis Tagihan', 0, 0);
-		$pdf->Cell(5, 6, ':', 0, 0);
-		$pdf->Cell(0, 6, $tagihan->jenis_tagihan, 0, 1);
-		
-		$pdf->Ln(5);
-		$pdf->SetFont('TIMES','B',12);
-		$pdf->Cell(40, 8, 'TOTAL BAYAR', 0, 0);
-		$pdf->Cell(5, 8, ':', 0, 0);
-		$pdf->Cell(0, 8, 'Rp. '.number_format($tagihan->nominal, 0, ',', '.'), 0, 1);
-		
-		// Footer / Signature
-		$pdf->Ln(15);
-		$pdf->SetFont('TIMES','',11);
-		$pdf->Cell(130); // Spacer
-		$pdf->Cell(60, 5, 'Cikande Permai, '.date('d F Y'), 0, 1, 'C');
-		$pdf->Cell(130);
-		$pdf->Cell(60, 5, 'Bendahara,', 0, 1, 'C');
-		
-		$pdf->Ln(20);
-		$pdf->Cell(130);
-		$pdf->SetFont('TIMES','B',11);
-		$pdf->Cell(60, 5, 'Nani Nuraeni S.Pd', 0, 1, 'C');
+        // 1. Kop Surat (Header)
+        $pdf->Image(FCPATH.'assets/dist/img/MI.png', 12, 8, 18, 18);
+        
+        $pdf->SetFont('TIMES', 'B', 10);
+        $pdf->Cell(22);
+        $pdf->Cell(0, 4.5, 'YAYASAN PENDIDIKAN ISLAM', 0, 1, 'L');
+        
+        $pdf->SetFont('TIMES', 'B', 13);
+        $pdf->Cell(22);
+        $pdf->Cell(0, 5.5, 'MADRASATUL QURAN DAAR EL-MUFLIHIN', 0, 1, 'L');
+        
+        $pdf->SetFont('TIMES', '', 8);
+        $pdf->Cell(22);
+        $pdf->Cell(0, 4, 'Perum Cikande Permai Blok G7/01 RT. 06/4 Kec. Cikande Kab. Serang', 0, 1, 'L');
+        
+        $pdf->Cell(22);
+        $pdf->Cell(0, 4, 'Telp. 0823-1138-8825 - Email: midaarelmuflihin@gmail.com', 0, 1, 'L');
+        
+        // Double lines below header
+        $pdf->Ln(2);
+        $pdf->SetLineWidth(0.6);
+        $pdf->Line(10, 29, 200, 29);
+        $pdf->SetLineWidth(0.2);
+        $pdf->Line(10, 30, 200, 30);
+        
+        // 2. Title
+        $pdf->Ln(4);
+        $pdf->SetFont('TIMES', 'BU', 11);
+        $pdf->Cell(0, 5, 'BUKTI PEMBAYARAN SISWA', 0, 1, 'C');
+        $pdf->Ln(3);
+        
+        // 3. Info Siswa
+        $pdf->SetFont('TIMES', '', 9.5);
+        
+        // Nama Siswa
+        $pdf->Cell(22, 5.5, 'Nama Siswa', 0, 0);
+        $pdf->Cell(3, 5.5, ':', 0, 0);
+        $pdf->Cell(95, 5.5, $t_first->name, 0, 0);
+        
+        // Tanggal
+        $pdf->Cell(15, 5.5, 'Tanggal', 0, 0);
+        $pdf->Cell(3, 5.5, ':', 0, 0);
+        $tgl_bayar = $t_first->tgl_pembayaran ? tanggal($t_first->tgl_pembayaran, 'bulan') : '-';
+        $pdf->Cell(0, 5.5, $tgl_bayar, 0, 1);
+        
+        // Kelas
+        $pdf->Cell(22, 5.5, 'Kelas', 0, 0);
+        $pdf->Cell(3, 5.5, ':', 0, 0);
+        $pdf->Cell(95, 5.5, $t_first->nama_kelas ? $t_first->nama_kelas : '-', 0, 1);
+        $pdf->Ln(2.5);
+        
+        // 4. Tabel Transaksi
+        $pdf->SetFont('TIMES', 'B', 9);
+        // Table Header
+        $pdf->Cell(10, 6, 'No.', 'TB', 0, 'C');
+        $pdf->Cell(130, 6, 'Keterangan Pembayaran', 'TB', 0, 'L');
+        $pdf->Cell(50, 6, 'Jumlah (Rp)', 'TB', 1, 'R');
+        
+        $pdf->SetFont('TIMES', '', 9);
+        $no = 1;
+        $total_bayar = 0;
+        $max_rows = 5;
+        $total_items = count($tagihan_list);
+        $last_row_index = max($max_rows, $total_items);
+        
+        // Loop paid items
+        foreach ($tagihan_list as $row) {
+            $border = ($no == $last_row_index) ? 'B' : 0;
+            $pdf->Cell(10, 5.5, $no . '.', $border, 0, 'C');
+            $pdf->Cell(130, 5.5, $row->jenis_tagihan, $border, 0, 'L');
+            $pdf->Cell(50, 5.5, number_format($row->nominal, 0, ',', '.'), $border, 1, 'R');
+            $total_bayar += $row->nominal;
+            $no++;
+        }
+        
+        // Draw empty rows up to 5 rows if items are fewer, to match the example image
+        for ($i = $no; $i <= $max_rows; $i++) {
+            $border = ($i == $last_row_index) ? 'B' : 0;
+            $pdf->Cell(10, 5.5, $i . '.', $border, 0, 'C');
+            $pdf->Cell(130, 5.5, '', $border, 0, 'L');
+            $pdf->Cell(50, 5.5, '', $border, 1, 'R');
+        }
+        
+        // 5. Grand Total
+        $pdf->Ln(1.5);
+        $pdf->SetFont('TIMES', 'B', 9.5);
+        $pdf->Cell(140, 6, 'Grand Total:', 0, 0, 'R');
+        
+        $pdf->Cell(50, 6, number_format($total_bayar, 0, ',', '.'), 0, 1, 'R');
+        $pdf->Ln(2);
+        
+        // 6. Signatures (Tanda Tangan)
+        $pdf->SetFont('TIMES', '', 9);
+        $pdf->Cell(130);
+        $pdf->Cell(60, 4, 'Cikande, ' . ($t_first->tgl_pembayaran ? tanggal($t_first->tgl_pembayaran, 'bulan') : tanggal(waktu(), 'bulan')), 0, 1, 'C');
+        
+        $pdf->Cell(60, 4.5, 'Mengetahui,', 0, 0, 'C');
+        $pdf->Cell(70);
+        $pdf->Cell(60, 4.5, 'Yang Menerima,', 0, 1, 'C');
+        
+        $pdf->Ln(12); // space for signature
+        
+        $pdf->SetFont('TIMES', 'B', 9);
+        $pdf->Cell(60, 4.5, 'Kh.Satibi Salim, M.Pd.I', 0, 0, 'C');
+        $pdf->Cell(70);
+        $pdf->Cell(60, 4.5, 'Nani Nuraeni S.Pd', 0, 1, 'C');
+        
+        // 7. Catatan (Notes)
+        $pdf->Ln(1);
+        $pdf->SetFont('TIMES', 'I', 7.5);
+        $pdf->Cell(0, 3.5, 'Catatan :', 0, 1);
+        $pdf->Cell(0, 3.5, '- Disimpan sebagai bukti pembayaran yang SAH', 0, 1);
 		
 		$pdf->Output();
 	}
