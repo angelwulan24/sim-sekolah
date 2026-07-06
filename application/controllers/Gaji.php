@@ -114,7 +114,7 @@ class Gaji extends CI_Controller {
                 // Insert to pengeluaran FIRST (gaji berelasi ke pengeluaran)
                 $pen_insert = array(
                     'nominal_pengeluaran' => $total_gaji_guru,
-                    'tgl_pengeluaran'     => date('Y-m-d'),
+                    'tgl_pengeluaran'     => date('Y-m-d H:i:s'),
                     'ket_pengeluaran'     => 'Pembayaran Gaji: ' . $nama_guru . ' (' . $bln . ')'
                 );
                 $this->M_General->insert('pengeluaran', $pen_insert);
@@ -126,7 +126,7 @@ class Gaji extends CI_Controller {
                     'periode'        => $bln,
                     'jam'            => $jam,
                     'nominal_gaji'   => $tarif_per_jam,
-                    'tgl_gaji'       => date('Y-m-d'),
+                    'tgl_gaji'       => date('Y-m-d H:i:s'),
                     'id_pengeluaran' => $id_pengeluaran
                 );
                 $this->M_General->insert($this->table, $insert);

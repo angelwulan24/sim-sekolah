@@ -219,7 +219,7 @@
                                     timer: 2000
                                 });
                                 setTimeout(function(){
-                                    window.location.href = "<?=base_url('Pengeluaran')?>";
+                                    window.location.href = "<?=base_url('Gaji')?>";
                                 }, 2000);
                             }else{
                                 $('#btn-simpan').text('Bayarkan Gaji');

@@ -58,7 +58,7 @@ class Lainnya extends CI_Controller {
 
 		$insert = array(
 			'nominal_pemasukan' => $total,
-			'tgl_pemasukan'     => date('Y-m-d'),
+			'tgl_pemasukan'     => date('Y-m-d H:i:s'),
 			'ket_pemasukan'     => filter_string($this->input->post('keterangan',TRUE))
 		);
 

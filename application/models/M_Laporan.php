@@ -86,6 +86,10 @@ class M_Laporan extends CI_Model {
         $pdf->Cell(70, 8, rupiah($total_masuk), 1, 0, 'R', true);
         $pdf->Cell(70, 8, rupiah($total_keluar), 1, 1, 'R', true);
 
+        $pdf->SetFillColor(220, 245, 220); // soft green
+        $pdf->Cell(50, 8, 'SALDO AKHIR', 1, 0, 'C', true);
+        $pdf->Cell(140, 8, rupiah($total_masuk - $total_keluar), 1, 1, 'R', true);
+
         $pdf->Ln(15);
         $pdf->SetFont('TIMES', '', 11);
         $pdf->Cell(130);
@@ -342,6 +346,12 @@ class M_Laporan extends CI_Model {
         $pdf->SetFillColor(0, 204, 255);
         $pdf->Cell(130, 9, 'T O T A L   P E N G E L U A R A N', 1, 0, 'C', true);
         $pdf->Cell(60, 9, rupiah($total_pengeluaran), 1, 1, 'R', true);
+
+        $pdf->Ln(4);
+        $pdf->SetFont('TIMES','B',11);
+        $pdf->SetFillColor(144, 238, 144); // light green
+        $pdf->Cell(130, 9, 'S A L D O   A K H I R', 1, 0, 'C', true);
+        $pdf->Cell(60, 9, rupiah($total_pemasukan - $total_pengeluaran), 1, 1, 'R', true);
 
         $pdf->Ln(15);
         $pdf->SetFont('TIMES', '', 11);

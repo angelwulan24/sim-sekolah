@@ -24,7 +24,7 @@
                     foreach ($isi as $v) { ?>
                         <tr>
                             <td><?=$no++;?></td>  
-                            <td><?=tanggal($v->tanggal,'bln').' - '.jam($v->tanggal).' WIB'?></td>  
+                            <td><?=tanggal($v->tgl_gaji,'bln').' - '.jam($v->tgl_gaji).' WIB'?></td>  
                             <td><?=$v->periode?></td>  
                             <td><?=$v->jam.' Jam'?></td>
                             <td><?=rupiah($v->jam*$v->nominal_gaji)?></td>    

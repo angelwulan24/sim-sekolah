@@ -61,7 +61,7 @@ class Pengeluaran extends CI_Controller {
 		$total = filter_string($this->input->post('nominal',TRUE));
 		$insert = array(
 			'nominal_pengeluaran' => $total,
-			'tgl_pengeluaran'     => date('Y-m-d'),
+			'tgl_pengeluaran'     => date('Y-m-d H:i:s'),
 			'ket_pengeluaran'     => filter_string($this->input->post('keterangan',TRUE))
 		);
 
