@@ -271,26 +271,32 @@
                 var awal = $('[name="awal"]').val();
                 var akhir = $('[name="akhir"]').val();
                 if (!awal || !akhir) {
-                    alert('Validasi Gagal: Tanggal awal dan akhir harus diisi!');
+                    Swal({ title: 'Validasi Gagal', text: 'Tanggal awal dan akhir harus diisi!', type: 'error' });
                     return false;
                 }
             } else if (val === 'bulan') {
                 var print_bulan = $('[name="print_bulan"]').val();
                 if (!print_bulan) {
-                    alert('Validasi Gagal: Bulan harus dipilih!');
+                    Swal({ title: 'Validasi Gagal', text: 'Bulan harus dipilih!', type: 'error' });
                     return false;
                 }
             }
 
-            // Alert user that form is about to submit
-            alert('Validasi sukses! Mengirim data laporan tipe: ' + val);
+            // Success alert using SweetAlert2
+            Swal({
+                title: 'Berhasil!',
+                text: 'Laporan sedang dicetak dan akan terbuka di tab baru.',
+                type: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
 
             // Programmatic native submit to bypass any library intercept
             var form = $('#form-print')[0];
             if (form) {
                 form.submit();
             } else {
-                alert('Error: Form #form-print tidak ditemukan!');
+                Swal({ title: 'Error', text: 'Form #form-print tidak ditemukan!', type: 'error' });
             }
 
             setTimeout(function() {

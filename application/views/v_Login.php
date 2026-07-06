@@ -22,13 +22,13 @@
   <!-- Custom Pastel Green Theme for Login -->
     <style>
     :root {
-        --pastel-green: #A2D5AB;       /* Matched Green */
-        --pastel-green-hover: #8BBF95; /* Darker accent */
-        --pastel-green-light: #E1F2E5;
-        --pastel-green-bg: #F2FAF4;
-        --text-dark: #2D4A3E;
+        --pastel-green: #27ae60;       /* Vibrant Emerald Green */
+        --pastel-green-hover: #2ecc71; /* Brighter Green for Hover/Glow */
+        --pastel-green-light: #d4edd9;
+        --pastel-green-bg: #f4faf6;
+        --text-dark: #1b5e20;
         --shadow-sm: 0 4px 15px rgba(0,0,0,0.05);
-        --shadow-hover: 0 6px 20px rgba(162,213,171,0.25);
+        --shadow-hover: 0 6px 20px rgba(39,174,96,0.2);
         --transition: all 0.3s ease;
     }
     body {
@@ -55,8 +55,10 @@
     .btn-primary:hover, .btn-primary:active, .btn-primary:focus {
         background-color: var(--pastel-green-hover) !important;
         border-color: var(--pastel-green-hover) !important;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(162,213,171,0.3);
+        transform: translateY(-3px) scale(1.025);
+        box-shadow: 0 0 20px rgba(46, 204, 113, 0.9), 0 0 40px rgba(46, 204, 113, 0.5), 0 8px 16px rgba(0,0,0,0.1);
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        filter: brightness(1.05);
     }
   </style>
 </head>
