@@ -27,7 +27,7 @@
                             <td><?=tanggal($v->tanggal,'bln').' - '.jam($v->tanggal).' WIB'?></td>  
                             <td><?=$v->periode?></td>  
                             <td><?=$v->jam.' Jam'?></td>
-                            <td><?=rupiah($v->jam*$v->nominal)?></td>    
+                            <td><?=rupiah($v->jam*$v->nominal_gaji)?></td>    
                         </tr>
                     <?php } ?>
 		              

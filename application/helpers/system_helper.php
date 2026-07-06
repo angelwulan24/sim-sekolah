@@ -23,6 +23,12 @@
 
         // Restrict Kepsek Access
         if ($role == 2) {
+            $allowed_controllers = ['beranda', 'guru', 'kelas', 'siswa', 'transaksi', 'laporan', 'auth'];
+            if (!in_array(strtolower($class), $allowed_controllers)) {
+                $CI->session->set_flashdata('error', 'Anda tidak memiliki akses ke halaman ini.');
+                redirect('Beranda', 'refresh');
+            }
+
             $blocked_methods = ['simpan', 'ubah', 'hapus', 'tambah', 'bayar', 'delete'];
             if (in_array(strtolower($method), $blocked_methods)) {
                 $CI->session->set_flashdata('error', 'Anda tidak memiliki akses untuk melakukan aksi ini.');
