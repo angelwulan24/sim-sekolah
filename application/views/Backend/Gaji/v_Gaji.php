@@ -15,6 +15,9 @@
 <div class="col-xs-12">
 	<div class="box box-primary">
         <div class="box-header">
+            <div class="pull-right">
+                <a href="<?=base_url('Gaji/Bayar')?>" class="btn btn-primary btn-sm">Form Pembayaran Gaji</a>
+            </div>
         </div>
 	    <div class="box-body">
 	    	<div class="table-responsive">    	

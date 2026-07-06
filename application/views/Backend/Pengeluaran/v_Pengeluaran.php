@@ -3,8 +3,7 @@
         <div class="box-header">
 
             <div class="pull-right">
-            	<a href="#" onclick="Tambah()" class="btn btn-primary btn-sm" style="margin-right: 5px;">Tambah Data Pengeluaran</a>
-                <a href="#" onclick="PembayaranGaji()" class="btn btn-warning btn-sm">Form Pembayaran Gaji</a>
+            	<a href="#" onclick="Tambah()" class="btn btn-primary btn-sm">Tambah Data Pengeluaran</a>
             </div>
         </div>
             <div class="row" style="margin-bottom: 15px;">
@@ -398,11 +397,5 @@
         $('#jenis_filter').val('').trigger('change');
         table.ajax.reload();
     });
-
-    function PembayaranGaji(){
-        window.location.href = "<?=base_url('Gaji/Bayar')?>";
-    }
-
-
 
 </script>

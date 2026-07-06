@@ -51,6 +51,7 @@ class Gaji extends CI_Controller {
 		$data['judul']	= 'Detail Pembayaran '.$this->parents;
 		$data['icon']	= $this->icon;
 		$data['id']     = $id;
+		$data['guru']   = $this->db->get_where('guru', ['NUPTK' => $id])->row();
 		$data['isi']	= $this->db->query("SELECT *, nominal_gaji AS nominal FROM gaji WHERE NUPTK = '$id' ORDER BY id_gaji DESC")->result();
 
 	    $this->template->views('Backend/'.$this->parents.'/v_Detail',$data);

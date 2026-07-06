@@ -24,7 +24,15 @@
             <li class = "<?php echo activate_menu('Lainnya')?>"><a href="<?= base_url()?>Lainnya"><i class="fa fa-circle-o text-aqua"></i> Pemasukan Lainnya</a></li>
         </ul>
     </li>
-    <li class = "<?php echo activate_menu('Pengeluaran')?>"><a href="<?= base_url()?>Pengeluaran"><i class="fa fa-level-up" style="color: #e74c3c;"></i> <span>Pengeluaran</span><span class="pull-right-container"></span></a></li>
+    <li class="treeview <?php if ($aktif == 'Pengeluaran' || $aktif == 'Gaji') echo 'active' ?>">
+        <a href="#"><i class="fa fa-level-up" style="color: #e74c3c;"></i> <span>Pengeluaran</span>
+            <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+        </a>
+        <ul class="treeview-menu">
+            <li class = "<?php echo activate_menu('Gaji')?>"><a href="<?= base_url()?>Gaji"><i class="fa fa-circle-o text-yellow"></i> Pembayaran Gaji</a></li>
+            <li class = "<?php echo activate_menu('Pengeluaran')?>"><a href="<?= base_url()?>Pengeluaran"><i class="fa fa-circle-o text-red"></i> Pengeluaran Lainnya</a></li>
+        </ul>
+    </li>
     <li class = "<?php echo activate_menu('Tunggakan')?>"><a href="<?= base_url()?>Tunggakan"><i class="fa fa-exclamation-triangle" style="color: #e67e22;"></i> <span>Info Tunggakan</span><span class="pull-right-container"></span></a></li>
     <?php } ?>
     <?php if($this->session->userdata('role') != 2) { ?>
