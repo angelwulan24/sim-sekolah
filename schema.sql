@@ -185,21 +185,6 @@ CREATE TABLE `gaji` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Table structure for table `kas_awal`
--- Menyimpan saldo pembuka kas sekolah.
--- Tabel laporan dihapus - keuangan kini dihitung dinamis dari tabel sumber.
---
-
-DROP TABLE IF EXISTS `kas_awal`;
-CREATE TABLE `kas_awal` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `saldo_awal` decimal(15,2) NOT NULL DEFAULT '0.00',
-  `keterangan` varchar(100) DEFAULT NULL,
-  `tanggal` date NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
 -- View: v_pengeluaran_gabungan
 -- Disederhanakan - tidak lagi memerlukan UNION karena gaji kini memiliki FK ke pengeluaran
 --

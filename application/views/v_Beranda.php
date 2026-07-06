@@ -10,18 +10,14 @@ $kas_masuk_today = $pemasukan_today + $tagihan_today;
 // Kas keluar hari ini: semua pengeluaran (termasuk gaji yang sudah masuk via FK)
 $kas_keluar_today = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pengeluaran AS DECIMAL(15,2))), 0) AS total FROM pengeluaran WHERE tgl_pengeluaran = '$today'")->row()->total ?? 0;
 
-// Saldo awal dari tabel kas_awal
-$kas_awal_row = $this->db->query("SELECT saldo_awal FROM kas_awal ORDER BY id ASC LIMIT 1")->row();
-$saldo_awal_global = $kas_awal_row ? $kas_awal_row->saldo_awal : 0;
-
 // Total semua pemasukan dan pengeluaran (saldo akhir kumulatif)
 $total_masuk_all = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pemasukan AS DECIMAL(15,2))), 0) AS total FROM pemasukan")->row()->total ?? 0;
 $total_tagihan_all = $this->db->query("SELECT COALESCE(SUM(CAST(j.nominal_tagihan AS DECIMAL(15,2))), 0) AS total FROM tagihan_siswa ts JOIN jenis_tagihan j ON ts.kode_tagihan = j.kode_tagihan WHERE ts.status = 'Lunas'")->row()->total ?? 0;
 $total_keluar_all = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pengeluaran AS DECIMAL(15,2))), 0) AS total FROM pengeluaran")->row()->total ?? 0;
-$sisa_dana = $saldo_awal_global + $total_masuk_all + $total_tagihan_all - $total_keluar_all;
+$sisa_dana = $total_masuk_all + $total_tagihan_all - $total_keluar_all;
 
 // Untuk card tampilan hari ini, ambil kas masuk & keluar
-$g = ['saldo_awal' => $saldo_awal_global, 'kas_masuk' => $kas_masuk_today, 'kas_keluar' => $kas_keluar_today];
+$g = ['kas_masuk' => $kas_masuk_today, 'kas_keluar' => $kas_keluar_today];
 
 // 3. Statistik Sekolah
 $count_guru  = $this->M_General->countAll('guru');
@@ -139,18 +135,8 @@ foreach(array_reverse($chart_data) as $row) {
 </div>
 
 <div class="row">
-    <!-- Saldo Awal -->
-    <div class="col-md-3">
-        <div class="finance-card">
-            <div class="icon-box bg-saldo"><i class="fa fa-university"></i></div>
-            <div class="content-box">
-                <span class="title">SALDO AWAL</span>
-                <span class="amount">Rp <?= number_format($g['saldo_awal'], 0, ',', '.') ?></span>
-            </div>
-        </div>
-    </div>
-    <!-- Kas Masuk -->
-    <div class="col-md-3">
+    <!-- Pemasukan -->
+    <div class="col-md-4">
         <div class="finance-card">
             <div class="icon-box bg-pemasukan"><i class="fa fa-download"></i></div>
             <div class="content-box">
@@ -159,8 +145,8 @@ foreach(array_reverse($chart_data) as $row) {
             </div>
         </div>
     </div>
-    <!-- Kas Keluar -->
-    <div class="col-md-3">
+    <!-- Pengeluaran -->
+    <div class="col-md-4">
         <div class="finance-card">
             <div class="icon-box bg-pengeluaran"><i class="fa fa-upload"></i></div>
             <div class="content-box">
@@ -170,7 +156,7 @@ foreach(array_reverse($chart_data) as $row) {
         </div>
     </div>
     <!-- Saldo Akhir -->
-    <div class="col-md-3">
+    <div class="col-md-4">
         <div class="finance-card">
             <div class="icon-box bg-kelas"><i class="fa fa-folder-open"></i></div>
             <div class="content-box">
