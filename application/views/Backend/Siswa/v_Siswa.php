@@ -235,7 +235,7 @@
             },
             columns: [
                 {
-                    "data": "nis_siswa",
+                    "data": "nis",
                     "orderable": false,
                     "searchable": false
                 },
@@ -247,10 +247,10 @@
                     }
                 },
                 {"data": "nama_siswa"},
-                {"data": "nis_siswa"},
+                {"data": "nis"},
                 {"data": "jk_siswa"},
                 {"data": "agama_siswa"},
-                {"data": "tempat_lahirsiswa"},
+                {"data": "tmp_lahir"},
                 {"data": "tgl_lahirsiswa"},
                 {"data": "ortu_wali"},
                 {"data": "telp_siswa"},
@@ -286,7 +286,7 @@
             ],
             order: [[2, 'asc']],
             rowId: function(a){
-                return a.nis_siswa;
+                return a.nis;
             },
             rowCallback: function(row, data, iDisplayIndex) {
                 var info = this.fnPagingInfo();
@@ -480,14 +480,14 @@
 			type:"GET",
 			dataType:"JSON",
 			success:function(data){
-				$('[name="id"]').val(data.nis_siswa);
+				$('[name="id"]').val(data.nis);
                 $('[name="nama"]').val(data.nama_siswa);
-                $('[name="nis"]').val(data.nis_siswa);
+                $('[name="nis"]').val(data.nis);
                 $('[name="agama"]').val(data.agama_siswa ? data.agama_siswa : 'Islam');
                 $('[name="orangtua_wali"]').val(data.ortu_wali);
                 $('[name="telpon"]').val(data.telp_siswa);
                 $('[name="alamat"]').val(data.alamat_ssiwa);
-                $('[name="tempat"]').val(data.tempat_lahirsiswa);
+                $('[name="tempat"]').val(data.tmp_lahir);
                 $('[name="tanggal"]').val(data.tgl_lahirsiswa);
                 $('[name="tanggal_masuk"]').val(data.tgl_masuk);
                 $('[name="tahun_ajaran"]').val(data.thn_ajaran);

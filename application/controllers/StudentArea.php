@@ -25,7 +25,7 @@ class StudentArea extends CI_Controller {
 		$nis = $user->email;
 
 		// Get Student Data with aliases to support the view keys
-		$student = $this->db->query("SELECT s.*, s.nama_siswa AS name, s.nis_siswa AS nis, s.jk_siswa AS sex, s.telp_siswa AS telpon, s.tempat_lahirsiswa AS tempat, s.tgl_lahirsiswa AS tanggal, s.thn_ajaran AS tahun_ajaran, s.status_siswa AS status, k.nama_kelas AS kelas, s.foto_siswa AS foto, s.ortu_wali AS orangtua_wali FROM siswa s LEFT JOIN kelas k ON s.id_kelas = k.id_kelas WHERE s.nis_siswa = '$nis'")->row();
+		$student = $this->db->query("SELECT s.*, s.nama_siswa AS name, s.nis AS nis, s.jk_siswa AS sex, s.telp_siswa AS telpon, s.tmp_lahir AS tempat, s.tgl_lahirsiswa AS tanggal, s.thn_ajaran AS tahun_ajaran, s.status_siswa AS status, k.nama_kelas AS kelas, s.foto_siswa AS foto, s.ortu_wali AS orangtua_wali FROM siswa s LEFT JOIN kelas k ON s.id_kelas = k.id_kelas WHERE s.nis = '$nis'")->row();
 
 		if(!$student){
 			echo "<div style='text-align:center; margin-top:50px; font-family:sans-serif;'>
@@ -48,7 +48,7 @@ class StudentArea extends CI_Controller {
 		$data['selected_tahun'] = $selected_tahun;
         
         // Generate academic years for filter (e.g. 2026/2027)
-        $tahun_list = $this->db->query("SELECT DISTINCT j.tahun_ajaran FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan WHERE t.nis_siswa = '$student->nis_siswa' ORDER BY j.tahun_ajaran DESC")->result();
+        $tahun_list = $this->db->query("SELECT DISTINCT j.tahun_ajaran FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan WHERE t.nis_siswa = '$student->nis' ORDER BY j.tahun_ajaran DESC")->result();
 		$data['tahun_list'] = $tahun_list;
 
         $current_school_yr = current_school_year();
@@ -57,7 +57,7 @@ class StudentArea extends CI_Controller {
 		$tagihan_db = $this->db->query("SELECT t.id_tagihan AS id, t.status, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, j.tenggat_waktu, j.tahun_ajaran 
                                         FROM tagihan_siswa t
                                         JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan
-                                        WHERE t.nis_siswa = '$student->nis_siswa' 
+                                        WHERE t.nis_siswa = '$student->nis' 
                                           AND j.tahun_ajaran = '$selected_tahun'
                                           AND NOT (t.status = 'Belum Lunas' AND j.nama_tagihan LIKE '%SPP%' AND j.tahun_ajaran != '$current_school_yr')
                                         ORDER BY t.id_tagihan ASC")->result();
@@ -128,7 +128,7 @@ class StudentArea extends CI_Controller {
 
 		$user_id = $this->session->userdata('id');
 		$user = $this->db->get_where('users', ['id_users' => $user_id])->row();
-		$student = $this->db->get_where('siswa', ['nis_siswa' => $user->email])->row();
+		$student = $this->db->get_where('siswa', ['nis' => $user->email])->row();
 
 		$total_nominal = 0;
 		$midtrans_items = [];
@@ -146,7 +146,7 @@ class StudentArea extends CI_Controller {
 		}
 
 		// Order ID format: BLK-[STUDENT_NIS]-[TIMESTAMP]
-		$order_id = 'BLK-' . $student->nis_siswa . '-' . time();
+		$order_id = 'BLK-' . $student->nis . '-' . time();
 
 		$params = [
 			'transaction_details' => [
@@ -266,10 +266,10 @@ class StudentArea extends CI_Controller {
 		$this->load->helper('data');
 		
 		$tagihan = $this->db->query("
-			SELECT t.id_tagihan AS id, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, si.nama_siswa AS name, si.nis_siswa AS nis, k.nama_kelas, t.tgl_pembayaran
+			SELECT t.id_tagihan AS id, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, si.nama_siswa AS name, si.nis AS nis, k.nama_kelas, t.tgl_pembayaran
 			FROM tagihan_siswa t
 			JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan
-			JOIN siswa si ON t.nis_siswa = si.nis_siswa 
+			JOIN siswa si ON t.nis_siswa = si.nis 
 			LEFT JOIN kelas k ON si.id_kelas = k.id_kelas
 			WHERE t.id_tagihan = '$id'
 		")->row();

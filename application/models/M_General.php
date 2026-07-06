@@ -80,9 +80,9 @@ class M_General extends CI_Model{
     }
 
     function getSiswa($kls = ''){
-        $this->datatables->select('nis_siswa, nama_siswa, jk_siswa');
+        $this->datatables->select('nis, nama_siswa, jk_siswa');
         $this->datatables->from('siswa');
-        $this->datatables->add_column('view','<center><a href="javascript:void(0)" onclick="Detail($1)" class="btn btn-info btn-xs"><i class="fa fa-eye"></i> Detail</a></center> ','nis_siswa');
+        $this->datatables->add_column('view','<center><a href="javascript:void(0)" onclick="Detail($1)" class="btn btn-info btn-xs"><i class="fa fa-eye"></i> Detail</a></center> ','nis');
         if($kls != ''){
             $this->datatables->where('id_kelas',$kls);
         }
@@ -108,7 +108,7 @@ class M_General extends CI_Model{
         // Ambil SEMUA tagihan dari tabel tagihan_siswa yang dibayar pada tanggal $t
         $all_tagihan = $this->db->query("SELECT s.nama_siswa AS name, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal 
                                        FROM tagihan_siswa AS t
-                                       JOIN siswa AS s ON s.nis_siswa = t.nis_siswa
+                                       JOIN siswa AS s ON s.nis = t.nis_siswa
                                        JOIN jenis_tagihan AS j ON j.kode_tagihan = t.kode_tagihan
                                        WHERE DATE(t.tgl_pembayaran) = '$t' 
                                        AND t.status = 'Lunas'")->result();
@@ -152,7 +152,7 @@ class M_General extends CI_Model{
         // Ambil SEMUA tagihan dari tabel tagihan_siswa yang dibayar pada rentang tanggal $t_awal s.d $t_akhir
         $all_tagihan = $this->db->query("SELECT s.nama_siswa AS name, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal 
                                        FROM tagihan_siswa AS t
-                                       JOIN siswa AS s ON s.nis_siswa = t.nis_siswa
+                                       JOIN siswa AS s ON s.nis = t.nis_siswa
                                        JOIN jenis_tagihan AS j ON j.kode_tagihan = t.kode_tagihan
                                        WHERE DATE(t.tgl_pembayaran) >= '$t_awal' AND DATE(t.tgl_pembayaran) <= '$t_akhir'
                                        AND t.status = 'Lunas'")->result();

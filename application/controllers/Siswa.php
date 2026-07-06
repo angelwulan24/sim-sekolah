@@ -42,7 +42,7 @@ class Siswa extends CI_Controller {
 
 
 	public function edit($id){
-		$data = $this->M_General->getByID($this->table,'nis_siswa',$id,'nis_siswa')->row();
+		$data = $this->M_General->getByID($this->table,'nis',$id,'DESC')->row();
 		echo json_encode($data);
 	}
 
@@ -79,10 +79,10 @@ class Siswa extends CI_Controller {
 					// Kita push (add) array data ke variabel data
 					array_push($data, array(
 						'nama_siswa'        => $row['A'],
-						'nis_siswa'         => $row['B'],
+						'nis'               => $row['B'],
 						'jk_siswa'          => $row['C'],
 						'agama_siswa'       => $row['D'],
-						'tempat_lahirsiswa' => $row['E'],
+						'tmp_lahir'         => $row['E'],
 						'tgl_lahirsiswa'    => $tgl_lahir,
 						'ortu_wali'         => $row['G'],
 						'telp_siswa'        => $row['H'],
@@ -102,9 +102,9 @@ class Siswa extends CI_Controller {
 
 				// Assign existing bills to each imported student
 				foreach ($data as $siswa_data) {
-					if (isset($siswa_data['nis_siswa'])) {
+					if (isset($siswa_data['nis'])) {
 						$this->_assign_existing_bills(
-							$siswa_data['nis_siswa'],
+							$siswa_data['nis'],
 							$siswa_data['id_kelas'],
 							$siswa_data['thn_ajaran'],
 							$siswa_data['tgl_masuk']
@@ -126,9 +126,9 @@ class Siswa extends CI_Controller {
         $insert = array(
                     'nama_siswa'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
                     'jk_siswa'		=> $this->input->post('gender',TRUE),
-                    'nis_siswa' 	=> $this->input->post('nis',TRUE),
+                    'nis' 	        => $this->input->post('nis',TRUE),
                     'id_kelas' 	    => $this->input->post('kelas',TRUE),
-                    'tempat_lahirsiswa'	=> filter_string($this->input->post('tempat',TRUE)),
+                    'tmp_lahir'	    => filter_string($this->input->post('tempat',TRUE)),
                     'tgl_lahirsiswa'	=> filter_string($this->input->post('tanggal',TRUE)),
                     'alamat_ssiwa'	=> filter_string($this->input->post('alamat',TRUE)),
                     'status_siswa'	=> filter_string($this->input->post('status',TRUE)),
@@ -153,11 +153,11 @@ class Siswa extends CI_Controller {
         }
 
         // Create User Account with NIS as username
-        $id_users = $this->_create_account($insert['nis_siswa'], $insert['nama_siswa'], $insert['tgl_lahirsiswa']);
+        $id_users = $this->_create_account($insert['nis'], $insert['nama_siswa'], $insert['tgl_lahirsiswa']);
         $insert['id_users'] = $id_users;
 
         $this->M_General->insert($this->table,$insert);
-        $this->_assign_existing_bills($insert['nis_siswa'], $insert['id_kelas'], $insert['thn_ajaran'], $insert['tgl_masuk']);
+        $this->_assign_existing_bills($insert['nis'], $insert['id_kelas'], $insert['thn_ajaran'], $insert['tgl_masuk']);
 
         $data['status'] = TRUE;
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
@@ -165,14 +165,14 @@ class Siswa extends CI_Controller {
 
 	function Ubah(){
         $id = $this->input->post('id');
-        $old_data = $this->M_General->getByID($this->table,'nis_siswa',$id,'nis_siswa')->row();
+        $old_data = $this->M_General->getByID($this->table,'nis',$id,'DESC')->row();
         
         $insert = array(
                     'nama_siswa'  	=> filter_string(ucwords($this->input->post('nama'),TRUE)),
                     'jk_siswa'		=> $this->input->post('gender',TRUE),
-                    'nis_siswa' 	=> $this->input->post('nis',TRUE),
+                    'nis' 	        => $this->input->post('nis',TRUE),
                     'id_kelas' 	    => $this->input->post('kelas',TRUE),
-                    'tempat_lahirsiswa'	=> filter_string($this->input->post('tempat',TRUE)),
+                    'tmp_lahir'	    => filter_string($this->input->post('tempat',TRUE)),
                     'tgl_lahirsiswa'	=> filter_string($this->input->post('tanggal',TRUE)),
                     'alamat_ssiwa'	=> filter_string($this->input->post('alamat',TRUE)),
                     'status_siswa'	=> filter_string($this->input->post('status',TRUE)),
@@ -195,12 +195,12 @@ class Siswa extends CI_Controller {
                 $insert['foto_siswa'] = $uploadData['file_name'];
             }
         }
-        $this->M_General->update($this->table,$insert,'nis_siswa',$id);
+        $this->M_General->update($this->table,$insert,'nis',$id);
 
         // Update User Account associated with this student
         if($old_data && !empty($old_data->id_users)){
             $this->db->where('id_users', $old_data->id_users);
-            $this->db->update('users', array('email' => $insert['nis_siswa'], 'nama_users' => $insert['nama_siswa']));
+            $this->db->update('users', array('email' => $insert['nis'], 'nama_users' => $insert['nama_users'] ?? $insert['nama_siswa']));
         }
 
         $data['status'] = TRUE;
@@ -208,7 +208,7 @@ class Siswa extends CI_Controller {
 	}
 
 	function Hapus($id){
-        $data_siswa = $this->M_General->getByID($this->table,'nis_siswa',$id,'nis_siswa')->row();
+        $data_siswa = $this->M_General->getByID($this->table,'nis',$id,'DESC')->row();
         if($data_siswa){
             // Delete User Account using foreign key id_users
             if (!empty($data_siswa->id_users)) {
@@ -222,7 +222,7 @@ class Siswa extends CI_Controller {
             }
         }
 
-		$this->M_General->delete($this->table,'nis_siswa',$id);
+		$this->M_General->delete($this->table,'nis',$id);
 		$data['status'] = TRUE;
 		$this->output->set_content_type('application/json')->set_output(json_encode($data));
 	}

@@ -26,9 +26,9 @@
 		            	<tr>
 		            		<td><?=$no++;?></td>
 		            		<td><?=$key->nama_siswa?></td>
-		            		<td><?=$key->nis_siswa?></td>
+		            		<td><?=$key->nis?></td>
 		            		<td><?=$key->jk_siswa?></td>
-                            <td><?=$key->tempat_lahirsiswa?></td>
+                            <td><?=$key->tmp_lahir?></td>
                             <td><?=date('d-m-Y', strtotime($key->tgl_lahirsiswa))?></td>
                             <td><?=$key->ortu_wali?></td>
                             <td><?=$key->telp_siswa?></td>

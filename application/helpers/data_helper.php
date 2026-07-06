@@ -14,7 +14,7 @@
 
     function get_siswa($id){
         $ci=& get_instance();
-        $q = $ci->db->query("SELECT nama_siswa FROM siswa WHERE nis_siswa='$id'")->row_array();
+        $q = $ci->db->query("SELECT nama_siswa FROM siswa WHERE nis='$id'")->row_array();
         return isset($q['nama_siswa']) ? $q['nama_siswa'] : '';
     }
 

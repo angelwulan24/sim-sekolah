@@ -26,7 +26,7 @@ class Tunggakan extends CI_Controller {
 		$data['id_kelas'] = $id_kelas;
 		$data['kelas'] = $this->db->query("SELECT id_kelas AS id, nama_kelas AS nama FROM kelas")->result();
 
-		$this->db->select('siswa.nis_siswa AS id, siswa.nama_siswa AS name, siswa.telp_siswa AS telpon, kelas.nama_kelas');
+		$this->db->select('siswa.nis AS id, siswa.nama_siswa AS name, siswa.telp_siswa AS telpon, kelas.nama_kelas');
 		$this->db->from('siswa');
 		$this->db->join('kelas', 'siswa.id_kelas = kelas.id_kelas', 'left');
 		$this->db->where('siswa.status_siswa', 'Aktif');
@@ -103,7 +103,7 @@ class Tunggakan extends CI_Controller {
         $rincian_raw = $this->input->post('rincian'); // Formatted string from JS (items separated by |)
         $total = $this->input->post('total');
 
-        $siswa = $this->db->get_where('siswa', ['nis_siswa' => $id_siswa])->row();
+        $siswa = $this->db->get_where('siswa', ['nis' => $id_siswa])->row();
 
         if ($siswa && !empty($siswa->telp_siswa)) {
             $phone = $siswa->telp_siswa;
@@ -149,7 +149,7 @@ class Tunggakan extends CI_Controller {
             $rincian_raw = $data['rincian'];
             $total = $data['total'];
 
-            $siswa = $this->db->get_where('siswa', ['nis_siswa' => $id_siswa])->row();
+            $siswa = $this->db->get_where('siswa', ['nis' => $id_siswa])->row();
 
             if ($siswa && !empty($siswa->telp_siswa)) {
                 $phone = $siswa->telp_siswa;

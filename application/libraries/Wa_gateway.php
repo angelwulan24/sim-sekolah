@@ -53,8 +53,8 @@ class Wa_gateway {
      */
     public function send_payment_confirmation($id_siswa, $item_name, $nominal, $method = 'Loket Sekolah')
     {
-        // Find siswa by nis_siswa
-        $siswa = $this->CI->db->get_where('siswa', ['nis_siswa' => $id_siswa])->row();
+        // Find siswa by nis
+        $siswa = $this->CI->db->get_where('siswa', ['nis' => $id_siswa])->row();
 
         $phone = ($siswa) ? $siswa->telp_siswa : '';
         $name = ($siswa) ? $siswa->nama_siswa : 'N/A';

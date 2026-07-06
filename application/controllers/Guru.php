@@ -48,7 +48,8 @@ class Guru extends CI_Controller {
                     'bidang_studi'	=> filter_string($this->input->post('bidang',TRUE)),
                     'alamat_guru'	=> filter_string($this->input->post('alamat',TRUE)),
                     'status_guru'	=> filter_string($this->input->post('status',TRUE)),
-                    'telp_guru'	    => filter_string($this->input->post('telepon',TRUE))
+                    'telp_guru'	    => filter_string($this->input->post('telepon',TRUE)),
+                    'tgl_lahirguru' => filter_string($this->input->post('tgl_lahirguru',TRUE))
                 );
 
         if(!empty($_FILES['foto']['name'])){
@@ -77,7 +78,8 @@ class Guru extends CI_Controller {
                     'bidang_studi'	=> filter_string($this->input->post('bidang',TRUE)),
                     'alamat_guru'	=> filter_string($this->input->post('alamat',TRUE)),
                     'status_guru'	=> filter_string($this->input->post('status',TRUE)),
-                    'telp_guru'	    => filter_string($this->input->post('telepon',TRUE))
+                    'telp_guru'	    => filter_string($this->input->post('telepon',TRUE)),
+                    'tgl_lahirguru' => filter_string($this->input->post('tgl_lahirguru',TRUE))
                 );
 
         if(!empty($_FILES['foto']['name'])){

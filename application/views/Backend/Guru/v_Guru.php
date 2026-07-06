@@ -101,6 +101,10 @@
                     <div><input type="text" required="" placeholder="Telepon" autocomplete="off" name="telepon" class="form-control"></div>
                 </div>
                 <div class="form-group">
+                    <label class="control-label"> Tanggal Lahir</label>
+                    <div><input type="text" autocomplete="off" placeholder="Tanggal Lahir" class="form-control datepicker" name="tgl_lahirguru"></div>
+                </div>
+                <div class="form-group">
                     <label class="control-label">Status</label>
                     <select name="status" required="" data-placeholder="--Pilih--" class="form-control">
                         <option value="">--Pilih--</option>
@@ -129,6 +133,10 @@
 	var label;
 	var table;
 	$(document).ready(function(){
+		$('.datepicker').datepicker({
+			format: "yyyy-mm-dd",
+			autoclose: true
+		});
 		$.fn.dataTableExt.oApi.fnPagingInfo = function(oSettings){
             return {
                 "iStart": oSettings._iDisplayStart,
@@ -361,6 +369,7 @@
                 $('[name="nip"]').val(data.NUPTK);
                 $('[name="telepon"]').val(data.telp_guru);
                 $('[name="alamat"]').val(data.alamat_guru);
+                $('[name="tgl_lahirguru"]').val(data.tgl_lahirguru);
                 $('[name="bidang"]').val(data.bidang_studi).trigger('change');
                 if ($.fn.iCheck) {
                     $('[name="gender"]').iCheck('uncheck');

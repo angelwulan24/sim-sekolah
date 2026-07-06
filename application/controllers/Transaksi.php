@@ -82,9 +82,9 @@ class Transaksi extends CI_Controller
 
         // Fetch students
         if ($id_kelas === NULL) {
-            $siswa = $this->db->query("SELECT nis_siswa FROM siswa")->result();
+            $siswa = $this->db->query("SELECT nis FROM siswa")->result();
         } else {
-            $siswa = $this->db->query("SELECT nis_siswa FROM siswa WHERE id_kelas = '$id_kelas'")->result();
+            $siswa = $this->db->query("SELECT nis FROM siswa WHERE id_kelas = '$id_kelas'")->result();
         }
 
         $is_spp = (strpos(strtoupper($nama_tagihan), 'SPP') !== false);
@@ -162,7 +162,7 @@ class Transaksi extends CI_Controller
                     $data_tagihan = array();
                     foreach ($siswa as $s) {
                         $data_tagihan[] = array(
-                            'nis_siswa'     => $s->nis_siswa,
+                            'nis_siswa'     => $s->nis,
                             'kode_tagihan'  => $current_kode,
                             'status'        => 'Belum Lunas',
                             'tgl_pembayaran' => NULL
@@ -190,7 +190,7 @@ class Transaksi extends CI_Controller
                 $data_tagihan = array();
                 foreach ($siswa as $s) {
                     $data_tagihan[] = array(
-                        'nis_siswa'     => $s->nis_siswa,
+                        'nis_siswa'     => $s->nis,
                         'kode_tagihan'  => $kode_base,
                         'status'        => 'Belum Lunas',
                         'tgl_pembayaran' => NULL

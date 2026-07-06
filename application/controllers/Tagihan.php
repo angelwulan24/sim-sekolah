@@ -48,7 +48,7 @@ class Tagihan extends CI_Controller {
 		$data['judul']	= 'Detail Tagihan';
 		$data['icon']	= 'fa fa-search';
 
-		$data['siswa'] = $this->db->query("SELECT s.nis_siswa AS nis, s.nama_siswa AS name, s.jk_siswa AS sex, s.telp_siswa AS telpon, s.foto_siswa AS foto, k.nama_kelas FROM siswa s LEFT JOIN kelas k ON s.id_kelas = k.id_kelas WHERE s.nis_siswa = '$id_siswa'")->row();
+		$data['siswa'] = $this->db->query("SELECT s.nis AS nis, s.nama_siswa AS name, s.jk_siswa AS sex, s.telp_siswa AS telpon, s.foto_siswa AS foto, k.nama_kelas FROM siswa s LEFT JOIN kelas k ON s.id_kelas = k.id_kelas WHERE s.nis = '$id_siswa'")->row();
         
 		$tahun_filter = $this->input->get('tahun_ajaran', true);
 		$data['tahun_filter'] = $tahun_filter;
@@ -147,9 +147,9 @@ class Tagihan extends CI_Controller {
 		$this->load->helper('data');
 		
         if (strpos($id, ',') !== false) {
-            $tagihan = $this->db->query("SELECT t.*, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, s.nama_siswa AS name, s.nis_siswa AS nis, k.nama_kelas FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan JOIN siswa s ON t.nis_siswa = s.nis_siswa LEFT JOIN kelas k ON s.id_kelas = k.id_kelas WHERE t.id_tagihan IN ($id)")->result();
+            $tagihan = $this->db->query("SELECT t.*, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, s.nama_siswa AS name, s.nis AS nis, k.nama_kelas FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan JOIN siswa s ON t.nis_siswa = s.nis LEFT JOIN kelas k ON s.id_kelas = k.id_kelas WHERE t.id_tagihan IN ($id)")->result();
         } else {
-            $tagihan = $this->db->query("SELECT t.*, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, s.nama_siswa AS name, s.nis_siswa AS nis, k.nama_kelas FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan JOIN siswa s ON t.nis_siswa = s.nis_siswa LEFT JOIN kelas k ON s.id_kelas = k.id_kelas WHERE t.id_tagihan = '$id'")->result();
+            $tagihan = $this->db->query("SELECT t.*, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, s.nama_siswa AS name, s.nis AS nis, k.nama_kelas FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan JOIN siswa s ON t.nis_siswa = s.nis LEFT JOIN kelas k ON s.id_kelas = k.id_kelas WHERE t.id_tagihan = '$id'")->result();
         }
 
         if(count($tagihan) == 0) {
