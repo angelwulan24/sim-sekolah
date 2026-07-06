@@ -1,6 +1,6 @@
 <div style="margin-bottom: 10px;" class="col-xs-12">
   <div class="pull-right">
-       <a href="<?=base_url('Cetak/cetak_laporan/'.$this->uri->segment(3))?>" class="btn btn-info"><i class="fa fa-print"></i> Cetak</a>  
+       <a href="<?=base_url('Laporan/Cetak_detail/'.$this->uri->segment(3))?>" class="btn btn-info"><i class="fa fa-print"></i> Cetak</a>  
   </div>
 </div>
 
@@ -169,17 +169,44 @@ if (!empty($isi['spp'])) { ?>
                       <th style="text-align: right;"><?=number_format($total,0,',','.')?></th>
                     </tr>
                 </tbody>
-<?php }
+<?php } ?>
 
- if (!empty($isi['pemasukan'])) {
- ?>
-                <thead><tr> <th colspan="4" style="size: 16px; background-color: #ffff00;">Lainnya</th></tr></thead>
+<?php if (!empty($isi['tagihan_lainnya'])) { ?>
+                <thead><tr> <th colspan="4" style="size: 16px; background-color: #ffff00;">Tagihan Lainnya</th></tr></thead>
                 <tbody>
                     <tr>
                       <th>Tanggal</th>
                       <th>Keterangan</th>
                       <th colspan="2">Nominal</th>
-            </tr>
+                    </tr>
+                     <?php 
+			$total = 0;
+			foreach ($isi['tagihan_lainnya'] as $k) { ?>
+                    <tr>
+                      <td><?= tgl_indo($isi['tanggal']) ?></td>
+                      <td><?=$k->keterangan?></td>
+                      <td style="width: 10px;">Rp.</td>
+                      <td style="text-align: right;"><?=number_format($k->nominal,0,',','.')?></td>
+                    </tr>
+            <?php
+            $total+=$k->nominal;
+             }$katot+=$total; ?>
+                    <tr>
+                      <th colspan="2">Total</th>
+                      <th>Rp.</th>
+                      <th style="text-align: right;"><?=number_format($total,0,',','.')?></th>
+                    </tr>
+                </tbody>
+<?php } ?>
+
+<?php if (!empty($isi['pemasukan'])) { ?>
+                <thead><tr> <th colspan="4" style="size: 16px; background-color: #ffff00;">Pemasukan Lainnya</th></tr></thead>
+                <tbody>
+                    <tr>
+                      <th>Tanggal</th>
+                      <th>Keterangan</th>
+                      <th colspan="2">Nominal</th>
+                    </tr>
                      <?php 
 			$total = 0;
 			foreach ($isi['pemasukan'] as $k) { ?>
@@ -198,7 +225,6 @@ if (!empty($isi['spp'])) { ?>
                       <th style="text-align: right;"><?=number_format($total,0,',','.')?></th>
                     </tr>
                 </tbody>
-
 <?php } ?>
                   <tr style="size: 18; background-color: #ffff00;">
                     <th colspan="3"> <i>Total Pemasukan hari ini</i> </th>

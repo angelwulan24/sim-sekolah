@@ -68,9 +68,9 @@ class Laporan extends CI_Controller {
 			$this->db->where('tanggal <=', $akhir);
 		}
 
-		// Query from v_laporan (dynamic aggregate) instead of deleted laporan table
-		$a = $this->db->get('v_laporan')->result();
-		$this->mod->Cetak_periode($a, $awal, $akhir);
+		// Fetch detailed transactions for the date range
+		$data = $this->M_General->get_Laporan_periode($awal, $akhir);
+		$this->mod->Cetak_detail($data);
 	}
 
 		function Detail($id){
