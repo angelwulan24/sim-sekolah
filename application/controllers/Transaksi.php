@@ -162,7 +162,7 @@ class Transaksi extends CI_Controller
                     $data_tagihan = array();
                     foreach ($siswa as $s) {
                         $data_tagihan[] = array(
-                            'nis_siswa'     => $s->nis,
+                            'nis'           => $s->nis,
                             'kode_tagihan'  => $current_kode,
                             'status'        => 'Belum Lunas',
                             'tgl_pembayaran' => NULL
@@ -190,7 +190,7 @@ class Transaksi extends CI_Controller
                 $data_tagihan = array();
                 foreach ($siswa as $s) {
                     $data_tagihan[] = array(
-                        'nis_siswa'     => $s->nis,
+                        'nis'           => $s->nis,
                         'kode_tagihan'  => $kode_base,
                         'status'        => 'Belum Lunas',
                         'tgl_pembayaran' => NULL
@@ -232,6 +232,20 @@ class Transaksi extends CI_Controller
     {
         $this->M_General->delete($this->table, 'kode_tagihan', $this->input->post('id'));
         $data['status'] = TRUE;
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    function Hapus_Multi()
+    {
+        $ids = $this->input->post('ids');
+        if (!empty($ids)) {
+            foreach ($ids as $id) {
+                $this->M_General->delete($this->table, 'kode_tagihan', $id);
+            }
+            $data['status'] = TRUE;
+        } else {
+            $data['status'] = FALSE;
+        }
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 }

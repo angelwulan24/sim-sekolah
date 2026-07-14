@@ -86,7 +86,7 @@ class Siswa extends CI_Controller {
 						'tgl_lahirsiswa'    => $tgl_lahir,
 						'ortu_wali'         => $row['G'],
 						'telp_siswa'        => $row['H'],
-						'alamat_ssiwa'      => $row['I'],
+						'alamat_siswa'      => $row['I'],
 						'tgl_masuk'         => $tgl_masuk,
 						'thn_ajaran'        => $row['K'],
 						'id_kelas'          => $row['L'],
@@ -130,7 +130,7 @@ class Siswa extends CI_Controller {
                     'id_kelas' 	    => $this->input->post('kelas',TRUE),
                     'tmp_lahir'	    => filter_string($this->input->post('tempat',TRUE)),
                     'tgl_lahirsiswa'	=> filter_string($this->input->post('tanggal',TRUE)),
-                    'alamat_ssiwa'	=> filter_string($this->input->post('alamat',TRUE)),
+                    'alamat_siswa'	=> filter_string($this->input->post('alamat',TRUE)),
                     'status_siswa'	=> filter_string($this->input->post('status',TRUE)),
                     'telp_siswa'    => filter_string($this->input->post('telpon',TRUE)),
                     'agama_siswa'     => filter_string($this->input->post('agama',TRUE)),
@@ -174,7 +174,7 @@ class Siswa extends CI_Controller {
                     'id_kelas' 	    => $this->input->post('kelas',TRUE),
                     'tmp_lahir'	    => filter_string($this->input->post('tempat',TRUE)),
                     'tgl_lahirsiswa'	=> filter_string($this->input->post('tanggal',TRUE)),
-                    'alamat_ssiwa'	=> filter_string($this->input->post('alamat',TRUE)),
+                    'alamat_siswa'	=> filter_string($this->input->post('alamat',TRUE)),
                     'status_siswa'	=> filter_string($this->input->post('status',TRUE)),
                     'telp_siswa'    => filter_string($this->input->post('telpon',TRUE)),
                     'agama_siswa'     => filter_string($this->input->post('agama',TRUE)),
@@ -250,7 +250,7 @@ class Siswa extends CI_Controller {
         }
     }
 
-    private function _assign_existing_bills($nis_siswa, $id_kelas, $thn_ajaran, $tgl_masuk) {
+    private function _assign_existing_bills($nis, $id_kelas, $thn_ajaran, $tgl_masuk) {
         if (empty($thn_ajaran)) {
             return;
         }
@@ -287,13 +287,13 @@ class Siswa extends CI_Controller {
 
             // Check if this student already has this bill assigned (to avoid duplicate assignment)
             $check = $this->db->get_where('tagihan_siswa', array(
-                'nis_siswa' => $nis_siswa,
+                'nis' => $nis,
                 'kode_tagihan' => $tag->kode_tagihan
             ))->row();
 
             if (!$check) {
                 $data_tagihan[] = array(
-                    'nis_siswa'      => $nis_siswa,
+                    'nis'            => $nis,
                     'kode_tagihan'   => $tag->kode_tagihan,
                     'status'         => 'Belum Lunas',
                     'tgl_pembayaran' => NULL

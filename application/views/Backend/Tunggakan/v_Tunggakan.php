@@ -1,7 +1,7 @@
 <div class="col-xs-12">
 	<div class="box box-primary">
         <div class="box-header">
-            <h3 class="box-title"><i class="fa fa-exclamation-triangle"></i> Daftar Tunggakan Siswa (Fokus Bulan Ini)</h3>
+            <h3 class="box-title"><i class="fa fa-exclamation-triangle"></i> Daftar Tunggakan Siswa </h3>
         </div>
         <div class="box-body">
             <div class="row" style="margin-bottom: 20px;">
@@ -11,7 +11,7 @@
                         <select name="id_kelas" class="form-control" onchange="this.form.submit()">
                             <option value="">-- Semua Kelas --</option>
                             <?php foreach($kelas as $k): ?>
-                                <option value="<?= $k->id ?>" <?= $id_kelas == $k->id ? 'selected' : '' ?>><?= $k->nama_kelas ?></option>
+                                <option value="<?= $k->id ?>" <?= $id_kelas == $k->id ? 'selected' : '' ?>><?= $k->nama ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>

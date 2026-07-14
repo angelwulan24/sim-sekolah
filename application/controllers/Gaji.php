@@ -176,4 +176,13 @@ class Gaji extends CI_Controller {
         }
     }
 
+    public function getRiwayatData() {
+        header('Content-Type:application/json');
+        $filter = array(
+            'jenis' => $this->input->post('jenis'),
+            'tanggal' => $this->input->post('tanggal')
+        );
+        echo $this->mod->getRiwayatData($filter);
+    }
+
 }

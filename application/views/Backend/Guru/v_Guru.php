@@ -288,6 +288,11 @@
 								sweet('Di '+method,'Berhasil '+method+' Data','success');
 								$('#simpan').text('Simpan');
 								$('#simpan').attr('disabled',false);
+							},
+							error: function (jqXHR, textStatus, errorThrown){
+								sweet('Oops...','Gagal menyimpan data','error');
+								$('#simpan').text('Simpan');
+								$('#simpan').attr('disabled',false);
 							}
 						});
 					}

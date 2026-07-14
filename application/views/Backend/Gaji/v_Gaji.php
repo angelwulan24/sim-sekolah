@@ -13,31 +13,103 @@
 </style>
 
 <div class="col-xs-12">
-	<div class="box box-primary">
-        <div class="box-header">
-            <div class="pull-right">
-                <a href="<?=base_url('Gaji/Bayar')?>" class="btn btn-primary btn-sm">Form Pembayaran Gaji</a>
+    <ul class="nav nav-tabs" style="margin-bottom: 15px; font-weight: bold;">
+        <li class="active"><a data-toggle="tab" href="#tab-gaji"><i class="fa fa-calculator"></i> Kelola Gaji Guru</a></li>
+        <li><a data-toggle="tab" href="#tab-riwayat-gaji"><i class="fa fa-history"></i> Riwayat Pembayaran Gaji</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- TAB 1: KELOLA GAJI GURU -->
+        <div id="tab-gaji" class="tab-pane fade in active">
+            <div class="box box-primary">
+                <div class="box-header">
+                    <div class="pull-right">
+                        <a href="<?=base_url('Gaji/Bayar')?>" class="btn btn-primary btn-sm">Form Pembayaran Gaji</a>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div class="table-responsive">    	
+                        <table id="list-data" class="table table-bordered table-hover" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10px;">No</th>
+                                    <th>Nama Guru</th>
+                                    <th>NIP</th>
+                                    <th>Jenis Kelamin</th>
+                                    <th>HP</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-	    <div class="box-body">
-	    	<div class="table-responsive">    	
-		        <table id="list-data" class="table table-bordered table-hover">
-		            <thead>
-			            <tr>
-                            <th style="width: 10px;">No</th>
-                            <th>Nama Guru</th>
-                            <th>NIP</th>
-                            <th>Jenis Kelamin</th>
-                            <th>HP</th>
-                            <th>Aksi</th>
-			            </tr>
-		            </thead>
-		            <tbody>
-		              
-		            </tbody>
-		        </table>
-	       	</div>
-	    </div>
+
+        <!-- TAB 2: RIWAYAT PEMBAYARAN GAJI -->
+        <div id="tab-riwayat-gaji" class="tab-pane fade">
+            <div class="box box-success">
+                <div class="box-header">
+                    <h3 class="box-title">Riwayat Pembayaran Gaji Guru</h3>
+                </div>
+                <div class="box-body">
+                    <!-- FILTER DATA RIWAYAT GAJI -->
+                    <div class="row" style="margin-bottom: 15px;">
+                        <div class="col-md-3">
+                            <select id="riwayat_gaji_jenis_filter" class="form-control">
+                                <option value="">-- Pilih Jenis Filter --</option>
+                                <option value="hari">Harian</option>
+                                <option value="bulan">Bulanan</option>
+                                <option value="tahun">Tahunan</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3" id="riwayat_gaji_wrap-filter-hari" style="display:none;">
+                            <input type="date" id="riwayat_gaji_filter_hari" class="form-control" placeholder="Pilih Hari">
+                        </div>
+                        
+                        <div class="col-md-3" id="riwayat_gaji_wrap-filter-bulan" style="display:none;">
+                            <input type="month" id="riwayat_gaji_filter_bulan" class="form-control">
+                        </div>
+                        
+                        <div class="col-md-3" id="riwayat_gaji_wrap-filter-tahun" style="display:none;">
+                            <select id="riwayat_gaji_filter_tahun" class="form-control">
+                                <option value="">-- Pilih Tahun --</option>
+                                <?php 
+                                    for($i = date('Y'); $i >= date('Y')-5; $i--) {
+                                        echo "<option value='$i'>$i</option>";
+                                    }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button id="riwayat_gaji_btn-filter" class="btn btn-success btn-sm"><i class="fa fa-filter"></i> Filter</button>
+                            <button id="riwayat_gaji_btn-reset" class="btn btn-default btn-sm"><i class="fa fa-refresh"></i> Reset</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="list-riwayat-gaji" class="table table-bordered table-hover" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10px;">No</th>
+                                    <th>Waktu Pembayaran</th>
+                                    <th>Nama Guru</th>
+                                    <th>NUPTK / NIP</th>
+                                    <th>Periode</th>
+                                    <th>Jam Kerja</th>
+                                    <th>Gaji / Jam</th>
+                                    <th>Total Gaji</th>
+                                    <th>Tempat Bayar</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -122,6 +194,86 @@
             }
         });
 
+        var table_riwayat_gaji = $("#list-riwayat-gaji").DataTable({
+            initComplete: function() {
+                var api = this.api();
+                $('#list-riwayat-gaji input')
+                    .off('.DT')
+                    .on('keyup.DT', function(e) {
+                        api.search(this.value).draw();
+                    });
+            },
+            oLanguage: {
+                sSearch       :"<i class='fa fa-search fa-fw'></i> Cari: ",
+                sLengthMenu   :"Tampilkan _MENU_ data",
+                sInfo         :"Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                sInfoFiltered :"(disaring dari _MAX_ total data)", 
+                sZeroRecords  :"Oops..data kosong", 
+                sEmptyTable   :"Data kosong.", 
+                sInfoEmpty    :"Menampilkan 0 sampai 0 data",
+                sProcessing   :"Sedang memproses...", 
+                oPaginate: {
+                    sPrevious :"Sebelumnya",
+                    sNext     :"Selanjutnya",
+                    sFirst    :"Pertama",
+                    sLast     :"Terakhir"
+                }
+            },
+            processing: true,
+            serverSide: true,
+            ajax: {
+                "url": "<?= base_url('Gaji/getRiwayatData') ?>",
+                "type": "POST",
+                "data": function (d) {
+                    d.jenis = $('#riwayat_gaji_jenis_filter').val();
+                    if(d.jenis === 'hari'){
+                        d.tanggal = $('#riwayat_gaji_filter_hari').val();
+                    } else if(d.jenis === 'bulan'){
+                        d.tanggal = $('#riwayat_gaji_filter_bulan').val();
+                    } else if(d.jenis === 'tahun'){
+                        d.tanggal = $('#riwayat_gaji_filter_tahun').val();
+                    }
+                }
+            },
+            columns: [
+                {
+                    "data": "id",
+                    "orderable": false,
+                    "searchable": false
+                },
+                {"data": "waktu_bayar"},
+                {"data": "nama"},
+                {"data": "nip"},
+                {"data": "periode"},
+                {"data": "jam"},
+                {
+                    "data": "nominal_gaji",
+                    "render": function(data, type, row) {
+                        return "Rp. " + parseInt(data).toLocaleString('id-ID');
+                    }
+                },
+                {
+                    "data": "total_gaji",
+                    "render": function(data, type, row) {
+                        return "Rp. " + parseInt(data).toLocaleString('id-ID');
+                    }
+                },
+                {
+                    "data": "view",
+                    "orderable": false,
+                    "searchable": false
+                }
+            ],
+            order: [[1, 'desc']],
+            rowCallback: function(row, data, iDisplayIndex) {
+                var info = this.fnPagingInfo();
+                var page = info.iPage;
+                var length = info.iLength;
+                var index = page * length + (iDisplayIndex + 1);
+                $('td:eq(0)', row).html(index);
+            }
+        });
+
 		$('#form').validate({
 			errorElement: 'div',
 			errorClass: 'help-block',
@@ -188,6 +340,34 @@
 			},
 			invalidHandler: function (form) {}
 		});
+
+    $('#riwayat_gaji_jenis_filter').change(function(){
+        $('#riwayat_gaji_wrap-filter-hari').hide();
+        $('#riwayat_gaji_wrap-filter-bulan').hide();
+        $('#riwayat_gaji_wrap-filter-tahun').hide();
+        
+        $('#riwayat_gaji_filter_hari').val('');
+        $('#riwayat_gaji_filter_bulan').val('');
+        $('#riwayat_gaji_filter_tahun').val('');
+        
+        var jenis = $(this).val();
+        if(jenis === 'hari') {
+            $('#riwayat_gaji_wrap-filter-hari').show();
+        } else if(jenis === 'bulan') {
+            $('#riwayat_gaji_wrap-filter-bulan').show();
+        } else if(jenis === 'tahun') {
+            $('#riwayat_gaji_wrap-filter-tahun').show();
+        }
+    });
+
+    $('#riwayat_gaji_btn-filter').click(function(){
+        table_riwayat_gaji.ajax.reload();
+    });
+
+    $('#riwayat_gaji_btn-reset').click(function(){
+        $('#riwayat_gaji_jenis_filter').val('').trigger('change');
+        table_riwayat_gaji.ajax.reload();
+    });
 
 	});
 

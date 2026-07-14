@@ -254,7 +254,7 @@
                 {"data": "tgl_lahirsiswa"},
                 {"data": "ortu_wali"},
                 {"data": "telp_siswa"},
-                {"data": "alamat_ssiwa"},
+                {"data": "alamat_siswa"},
                 {"data": "tgl_masuk"},
                 {"data": "thn_ajaran"},
                 {"data": "nama_kelas"},
@@ -301,25 +301,41 @@
             $('#form-import').on('submit',function(event){
 
             event.preventDefault();
-            $('#import').text('Mengimport..');
-            $('#import').attr('disabled',true);
+            var form = this;
+            Swal({
+                title: 'Konfirmasi Import',
+                text: 'Apakah Anda yakin ingin mengimport data siswa dari file excel ini?',
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Import',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.value) {
+                    $('#import').text('Mengimport..');
+                    $('#import').attr('disabled',true);
 
-            $.ajax({
-                url: '<?=base_url($this->uri->segment(1).'/import')?>',
-                method:"POST",
-                data:new FormData(this),
-                cache:false,
-                contentType:false,
-                processData:false,
-                success:function(data){
-                    $('#modal-import').modal('hide');
-                    reload();
-                    sweet('Sukses','Berhasil Import Data','success');
-                    $('#import').text('Import');
-                    $('#import').attr('disabled',false);
-                },
-                error: function (jqXHR, textStatus, errorThrown){
-                    sweet('Oops...','Data gagal di import','error');
+                    $.ajax({
+                        url: '<?=base_url($this->uri->segment(1).'/import')?>',
+                        method:"POST",
+                        data:new FormData(form),
+                        cache:false,
+                        contentType:false,
+                        processData:false,
+                        success:function(data){
+                            $('#modal-import').modal('hide');
+                            reload();
+                            sweet('Sukses','Berhasil Import Data','success');
+                            $('#import').text('Import');
+                            $('#import').attr('disabled',false);
+                        },
+                        error: function (jqXHR, textStatus, errorThrown){
+                            sweet('Oops...','Data gagal di import','error');
+                            $('#import').text('Import');
+                            $('#import').attr('disabled',false);
+                        }
+                    });
                 }
             });
         });
@@ -383,6 +399,11 @@
 								$('#modal-form').modal('hide');
 								reload();
 								sweet('Di '+method,'Berhasil '+method+' Data','success');
+								$('#simpan').text('Simpan');
+								$('#simpan').attr('disabled',false);
+							},
+							error: function (jqXHR, textStatus, errorThrown){
+								sweet('Oops...','Gagal menyimpan data','error');
 								$('#simpan').text('Simpan');
 								$('#simpan').attr('disabled',false);
 							}
@@ -486,7 +507,7 @@
                 $('[name="agama"]').val(data.agama_siswa ? data.agama_siswa : 'Islam');
                 $('[name="orangtua_wali"]').val(data.ortu_wali);
                 $('[name="telpon"]').val(data.telp_siswa);
-                $('[name="alamat"]').val(data.alamat_ssiwa);
+                $('[name="alamat"]').val(data.alamat_siswa);
                 $('[name="tempat"]').val(data.tmp_lahir);
                 $('[name="tanggal"]').val(data.tgl_lahirsiswa);
                 $('[name="tanggal_masuk"]').val(data.tgl_masuk);

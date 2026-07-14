@@ -109,6 +109,22 @@
   <script src="<?= base_url('assets/') ?>bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
   <!-- iCheck -->
   <script src="<?= base_url('assets/') ?>plugins/iCheck/icheck.min.js"></script>
+  <!-- Sweetalert2 -->
+  <script src="<?= base_url('assets/') ?>bower_components/sweetalert2/sweetalert2.all.min.js"></script>
+  
+  <?php if ($this->session->flashdata('logout_success')): ?>
+    <script>
+      $(document).ready(function() {
+        Swal({
+          title: 'Logout Berhasil',
+          text: 'Anda telah keluar dari sistem.',
+          type: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      });
+    </script>
+  <?php endif; ?>
 </body>
 
 </html>

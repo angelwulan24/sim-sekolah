@@ -32,7 +32,7 @@
                             <td><?=date('d-m-Y', strtotime($key->tgl_lahirsiswa))?></td>
                             <td><?=$key->ortu_wali?></td>
                             <td><?=$key->telp_siswa?></td>
-                            <td><?=$key->alamat_ssiwa?></td>
+                            <td><?=$key->alamat_siswa?></td>
                             <td><?=$key->status_siswa?></td>
 		            	</tr>
 		             <?php } ?>

@@ -10,3 +10,47 @@ API Response: {"status":false,"message":"Failed to connect to localhost port 500
 API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
 2026-07-07 01:04:29 | Attempting Send | NIS: 33333333 | Name: Bagus Dwi Atmaja | Target Telp: 081399205647
 API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-07 03:53:33 | Attempting Send | NIS: 11111111 | Name: Angelina Wulandari | Target Telp: 081399205647
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-07 03:53:36 | Attempting Send | NIS: 11111111 | Name: Angelina Wulandari | Target Telp: 081399205647
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-10 05:08:15 | Attempting Send | NIS: 11111111 | Name: Angelina Wulandari | Target Telp: 085216165214
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-10 05:08:18 | Attempting Send | NIS: 11111111 | Name: Angelina Wulandari | Target Telp: 085216165214
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-10 06:16:25 | Attempting Send | NIS: 22222222 | Name: Febriana Valentine | Target Telp: 085216165214
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-10 06:16:27 | Attempting Send | NIS: 22222222 | Name: Febriana Valentine | Target Telp: 085216165214
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-10 06:48:59 | Attempting Send | NIS: 22222222 | Name: Febriana Valentine | Target Telp: 085216165214
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-10 10:26:09 | Attempting Send | NIS: 22222222 | Name: Febriana Valentine | Target Telp: 085216165214
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-10 10:26:11 | Attempting Send | NIS: 22222222 | Name: Febriana Valentine | Target Telp: 085216165214
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-13 14:29:36 | Attempting Send | NIS: 88888888 | Name: Test Siswa 3 | Target Telp: 087777777
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-13 14:35:01 | Attempting Send | NIS: 88888888 | Name: Test Siswa 3 | Target Telp: 087777777
+API Response: {"status":false,"message":"Failed to connect to localhost port 5001: Connection refused"}
+2026-07-13 17:52:23 | Attempting Send | NIS: 22222222 | Name: Febriana Valentine | Target Telp: 085216165214
+API Response: {"status":true,"message":"Success"}
+2026-07-13 18:11:28 | Attempting Send | NIS: 88888888 | Name: Test Siswa 3 | Target Telp: 087777777
+API Response: {"status":false,"message":"WhatsApp not connected"}
+2026-07-13 22:14:47 | Attempting Send | NIS: 88888888 | Name: Test Siswa 3 | Target Telp: 087777777
+API Response: {"status":false,"message":"WhatsApp not connected"}
+2026-07-13 22:15:03 | Attempting Send | NIS: 88888888 | Name: Test Siswa 3 | Target Telp: 087777777
+API Response: {"status":false,"message":"WhatsApp not connected"}
+2026-07-13 22:15:03 | Attempting Send | NIS: 88888888 | Name: Test Siswa 3 | Target Telp: 087777777
+API Response: {"status":false,"message":"WhatsApp not connected"}
+2026-07-13 22:17:43 | Attempting Send | NIS: 11111111 | Name: Angelina Wulandari | Target Telp: 085216165214
+API Response: {"status":false,"message":"WhatsApp not connected"}
+2026-07-13 22:17:43 | Attempting Send | NIS: 11111111 | Name: Angelina Wulandari | Target Telp: 085216165214
+API Response: {"status":false,"message":"WhatsApp not connected"}
+2026-07-14 00:00:26 | Attempting Send | NIS: 11111111 | Name: Angelina Wulandari | Target Telp: 085216165214
+API Response: {"status":false,"message":"WhatsApp not connected"}
+2026-07-14 00:00:53 | Attempting Send | NIS: 11111111 | Name: Angelina Wulandari | Target Telp: 085216165214
+API Response: {"status":false,"message":"WhatsApp not connected"}
+2026-07-14 00:16:01 | Attempting Send | NIS: 11111111 | Name: Angelina Wulandari | Target Telp: 085216165214
+API Response: {"status":false,"message":"WhatsApp not connected"}
+2026-07-14 01:18:30 | Attempting Send | NIS: 11111111 | Name: Angelina Wulandari | Target Telp: 085216165214
+API Response: {"status":false,"message":"WhatsApp not connected"}

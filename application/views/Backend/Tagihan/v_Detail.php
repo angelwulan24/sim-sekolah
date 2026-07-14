@@ -118,7 +118,7 @@
                                         <i class="fa fa-money"></i> Bayar
                                     </button>
                                 <?php } else { ?>
-                                    <a target="_blank" href="<?=base_url('Tagihan/Cetak_Bukti/'.$s->id)?>" class="btn btn-abu-tua btn-xs">
+                                    <a href="<?=base_url('Tagihan/Cetak_Bukti/'.$s->id)?>" class="btn btn-abu-tua btn-xs btn-print-bukti">
                                         <i class="fa fa-print"></i> Cetak Bukti
                                     </a>
                                 <?php } ?>
@@ -193,7 +193,7 @@
                                         <i class="fa fa-money"></i> Bayar
                                     </button>
                                 <?php } else { ?>
-                                    <a target="_blank" href="<?=base_url('Tagihan/Cetak_Bukti/'.$l->id)?>" class="btn btn-abu-tua btn-xs">
+                                    <a href="<?=base_url('Tagihan/Cetak_Bukti/'.$l->id)?>" class="btn btn-abu-tua btn-xs btn-print-bukti">
                                         <i class="fa fa-print"></i> Cetak Bukti
                                     </a>
                                 <?php } ?>
@@ -308,9 +308,19 @@ $(document).ready(function() {
                                     confirmButtonColor: '#28a745'
                                 }).then((result) => {
                                     if(result.value) {
-                                        window.open("<?=base_url('Tagihan/Cetak_Bukti/')?>" + data.ids, '_blank');
+                                        Swal({
+                                            title: 'Berhasil!',
+                                            text: 'Bukti pembayaran sedang diunduh ke perangkat Anda.',
+                                            type: 'success',
+                                            timer: 2000,
+                                            showConfirmButton: false
+                                        }).then(() => {
+                                            window.location.href = "<?=base_url('Tagihan/Cetak_Bukti/')?>" + data.ids;
+                                            setTimeout(() => { location.reload(); }, 1000);
+                                        });
+                                    } else {
+                                        location.reload();
                                     }
-                                    location.reload();
                                 });
                             }
                         },
@@ -418,9 +428,19 @@ $(document).ready(function() {
                                 confirmButtonColor: '#28a745'
                             }).then((result) => {
                                 if(result.value) {
-                                    window.open("<?=base_url('Tagihan/Cetak_Bukti/')?>" + id_tagihan, '_blank');
+                                    Swal({
+                                        title: 'Berhasil!',
+                                        text: 'Bukti pembayaran sedang diunduh ke perangkat Anda.',
+                                        type: 'success',
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        window.location.href = "<?=base_url('Tagihan/Cetak_Bukti/')?>" + id_tagihan;
+                                        setTimeout(() => { location.reload(); }, 1000);
+                                    });
+                                } else {
+                                    location.reload();
                                 }
-                                location.reload();
                             });
                         }
                     },
@@ -455,6 +475,33 @@ $(document).ready(function() {
                             });
                         }
                     }
+                });
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-print-bukti', function(e){
+        e.preventDefault();
+        var url = $(this).attr('href');
+        Swal({
+            title: 'Cetak Bukti',
+            text: 'Apakah Anda yakin ingin mencetak bukti pembayaran ini?',
+            type: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Cetak',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if(result.value) {
+                Swal({
+                    title: 'Berhasil!',
+                    text: 'Bukti pembayaran sedang diunduh ke perangkat Anda.',
+                    type: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = url;
                 });
             }
         });

@@ -54,7 +54,7 @@ class Tunggakan extends CI_Controller {
             $tagihan_db = $this->db->query("SELECT t.id_tagihan AS id, t.status, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, j.tenggat_waktu, j.tahun_ajaran 
                                             FROM tagihan_siswa t
                                             JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan
-                                            WHERE t.nis_siswa = '$s->id' AND t.status = 'Belum Lunas'
+                                            WHERE t.nis = '$s->id' AND t.status = 'Belum Lunas'
                                               AND NOT (j.nama_tagihan LIKE '%SPP%' AND j.tahun_ajaran != '$current_year_setting')")->result();
 
             $current_month = (int)date('m');

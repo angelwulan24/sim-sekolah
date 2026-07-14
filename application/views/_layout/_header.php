@@ -40,7 +40,7 @@ if ($masuk['role'] == 3) {
                         </div>
                         <?php endif; ?>
                         <div class="pull-right" style="<?= ($masuk['role'] == 3) ? 'width: 100%; text-align: center;' : '' ?>">
-                            <a href="<?php echo base_url('Auth/logout')?>" class="btn btn-default btn-flat" style="<?= ($masuk['role'] == 3) ? 'width: 100%;' : '' ?>">Sign out</a>
+                            <a href="<?php echo base_url('Auth/logout')?>" class="btn btn-default btn-flat btn-logout-confirm" style="<?= ($masuk['role'] == 3) ? 'width: 100%;' : '' ?>">Logout</a>
                         </div>
                     </li>
                 </ul>

@@ -45,6 +45,7 @@ CREATE TABLE `guru` (
   `status_guru` enum('Berhenti','Cuti','Aktif') NOT NULL,
   `telp_guru` varchar(15) NOT NULL,
   `foto_guru` varchar(255) DEFAULT NULL,
+  `tgl_lahirguru` date DEFAULT NULL,
   PRIMARY KEY (`NUPTK`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -69,22 +70,22 @@ CREATE TABLE `kelas` (
 
 DROP TABLE IF EXISTS `siswa`;
 CREATE TABLE `siswa` (
-  `nis_siswa` varchar(15) NOT NULL,
+  `nis` varchar(15) NOT NULL,
   `nama_siswa` varchar(50) NOT NULL,
   `jk_siswa` varchar(15) DEFAULT NULL,
   `agama_siswa` varchar(20) DEFAULT NULL,
   `status_siswa` varchar(50) NOT NULL DEFAULT 'Aktif',
   `ortu_wali` varchar(50) NOT NULL,
-  `tempat_lahirsiswa` varchar(20) NOT NULL,
+  `tmp_lahir` varchar(20) NOT NULL,
   `tgl_lahirsiswa` date NOT NULL,
-  `alamat_ssiwa` varchar(100) NOT NULL,
+  `alamat_siswa` varchar(100) NOT NULL,
   `telp_siswa` varchar(20) DEFAULT '',
   `id_kelas` int(11) DEFAULT NULL,
   `foto_siswa` varchar(255) DEFAULT NULL,
   `tgl_masuk` date DEFAULT NULL,
   `thn_ajaran` varchar(20) DEFAULT NULL,
   `id_users` int(11) DEFAULT NULL,
-  PRIMARY KEY (`nis_siswa`),
+  PRIMARY KEY (`nis`),
   KEY `fk_siswa_kelas` (`id_kelas`),
   KEY `fk_siswa_users` (`id_users`),
   CONSTRAINT `fk_siswa_kelas` FOREIGN KEY (`id_kelas`) REFERENCES `kelas` (`id_kelas`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -102,7 +103,6 @@ CREATE TABLE `pemasukan` (
   `tgl_pemasukan` date NOT NULL,
   `ket_pemasukan` varchar(100) NOT NULL,
   `nominal_pemasukan` varchar(12) NOT NULL,
-  `tanggal` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id_pemasukan`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -131,16 +131,16 @@ DROP TABLE IF EXISTS `tagihan_siswa`;
 CREATE TABLE `tagihan_siswa` (
   `id_tagihan` int(11) NOT NULL AUTO_INCREMENT,
   `id_pemasukan` int(11) DEFAULT NULL,
-  `nis_siswa` varchar(15) NOT NULL,
+  `nis` varchar(15) NOT NULL,
   `kode_tagihan` varchar(10) NOT NULL,
   `status` enum('Belum Lunas','Lunas') DEFAULT 'Belum Lunas',
   `tgl_pembayaran` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id_tagihan`),
   KEY `fk_tagihan_pemasukan` (`id_pemasukan`),
-  KEY `fk_tagihan_siswa_nis` (`nis_siswa`),
+  KEY `fk_tagihan_siswa_nis` (`nis`),
   KEY `fk_tagihan_jenis` (`kode_tagihan`),
   CONSTRAINT `fk_tagihan_pemasukan` FOREIGN KEY (`id_pemasukan`) REFERENCES `pemasukan` (`id_pemasukan`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `fk_tagihan_siswa_nis` FOREIGN KEY (`nis_siswa`) REFERENCES `siswa` (`nis_siswa`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_tagihan_siswa_nis` FOREIGN KEY (`nis`) REFERENCES `siswa` (`nis`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_tagihan_jenis` FOREIGN KEY (`kode_tagihan`) REFERENCES `jenis_tagihan` (`kode_tagihan`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -155,7 +155,6 @@ CREATE TABLE `pengeluaran` (
   `nominal_pengeluaran` varchar(12) NOT NULL,
   `tgl_pengeluaran` date NOT NULL,
   `ket_pengeluaran` text NOT NULL,
-  `tanggal` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `bukti` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id_pengeluaran`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -174,8 +173,7 @@ CREATE TABLE `gaji` (
   `periode` varchar(20) NOT NULL,
   `jam` varchar(4) NOT NULL,
   `nominal_gaji` varchar(12) NOT NULL,
-  `tgl_gaji` date NOT NULL,
-  `tanggal` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `tgl_gaji` datetime NOT NULL,
   `id_pengeluaran` int(11) DEFAULT NULL COMMENT 'FK ke pengeluaran - setiap gaji memiliki record pengeluaran terkait',
   PRIMARY KEY (`id_gaji`),
   KEY `fk_gaji_guru` (`NUPTK`),

@@ -6,7 +6,8 @@ const {
     default: makeWASocket,
     DisconnectReason,
     useMultiFileAuthState,
-    fetchLatestBaileysVersion
+    fetchLatestBaileysVersion,
+    Browsers
 } = require('@whiskeysockets/baileys');
 
 const app = express();
@@ -35,7 +36,7 @@ async function connectToWhatsApp() {
         version,
         printQRInTerminal: true,
         auth: state,
-        browser: ['SIM Sekolah Gateway', 'Chrome', '1.0.0']
+        browser: Browsers.windows('Desktop')
     });
 
     sock.ev.on('creds.update', saveCreds);
@@ -64,8 +65,26 @@ async function connectToWhatsApp() {
             if (shouldReconnect) {
                 setTimeout(connectToWhatsApp, 3000);
             } else {
-                console.log('Logged out.');
+                console.log('Logged out. Cleaning session and reconnecting to generate new QR...');
                 io.emit('connection_status', { status: 'logged_out' });
+                
+                // Clear authentication files
+                const fs = require('fs');
+                const path = require('path');
+                const dir = path.join(__dirname, 'auth_info_baileys');
+                if (fs.existsSync(dir)) {
+                    try {
+                        const files = fs.readdirSync(dir);
+                        for (const file of files) {
+                            fs.unlinkSync(path.join(dir, file));
+                        }
+                        console.log('Cleared auth_info_baileys directory');
+                    } catch (err) {
+                        console.error('Error clearing auth directory:', err);
+                    }
+                }
+                
+                setTimeout(connectToWhatsApp, 3000);
             }
         } else if (connection === 'open') {
             console.log('WhatsApp connection opened!');
@@ -117,6 +136,15 @@ app.post('/message/send-text', async (req, res) => {
         }
         if (!formattedNumber.endsWith('@s.whatsapp.net')) {
             formattedNumber += '@s.whatsapp.net';
+        }
+
+        // Simulate human typing presence to prevent spam detection/account bans
+        try {
+            await sock.sendPresenceUpdate('composing', formattedNumber);
+            await new Promise(resolve => setTimeout(resolve, 1500)); // natural typing delay
+            await sock.sendPresenceUpdate('paused', formattedNumber);
+        } catch (presenceErr) {
+            console.error('Presence simulation error (non-fatal):', presenceErr);
         }
 
         await sock.sendMessage(formattedNumber, { text });

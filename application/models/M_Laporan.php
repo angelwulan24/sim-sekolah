@@ -101,7 +101,7 @@ class M_Laporan extends CI_Model {
         $pdf->SetFont('TIMES', 'B', 11);
         $pdf->Cell(60, 5, 'Kh.Satibi Salim, M.Pd.I', 0, 1, 'C');
 
-        $pdf->Output();
+        $pdf->Output('D', 'Laporan_Keuangan_Periode_' . $awal . '_to_' . $akhir . '.pdf');
     }
 
 
@@ -149,46 +149,6 @@ class M_Laporan extends CI_Model {
         $total_pemasukan = 0;
         $printed = false;
 
-        // Pendaftaran
-        if(!empty($data['pendaftaran'])) {
-            if ($printed) { $pdf->Ln(4); }
-            $pdf->SetFillColor(255, 255, 0);
-            $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(190, 8, ' [ PEMASUKAN ] UANG PENDAFTARAN', 1, 1, 'L', true);
-            $pdf->SetFont('TIMES','',10);
-            $subtotal = 0;
-            foreach($data['pendaftaran'] as $row) {
-                $pdf->Cell(130, 7, $row->siswa, 1, 0, 'L');
-                $pdf->Cell(60, 7, rupiah($row->nominal), 1, 1, 'R');
-                $subtotal += $row->nominal;
-            }
-            $total_pemasukan += $subtotal;
-            $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(130, 7, 'Sub Total Pendaftaran', 1, 0, 'R', true);
-            $pdf->Cell(60, 7, rupiah($subtotal), 1, 1, 'R', true);
-            $printed = true;
-        }
-
-        // Ujian
-        if(!empty($data['ujian'])) {
-            if ($printed) { $pdf->Ln(4); }
-            $pdf->SetFillColor(255, 255, 0);
-            $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(190, 8, ' [ PEMASUKAN ] UANG UJIAN', 1, 1, 'L', true);
-            $pdf->SetFont('TIMES','',10);
-            $subtotal = 0;
-            foreach($data['ujian'] as $row) {
-                $pdf->Cell(130, 7, $row->name . ' (' . $row->periode . ')', 1, 0, 'L');
-                $pdf->Cell(60, 7, rupiah($row->nominal), 1, 1, 'R');
-                $subtotal += $row->nominal;
-            }
-            $total_pemasukan += $subtotal;
-            $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(130, 7, 'Sub Total Ujian', 1, 0, 'R', true);
-            $pdf->Cell(60, 7, rupiah($subtotal), 1, 1, 'R', true);
-            $printed = true;
-        }
-
         // SPP
         if(!empty($data['spp'])) {
             if ($printed) { $pdf->Ln(4); }
@@ -209,45 +169,6 @@ class M_Laporan extends CI_Model {
             $printed = true;
         }
 
-         // Buku
-         if(!empty($data['buku'])) {
-            if ($printed) { $pdf->Ln(4); }
-            $pdf->SetFillColor(255, 255, 0);
-            $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(190, 8, ' [ PEMASUKAN ] UANG BUKU', 1, 1, 'L', true);
-            $pdf->SetFont('TIMES','',10);
-            $subtotal = 0;
-            foreach($data['buku'] as $row) {
-                $pdf->Cell(130, 7, $row->name, 1, 0, 'L');
-                $pdf->Cell(60, 7, rupiah($row->total), 1, 1, 'R');
-                $subtotal += $row->total;
-            }
-            $total_pemasukan += $subtotal;
-            $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(130, 7, 'Sub Total Buku', 1, 0, 'R', true);
-            $pdf->Cell(60, 7, rupiah($subtotal), 1, 1, 'R', true);
-            $printed = true;
-        }
-
-        // Baju
-        if(!empty($data['baju'])) {
-            if ($printed) { $pdf->Ln(4); }
-            $pdf->SetFillColor(255, 255, 0);
-            $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(190, 8, ' [ PEMASUKAN ] UANG BAJU', 1, 1, 'L', true);
-            $pdf->SetFont('TIMES','',10);
-            $subtotal = 0;
-            foreach($data['baju'] as $row) {
-                $pdf->Cell(130, 7, $row->name, 1, 0, 'L');
-                $pdf->Cell(60, 7, rupiah($row->total), 1, 1, 'R');
-                $subtotal += $row->total;
-            }
-            $total_pemasukan += $subtotal;
-            $pdf->SetFont('TIMES','B',10);
-            $pdf->Cell(130, 7, 'Sub Total Baju', 1, 0, 'R', true);
-            $pdf->Cell(60, 7, rupiah($subtotal), 1, 1, 'R', true);
-            $printed = true;
-        }
 
         // Tagihan Lainnya
         if(!empty($data['tagihan_lainnya'])) {
@@ -364,6 +285,10 @@ class M_Laporan extends CI_Model {
         $pdf->SetFont('TIMES', 'B', 11);
         $pdf->Cell(60, 5, 'Kh.Satibi Salim, M.Pd.I', 0, 1, 'C');
 
-        $pdf->Output();
+        if (isset($data['tanggal'])) {
+            $pdf->Output('D', 'Rincian_Detail_Transaksi_Harian_' . $data['tanggal'] . '.pdf');
+        } else {
+            $pdf->Output('D', 'Rincian_Detail_Transaksi_Berkala_' . $data['awal'] . '_to_' . $data['akhir'] . '.pdf');
+        }
     }
 }

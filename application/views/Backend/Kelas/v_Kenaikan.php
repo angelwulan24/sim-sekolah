@@ -70,3 +70,27 @@
         });
     });
 </script>
+
+<?php if ($this->session->flashdata('success')): ?>
+<script>
+    $(document).ready(function() {
+        Swal({
+            title: 'Berhasil!',
+            text: '<?= $this->session->flashdata('success') ?>',
+            type: 'success'
+        });
+    });
+</script>
+<?php endif; ?>
+
+<?php if ($this->session->flashdata('error')): ?>
+<script>
+    $(document).ready(function() {
+        Swal({
+            title: 'Gagal!',
+            text: '<?= $this->session->flashdata('error') ?>',
+            type: 'error'
+        });
+    });
+</script>
+<?php endif; ?>

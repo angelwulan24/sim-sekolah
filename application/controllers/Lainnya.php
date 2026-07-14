@@ -31,7 +31,11 @@ class Lainnya extends CI_Controller {
 
 	function getData (){
 		header('Content-Type:application/json');
-		echo $this->mod->getAllData();
+		$filter = array(
+			'jenis'   => $this->input->post('jenis'),
+			'tanggal' => $this->input->post('tanggal')
+		);
+		echo $this->mod->getAllData($filter);
 	}
 
 	function getDetail(){

@@ -1,7 +1,11 @@
 <div class="col-xs-12">
     <div class="box box-primary">
         <div class="box-header">
-
+            <?php if ($this->session->userdata('role') == 1) { ?>
+            <button class="btn btn-danger" id="btn-hapus-terpilih" disabled onclick="HapusTerpilih()">
+                <i class="fa fa-trash"></i> Hapus Terpilih
+            </button>
+            <?php } ?>
             <div class="pull-right">
                 <?php if ($this->session->userdata('role') == 1) { ?>
                 <a href="#" onclick="Tambah()" class="btn btn-primary">Tambah Data </a>
@@ -14,14 +18,15 @@
                 <table id="list-data" class="table table-bordered table-hover">
                     <thead>
                         <tr>
-                      <th style="width: 10px;">No</th>
-                      <th>Kode Tagihan</th>
-                      <th>Jenis Tagihan</th>
-                      <th>Tahun Ajaran</th>
-                      <th>Kelas</th>
-                      <th>Nominal</th>
-                      <th>Tenggat Waktu</th>
-                      <th width="200">Aksi</th>
+                            <th width="30"><input type="checkbox" class="check-all"></th>
+                            <th style="width: 10px;">No</th>
+                            <th>Kode Tagihan</th>
+                            <th>Jenis Tagihan</th>
+                            <th>Tahun Ajaran</th>
+                            <th>Kelas</th>
+                            <th>Nominal</th>
+                            <th>Tenggat Waktu</th>
+                            <th width="200">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -189,6 +194,14 @@
                 {
                     "data": "kode_tagihan",
                     "orderable": false,
+                    "searchable": false,
+                    "render": function(data, type, row) {
+                        return '<input type="checkbox" class="check-item" value="' + data + '">';
+                    }
+                },
+                {
+                    "data": null,
+                    "orderable": false,
                     "searchable": false
                 },
                 {"data": "kode_tagihan"},
@@ -203,7 +216,7 @@
                     "searchable": false
                 }
             ],
-            order: [[1, 'asc']],
+            order: [[2, 'asc']],
             rowId: function(a){
                 return a.kode_tagihan;
             },
@@ -212,8 +225,23 @@
                 var page = info.iPage;
                 var length = info.iLength;
                 var index = page * length + (iDisplayIndex + 1);
-                $('td:eq(0)', row).html(index);
+                $('td:eq(1)', row).html(index);
             }
+        });
+
+        $(document).on('change', '.check-all', function() {
+            var isChecked = $(this).is(':checked');
+            $('.check-item').prop('checked', isChecked);
+            updateHapusBtn();
+        });
+
+        $(document).on('change', '.check-item', function() {
+            updateHapusBtn();
+        });
+
+        table.on('draw', function() {
+            $('.check-all').prop('checked', false);
+            updateHapusBtn();
         });
 
         $('#form').validate({
@@ -425,5 +453,50 @@
                 sweet('Oops...','Data tidak dapat diambil','error');
             }
         });
+    }
+
+    function updateHapusBtn() {
+        var checked = $('.check-item:checked').length;
+        $('#btn-hapus-terpilih').attr('disabled', checked === 0);
+    }
+
+    function HapusTerpilih() {
+        var ids = [];
+        $('.check-item:checked').each(function() {
+            ids.push($(this).val());
+        });
+
+        if (ids.length > 0) {
+            Swal({
+                title: 'Hapus ' + ids.length + ' Jenis Tagihan?',
+                text: "Semua jenis tagihan terpilih ini akan dihapus permanen beserta relasinya!",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        url: "<?=base_url($this->uri->segment(1).'/Hapus_Multi')?>",
+                        type: "POST",
+                        data: {ids: ids},
+                        dataType: "JSON",
+                        success: function(data) {
+                            if (data.status) {
+                                reload();
+                                sweet('Terhapus!', ids.length + ' jenis tagihan berhasil dihapus.', 'success');
+                            } else {
+                                sweet('Gagal', 'Terjadi kesalahan saat menghapus data.', 'error');
+                            }
+                        },
+                        error: function() {
+                            sweet('Oops...', 'Koneksi ke server gagal', 'error');
+                        }
+                    });
+                }
+            });
+        }
     }
 </script>

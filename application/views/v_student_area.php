@@ -50,6 +50,7 @@
                     <form action="<?= base_url('StudentArea') ?>" method="GET" class="form-inline" style="display:inline-block;">
                         <label style="font-weight: normal; margin-right: 5px;">Tahun Ajaran: </label>
                         <select name="tahun" class="form-control input-sm" onchange="this.form.submit()">
+                            <option value="">-- Semua Tahun --</option>
                             <?php foreach($tahun_list as $tl): ?>
                                 <option value="<?= $tl->tahun_ajaran ?>" <?= ($selected_tahun == $tl->tahun_ajaran) ? 'selected' : '' ?>><?= $tl->tahun_ajaran ?></option>
                             <?php endforeach; ?>
@@ -64,64 +65,73 @@
 
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped text-center">
-                        <thead class="bg-blue shadow">
+                        <thead>
                             <tr>
                                 <th style="width: 30px;"><input type="checkbox" id="check-all-spp"></th>
                                 <th style="width: 10px;">No</th>
                                 <th>Bulan</th>
-                                <th>Jumlah</th>
+                                <th>Tahun Ajaran</th>
+                                <th>Nominal</th>
+                                <th>Tenggat Waktu</th>
                                 <th>Status</th>
-                                <th>Tanggal Bayar</th>
+                                <th>Waktu Bayar</th>
+                                <th>Tempat Bayar</th>
                                 <th style="width: 80px;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php $no=1; foreach($tagihan_bulanan as $tb): ?>
+                            <?php 
+                            $no = 1;
+                            foreach($tagihan_spp as $s) { 
+                            ?>
                             <tr>
                                 <td style="vertical-align:middle;">
-                                    <?php if($tb->status != 'Lunas'): ?>
+                                    <?php if($s->status == 'Belum Lunas') { ?>
                                         <input type="checkbox" class="check-item check-spp" 
-                                               data-jenis="<?= $tb->jenis ?>" 
-                                               data-label_bayar="<?= $tb->label_bayar ?>" 
-                                               data-nominal="<?= $tb->nominal ?>"
-                                               data-tagihan_id="<?= $tb->tagihan_id ?>">
-                                    <?php endif; ?>
-                                </td>
-                                <td style="vertical-align:middle;"><?= $no++ ?></td>
-                                <td style="vertical-align:middle; font-weight:bold;"><?= $tb->label_bayar ?></td>
-                                <td style="vertical-align:middle;">Rp <?= number_format($tb->nominal, 0, ',', '.') ?></td>
-                                <td style="vertical-align:middle;">
-                                    <?php if($tb->status == 'Lunas'): ?>
-                                        <span class="label label-success" style="font-size:11px;">Lunas</span>
-                                    <?php else: ?>
-                                        <span class="label label-danger" style="font-size:11px;">Belum Lunas</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td style="vertical-align:middle;">
-                                    <?php if($tb->status == 'Lunas'): ?>
-                                        <?= $tb->tanggal_bayar ?>
-                                    <?php else: ?>
+                                               data-jenis="SPP" 
+                                               data-label_bayar="<?= str_replace("SPP - ", "", $s->jenis_tagihan) ?>" 
+                                               data-nominal="<?= $s->nominal ?>"
+                                               data-tagihan_id="<?= $s->id ?>">
+                                    <?php } else { ?>
                                         -
-                                    <?php endif; ?>
+                                    <?php } ?>
+                                </td>
+                                <td style="vertical-align:middle;"><?=$no++?></td>
+                                <td style="vertical-align:middle; font-weight:bold;"><?=str_replace("SPP - ", "", $s->jenis_tagihan)?></td>
+                                <td style="vertical-align:middle;"><?=$s->tahun_ajaran ? $s->tahun_ajaran : '-'?></td>
+                                <td style="vertical-align:middle;">Rp <?=number_format($s->nominal,0,',','.')?></td>
+                                <td style="vertical-align:middle;">
+                                    <?=!empty($s->tenggat_waktu) ? date('d M Y', strtotime($s->tenggat_waktu)) : '-'?>
                                 </td>
                                 <td style="vertical-align:middle;">
-                                        <?php if($tb->status == 'Lunas'): ?>
-                                            <?php 
-                                                $print_url = base_url('StudentArea/print_tagihan/'.$tb->tagihan_id);
-                                            ?>
-                                            <a href="<?= $print_url ?>" target="_blank" class="btn btn-abu-tua btn-xs btn-flat btn-print-tagihan"><i class="fa fa-print"></i> Cetak Bukti</a>
-                                        <?php else: ?>
-                                            <button class="btn btn-warning btn-xs btn-flat shadow pay-button" 
-                                                    data-jenis="<?= $tb->jenis ?>" 
-                                                    data-label_bayar="<?= $tb->label_bayar ?>" 
-                                                    data-nominal="<?= $tb->nominal ?>"
-                                                    data-tagihan_id="<?= $tb->tagihan_id ?>">
-                                                <i class="fa fa-money"></i> Bayar
-                                            </button>
-                                        <?php endif; ?>
+                                    <?php if($s->status == 'Lunas') { ?>
+                                        <span class="label label-success">Lunas</span>
+                                    <?php } else { ?>
+                                        <span class="label label-danger">Belum Lunas</span>
+                                    <?php } ?>
+                                </td>
+                                <td style="vertical-align:middle;"><?=$s->waktu_bayar ? date('d-m-Y H:i', strtotime($s->waktu_bayar)) : '-'?></td>
+                                <td style="vertical-align:middle;"><?=$s->status == 'Lunas' ? 'Online' : '-'?></td>
+                                <td style="vertical-align:middle;">
+                                    <?php if($s->status == 'Belum Lunas') { ?>
+                                        <button class="btn btn-warning btn-xs btn-flat shadow pay-button" 
+                                                data-jenis="SPP" 
+                                                data-label_bayar="<?= str_replace("SPP - ", "", $s->jenis_tagihan) ?>" 
+                                                data-nominal="<?= $s->nominal ?>"
+                                                data-tagihan_id="<?= $s->id ?>">
+                                            <i class="fa fa-money"></i> Bayar
+                                        </button>
+                                    <?php } else { ?>
+                                        <a href="<?=base_url('StudentArea/print_tagihan/'.$s->id)?>" class="btn btn-abu-tua btn-xs btn-flat btn-print-tagihan">
+                                            <i class="fa fa-print"></i> Cetak Bukti
+                                        </a>
+                                    <?php } ?>
                                 </td>
                             </tr>
-                            <?php endforeach; ?>
+                            <?php } ?>
+                            <?php if (count($tagihan_spp) == 0): ?>
+                                <tr><td colspan="10" class="text-muted">Tidak ada tagihan SPP.</td></tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -132,63 +142,79 @@
         <!-- Tagihan Lainnya Box -->
         <div class="box box-warning" style="margin-top: 20px;">
             <div class="box-header with-border">
-                <h3 class="box-title"><i class="fa fa-list-alt"></i> Tagihan Lainnya</h3>
+                <i class="fa fa-list-alt"></i>
+                <h3 class="box-title">Tagihan Lainnya</h3>
             </div>
             <div class="box-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped text-center">
-                        <thead class="bg-orange shadow">
+                        <thead>
                             <tr>
                                 <th style="width: 30px;"><input type="checkbox" id="check-all-lain"></th>
                                 <th style="width: 10px;">No</th>
                                 <th>Jenis Tagihan</th>
-                                <th>Tenggat</th>
-                                <th>Jumlah</th>
+                                <th>Tahun Ajaran</th>
+                                <th>Tenggat Waktu</th>
+                                <th>Nominal</th>
                                 <th>Status</th>
+                                <th>Waktu Bayar</th>
+                                <th>Tempat Bayar</th>
                                 <th style="width: 80px;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if(empty($tagihan_lainnya)): ?>
-                                <tr><td colspan="7" class="text-muted">Tidak ada tagihan lainnya di tahun ini.</td></tr>
-                            <?php endif; ?>
-                            <?php $no=1; foreach($tagihan_lainnya as $tl): ?>
+                            <?php 
+                            $no2 = 1;
+                            foreach($tagihan_lainnya as $l) { 
+                            ?>
                             <tr>
                                 <td style="vertical-align:middle;">
-                                    <?php if($tl->status != 'Lunas'): ?>
+                                    <?php if($l->status == 'Belum Lunas') { ?>
                                         <input type="checkbox" class="check-item check-lain" 
-                                               data-jenis="<?= $tl->jenis ?>" 
-                                               data-label_bayar="<?= $tl->label_bayar ?>" 
-                                               data-nominal="<?= $tl->nominal ?>"
-                                               data-tagihan_id="<?= $tl->tagihan_id ?>">
-                                    <?php endif; ?>
+                                               data-jenis="<?= explode(' ', $l->jenis_tagihan)[0] ?>" 
+                                               data-label_bayar="<?= $l->tahun_ajaran ?>" 
+                                               data-nominal="<?= $l->nominal ?>"
+                                               data-tagihan_id="<?= $l->id ?>">
+                                    <?php } else { ?>
+                                        -
+                                    <?php } ?>
                                 </td>
-                                <td style="vertical-align:middle;"><?= $no++ ?></td>
-                                <td style="vertical-align:middle; font-weight:bold;"><?= $tl->nama_tagihan ?></td>
-                                <td style="vertical-align:middle;"><?= $tl->tenggat_waktu ?></td>
-                                <td style="vertical-align:middle;">Rp <?= number_format($tl->nominal, 0, ',', '.') ?></td>
+                                <td style="vertical-align:middle;"><?=$no2++?></td>
+                                <td style="vertical-align:middle; font-weight:bold;"><?=$l->jenis_tagihan?></td>
+                                <td style="vertical-align:middle;"><?=$l->tahun_ajaran ? $l->tahun_ajaran : '-'?></td>
                                 <td style="vertical-align:middle;">
-                                    <?php if($tl->status == 'Lunas'): ?>
-                                        <span class="label label-success" style="font-size:11px;">Lunas</span>
-                                    <?php else: ?>
-                                        <span class="label label-danger" style="font-size:11px;">Belum Lunas</span>
-                                    <?php endif; ?>
+                                    <?=!empty($l->tenggat_waktu) ? date('d M Y', strtotime($l->tenggat_waktu)) : '-'?>
                                 </td>
+                                <td style="vertical-align:middle;">Rp <?=number_format($l->nominal,0,',','.')?></td>
                                 <td style="vertical-align:middle;">
-                                    <?php if($tl->status == 'Lunas'): ?>
-                                        <a href="<?= base_url('StudentArea/print_tagihan/'.$tl->tagihan_id) ?>" target="_blank" class="btn btn-abu-tua btn-xs btn-flat btn-print-tagihan"><i class="fa fa-print"></i> Cetak Bukti</a>
-                                    <?php else: ?>
+                                    <?php if($l->status == 'Lunas') { ?>
+                                        <span class="label label-success">Lunas</span>
+                                    <?php } else { ?>
+                                        <span class="label label-danger">Belum Lunas</span>
+                                    <?php } ?>
+                                </td>
+                                <td style="vertical-align:middle;"><?=$l->waktu_bayar ? date('d-m-Y H:i', strtotime($l->waktu_bayar)) : '-'?></td>
+                                <td style="vertical-align:middle;"><?=$l->status == 'Lunas' ? 'Online' : '-'?></td>
+                                <td style="vertical-align:middle;">
+                                    <?php if($l->status == 'Belum Lunas') { ?>
                                         <button class="btn btn-warning btn-xs btn-flat shadow pay-button" 
-                                                data-jenis="<?= $tl->jenis ?>" 
-                                                data-label_bayar="<?= $tl->label_bayar ?>" 
-                                                data-nominal="<?= $tl->nominal ?>"
-                                                data-tagihan_id="<?= $tl->tagihan_id ?>">
+                                                data-jenis="<?= explode(' ', $l->jenis_tagihan)[0] ?>" 
+                                                data-label_bayar="<?= $l->tahun_ajaran ?>" 
+                                                data-nominal="<?= $l->nominal ?>"
+                                                data-tagihan_id="<?= $l->id ?>">
                                             <i class="fa fa-money"></i> Bayar
                                         </button>
-                                    <?php endif; ?>
+                                    <?php } else { ?>
+                                        <a href="<?=base_url('StudentArea/print_tagihan/'.$l->id)?>" class="btn btn-abu-tua btn-xs btn-flat btn-print-tagihan">
+                                            <i class="fa fa-print"></i> Cetak Bukti
+                                        </a>
+                                    <?php } ?>
                                 </td>
                             </tr>
-                            <?php endforeach; ?>
+                            <?php } ?>
+                            <?php if (count($tagihan_lainnya) == 0): ?>
+                                <tr><td colspan="10" class="text-muted">Tidak ada tagihan lainnya.</td></tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -209,30 +235,24 @@
 </div>
 
 <style>
-    /* Table Headers - Neutral / Clean */
+    /* Match Admin Font Family and styles */
+    body, h1, h2, h3, h4, h5, h6, .box, .table, .btn, .label {
+        font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+    }
+    
+    /* Table Headers - Match Admin standard tables */
     .table > thead > tr > th { 
         vertical-align: middle; 
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 12px 8px !important;
-        background-color: #f8f9fa !important;
-        color: var(--text-dark) !important;
-        border-bottom: 2px solid #dee2e6 !important;
+        font-weight: bold;
+        border-bottom: 2px solid #f4f4f4 !important;
     }
+    
     .label {
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        padding: 0.5em 0.8em;
+        font-weight: bold;
     }
     
     /* Action Buttons */
     .btn-flat { border-radius: 4px !important; }
-    
-    /* Improve table row appearance */
-    .table-striped > tbody > tr:nth-of-type(odd) {
-        background-color: #fcfcfc !important;
-    }
 </style>
 
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="<?= $midtrans_client_key ?>"></script>
@@ -322,8 +342,35 @@
                                         data: { order_id: result.order_id },
                                         dataType: 'json',
                                         success: function(val){
-                                            Swal({ title: 'Sukses', text: 'Pembayaran Berhasil Diverifikasi!', type: 'success' })
-                                            .then(() => { location.reload(); });
+                                            if(val.status == 'success') {
+                                                Swal({
+                                                    title: 'Lunas!',
+                                                    text: 'Pembayaran berhasil dikonfirmasi',
+                                                    type: 'success',
+                                                    showCancelButton: true,
+                                                    confirmButtonText: '<i class="fa fa-print"></i> Cetak Bukti',
+                                                    cancelButtonText: 'Tutup',
+                                                    confirmButtonColor: '#28a745'
+                                                }).then((res) => {
+                                                    if(res.value) {
+                                                        Swal({
+                                                            title: 'Berhasil!',
+                                                            text: 'Bukti pembayaran sedang diunduh ke perangkat Anda.',
+                                                            type: 'success',
+                                                            timer: 2000,
+                                                            showConfirmButton: false
+                                                        }).then(() => {
+                                                            window.location.href = "<?=base_url('StudentArea/print_tagihan/')?>" + val.ids;
+                                                            setTimeout(() => { location.reload(); }, 1000);
+                                                        });
+                                                    } else {
+                                                        location.reload();
+                                                    }
+                                                });
+                                            } else {
+                                                Swal({ title: 'Menunggu', text: val.message, type: 'info' })
+                                                .then(() => { location.reload(); });
+                                            }
                                         },
                                         error: function(){
                                             location.reload();
@@ -349,7 +396,7 @@
         });
     });
 
-    // Existing single pay logic remains but let's use the same delegator
+    // Existing single pay logic using Midtrans and verify redirect
     $(document).on('click', '.pay-button', function(e){
         e.preventDefault();
         var btn = $(this);
@@ -359,7 +406,7 @@
             nominal: btn.data('nominal'),
             tagihan_id: btn.data('tagihan_id')
         }];
-        
+
         if (typeof snap === 'undefined') {
             Swal({ title: 'Error', text: 'Midtrans library tidak termuat. Periksa koneksi internet Anda.', type: 'error' });
             return;
@@ -379,12 +426,16 @@
                 btn.html('<i class="fa fa-spinner fa-spin"></i>').attr('disabled', true);
                 
                 $.ajax({
-                    url: '<?= base_url('StudentArea/get_token_bulk') ?>', // Using bulk endpoint for consistency
+                    url: '<?= base_url('StudentArea/get_token_bulk') ?>',
                     type: 'POST',
                     data: { items: JSON.stringify(item) },
                     dataType: 'json',
                     success: function(response){
-                        btn.html('<i class="fa fa-money"></i> Bayar').attr('disabled', false);
+                        btn.html('<i class="fa fa-money"></i>').attr('disabled', false);
+                        if(response.error){
+                            Swal({ title: 'Gagal', text: response.error, type: 'error' });
+                            return;
+                        }
                         if(response.token){
                             snap.pay(response.token, {
                                 onSuccess: function(result){
@@ -392,12 +443,56 @@
                                         url: '<?= base_url('StudentArea/finish_payment') ?>',
                                         type: 'POST',
                                         data: { order_id: result.order_id },
-                                        success: function(){ location.reload(); },
-                                        error: function(){ location.reload(); }
+                                        dataType: 'json',
+                                        success: function(val){
+                                            if(val.status == 'success') {
+                                                Swal({
+                                                    title: 'Lunas!',
+                                                    text: 'Pembayaran berhasil dikonfirmasi',
+                                                    type: 'success',
+                                                    showCancelButton: true,
+                                                    confirmButtonText: '<i class="fa fa-print"></i> Cetak Bukti',
+                                                    cancelButtonText: 'Tutup',
+                                                    confirmButtonColor: '#28a745'
+                                                }).then((res) => {
+                                                    if(res.value) {
+                                                        Swal({
+                                                            title: 'Berhasil!',
+                                                            text: 'Bukti pembayaran sedang diunduh ke perangkat Anda.',
+                                                            type: 'success',
+                                                            timer: 2000,
+                                                            showConfirmButton: false
+                                                        }).then(() => {
+                                                            window.location.href = "<?=base_url('StudentArea/print_tagihan/')?>" + val.ids;
+                                                            setTimeout(() => { location.reload(); }, 1000);
+                                                        });
+                                                    } else {
+                                                        location.reload();
+                                                    }
+                                                });
+                                            } else {
+                                                Swal({ title: 'Menunggu', text: val.message, type: 'info' })
+                                                .then(() => { location.reload(); });
+                                            }
+                                        },
+                                        error: function(){
+                                            location.reload();
+                                        }
                                     });
+                                },
+                                onPending: function(result){
+                                    Swal({ title: 'Menunggu', text: 'Silakan selesaikan pembayaran.', type: 'info' })
+                                    .then(() => { location.reload(); });
+                                },
+                                onError: function(result){
+                                    Swal({ title: 'Error', text: 'Pembayaran Gagal!', type: 'error' });
                                 }
                             });
                         }
+                    },
+                    error: function(){
+                        btn.html('<i class="fa fa-money"></i>').attr('disabled', false);
+                        Swal({ title: 'Error', text: 'Terjadi kesalahan sistem.', type: 'error' });
                     }
                 });
             }
@@ -419,7 +514,15 @@
             cancelButtonText: 'Batal'
         }).then((result) => {
             if(result.value) {
-                window.open(url, '_blank');
+                Swal({
+                    title: 'Berhasil!',
+                    text: 'Bukti pembayaran sedang diunduh ke perangkat Anda.',
+                    type: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = url;
+                });
             }
         });
     });

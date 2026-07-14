@@ -45,6 +45,7 @@ class Auth extends CI_Controller {
 					'role'	=> $user['role']
 				);
 				$this->session->set_userdata( $data );
+				$this->session->set_flashdata('login_success', TRUE);
 				if($user['role'] == 3){
 					redirect('StudentArea','refresh');
 				} else {
@@ -151,7 +152,9 @@ class Auth extends CI_Controller {
 
 
 	public function logout(){
-		$this->session->sess_destroy();
+		$this->session->unset_userdata('id');
+		$this->session->unset_userdata('role');
+		$this->session->set_flashdata('logout_success', TRUE);
 		redirect('Auth');
 	}
 }

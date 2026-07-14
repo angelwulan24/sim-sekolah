@@ -50,6 +50,13 @@
         if (data.status === 'connected') {
             $('#qr_code_area').html('<i class="fa fa-check-circle fa-5x text-success"></i><br><h3>Terhubung</h3><p>Nomor Admin siap digunakan.</p>');
             $('#btn-connect').hide();
+            Swal({
+                title: 'Terhubung!',
+                text: 'Koneksi ke WhatsApp Gateway Berhasil.',
+                type: 'success',
+                timer: 2500,
+                showConfirmButton: false
+            });
         } else if (data.status === 'disconnected') {
             $('#qr_code_area').html('<p class="text-muted">Koneksi Terputus</p><i class="fa fa-whatsapp fa-5x text-danger"></i>');
             $('#btn-connect').show().text('Menghubungkan...');

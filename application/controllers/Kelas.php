@@ -53,11 +53,11 @@ class Kelas extends CI_Controller {
 
 				array_push($ar,array(
 					'id_kelas' => $kelas,
-					'nis_siswa' => $key
+					'nis' => $key
 				));
 			}
 
-		$this->db->update_batch('siswa',$ar,'nis_siswa');
+		$this->db->update_batch('siswa',$ar,'nis');
 		}
 
 		redirect($this->uri->segment(1),'refresh');

@@ -3,7 +3,7 @@
 $today = date('Y-m-d');
 
 // Kas masuk hari ini: pemasukan lainnya + tagihan siswa lunas
-$pemasukan_today = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pemasukan AS DECIMAL(15,2))), 0) AS total FROM pemasukan WHERE tgl_pemasukan = '$today'")->row()->total ?? 0;
+$pemasukan_today = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pemasukan AS DECIMAL(15,2))), 0) AS total FROM pemasukan p WHERE tgl_pemasukan = '$today' AND NOT EXISTS (SELECT 1 FROM tagihan_siswa ts WHERE ts.id_pemasukan = p.id_pemasukan)")->row()->total ?? 0;
 $tagihan_today = $this->db->query("SELECT COALESCE(SUM(CAST(j.nominal_tagihan AS DECIMAL(15,2))), 0) AS total FROM tagihan_siswa ts JOIN jenis_tagihan j ON ts.kode_tagihan = j.kode_tagihan WHERE ts.status = 'Lunas' AND DATE(ts.tgl_pembayaran) = '$today'")->row()->total ?? 0;
 $kas_masuk_today = $pemasukan_today + $tagihan_today;
 
@@ -11,7 +11,7 @@ $kas_masuk_today = $pemasukan_today + $tagihan_today;
 $kas_keluar_today = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pengeluaran AS DECIMAL(15,2))), 0) AS total FROM pengeluaran WHERE tgl_pengeluaran = '$today'")->row()->total ?? 0;
 
 // Total semua pemasukan dan pengeluaran (saldo akhir kumulatif)
-$total_masuk_all = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pemasukan AS DECIMAL(15,2))), 0) AS total FROM pemasukan")->row()->total ?? 0;
+$total_masuk_all = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pemasukan AS DECIMAL(15,2))), 0) AS total FROM pemasukan p WHERE NOT EXISTS (SELECT 1 FROM tagihan_siswa ts WHERE ts.id_pemasukan = p.id_pemasukan)")->row()->total ?? 0;
 $total_tagihan_all = $this->db->query("SELECT COALESCE(SUM(CAST(j.nominal_tagihan AS DECIMAL(15,2))), 0) AS total FROM tagihan_siswa ts JOIN jenis_tagihan j ON ts.kode_tagihan = j.kode_tagihan WHERE ts.status = 'Lunas'")->row()->total ?? 0;
 $total_keluar_all = $this->db->query("SELECT COALESCE(SUM(CAST(nominal_pengeluaran AS DECIMAL(15,2))), 0) AS total FROM pengeluaran")->row()->total ?? 0;
 $sisa_dana = $total_masuk_all + $total_tagihan_all - $total_keluar_all;

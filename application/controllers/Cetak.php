@@ -148,7 +148,7 @@ class Cetak extends CI_Controller{
       $pdf->Cell(130);
       $pdf->SetFont('TIMES', 'B', 11);
       $pdf->Cell(60, 5, 'Kh.Satibi Salim, M.Pd.I', 0, 1, 'C');
-      $pdf->Output();
+      $pdf->Output('D', 'Laporan_' . $tgl . '.pdf');
     }
 
     function Cetak_periode(){
@@ -219,6 +219,6 @@ class Cetak extends CI_Controller{
         $pdf->Cell(130);
         $pdf->SetFont('TIMES', 'B', 11);
         $pdf->Cell(60, 5, 'Kh.Satibi Salim, M.Pd.I', 0, 1, 'C');
-        $pdf->Output();  
+        $pdf->Output('D', 'Laporan_Periode_' . $awal_tgl . '_to_' . $akhir_tgl . '.pdf');  
     }
 }

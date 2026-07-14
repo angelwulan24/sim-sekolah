@@ -1,0 +1,21 @@
+Array
+(
+    [0] => Array
+        (
+            [id_tagihan] => 2
+            [status] => Lunas
+            [tgl_pembayaran] => 2026-07-10 05:08:15
+            [nama_tagihan] => Study Tour
+            [nominal_tagihan] => 20000
+        )
+
+    [1] => Array
+        (
+            [id_tagihan] => 3
+            [status] => Lunas
+            [tgl_pembayaran] => 2026-07-10 05:08:15
+            [nama_tagihan] => Uang Buku
+            [nominal_tagihan] => 50000
+        )
+
+)

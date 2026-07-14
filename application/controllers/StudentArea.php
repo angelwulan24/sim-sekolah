@@ -42,68 +42,33 @@ class StudentArea extends CI_Controller {
 		$data['student'] = $student;
 		
 		// Year Selection Logic
-		// Default to student's current academic year if no year selected
-		$selected_tahun = $this->input->get('tahun') ? $this->input->get('tahun') : $student->tahun_ajaran;
+		// Default to empty string (All Years) if no year selected (matching admin logic)
+		$selected_tahun = $this->input->get('tahun', true);
 		
 		$data['selected_tahun'] = $selected_tahun;
         
         // Generate academic years for filter (e.g. 2026/2027)
-        $tahun_list = $this->db->query("SELECT DISTINCT j.tahun_ajaran FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan WHERE t.nis_siswa = '$student->nis' ORDER BY j.tahun_ajaran DESC")->result();
+        $tahun_list = $this->db->query("SELECT DISTINCT j.tahun_ajaran FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan WHERE t.nis = '$student->nis' ORDER BY j.tahun_ajaran DESC")->result();
 		$data['tahun_list'] = $tahun_list;
 
-        $current_school_yr = current_school_year();
-
-		// 1. Tagihan Bulanan (SPP) dari database
-		$tagihan_db = $this->db->query("SELECT t.id_tagihan AS id, t.status, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, j.tenggat_waktu, j.tahun_ajaran 
-                                        FROM tagihan_siswa t
-                                        JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan
-                                        WHERE t.nis_siswa = '$student->nis' 
-                                          AND j.tahun_ajaran = '$selected_tahun'
-                                          AND NOT (t.status = 'Belum Lunas' AND j.nama_tagihan LIKE '%SPP%' AND j.tahun_ajaran != '$current_school_yr')
-                                        ORDER BY t.id_tagihan ASC")->result();
-
-		$spp_list = [];
-		foreach($tagihan_db as $t){
-            if (strpos(strtoupper($t->jenis_tagihan), 'SPP') !== false) {
-                $month_label = str_replace('SPP - ', '', $t->jenis_tagihan);
-                $is_lunas = ($t->status == 'Lunas');
-                $tanggal_bayar = ($is_lunas && $t->waktu_bayar) ? date('d-m-Y', strtotime($t->waktu_bayar)) : '-';
-
-                $spp_list[] = (object)[
-                    'tagihan_id' => $t->id,
-                    'spp_id' => null,
-                    'jenis' => 'SPP',
-                    'nominal' => $t->nominal,
-                    'label_bayar' => $month_label,
-                    'nama_tagihan' => $t->jenis_tagihan,
-                    'status' => $is_lunas ? 'Lunas' : 'Belum Lunas',
-                    'tanggal_bayar' => $tanggal_bayar,
-                    'tempat_bayar' => $is_lunas ? 'Admin/Loket' : '-'
-                ];
-            }
-		}
-		$data['tagihan_bulanan'] = $spp_list;
-
-        // 2. Tagihan Lainnya (Non-SPP dari database)
-		$tagihan_lainnya = [];
-        foreach($tagihan_db as $t){
-            if (strpos(strtoupper($t->jenis_tagihan), 'SPP') === false) {
-                // Simplified status check
-                $tagihan_lainnya[] = (object)[
-                    'tagihan_id' => $t->id,
-                    'jenis' => explode(' ', $t->jenis_tagihan)[0],
-                    'nama_tagihan' => $t->jenis_tagihan,
-                    'nominal' => $t->nominal,
-                    'label_bayar' => $t->tahun_ajaran,
-                    'tenggat_waktu' => !empty($t->tenggat_waktu) ? date('d-m-Y', strtotime($t->tenggat_waktu)) : '-',
-                    'status' => $t->status,
-                    'tanggal_bayar' => ($t->status == 'Lunas') ? ($t->waktu_bayar ? date('d-m-Y', strtotime($t->waktu_bayar)) : '-') : '-',
-                    'tempat_bayar' => ($t->status == 'Lunas') ? 'Admin/Loket' : '-'
-                ];
-            }
+        $where_tahun = "";
+        if (!empty($selected_tahun)) {
+            $where_tahun = " AND j.tahun_ajaran = '$selected_tahun'";
         }
 
-		$data['tagihan_lainnya'] = $tagihan_lainnya;
+        // Ambil Tagihan SPP (matching admin logic)
+        $data['tagihan_spp'] = $this->db->query("SELECT t.id_tagihan AS id, t.status, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, j.tahun_ajaran, j.tenggat_waktu 
+            FROM tagihan_siswa t 
+            JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan 
+            WHERE t.nis = '$student->nis' AND j.nama_tagihan LIKE '%SPP%' $where_tahun 
+            ORDER BY t.id_tagihan ASC")->result();
+        
+        // Ambil Tagihan Lainnya (selain SPP, matching admin logic)
+        $data['tagihan_lainnya'] = $this->db->query("SELECT t.id_tagihan AS id, t.status, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, j.tahun_ajaran, j.tenggat_waktu 
+            FROM tagihan_siswa t 
+            JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan 
+            WHERE t.nis = '$student->nis' AND j.nama_tagihan NOT LIKE '%SPP%' $where_tahun 
+            ORDER BY t.id_tagihan ASC")->result();
 		
 		// For sidebar active state
 		$this->parents = 'Tagihan'; 
@@ -195,14 +160,41 @@ class StudentArea extends CI_Controller {
 			$gross_amount = $status['gross_amount'];
 
 			if ($trans_status == 'capture' || $trans_status == 'settlement') {
-				$this->_payment_success($order_id, $gross_amount);
-				echo json_encode(['status' => 'success', 'message' => 'Payment verified']);
+				$tagihan_ids = $this->_payment_success($order_id, $gross_amount);
+				echo json_encode([
+					'status' => 'success', 
+					'message' => 'Payment verified',
+					'ids' => implode(',', $tagihan_ids)
+				]);
 			} else {
 				echo json_encode(['status' => 'pending', 'message' => 'Status: ' . $trans_status]);
 			}
 		} else {
 			echo json_encode(['error' => 'Failed to check status']);
 		}
+	}
+
+	public function pay_confirm_direct(){
+		$items_raw = $this->input->post('items');
+		$items = json_decode($items_raw);
+		
+		if(empty($items)){
+			echo json_encode(['error' => 'Tidak ada item terpilih']);
+			return;
+		}
+
+		$time = date('Y-m-d H:i:s');
+		$processed_ids = [];
+		foreach($items as $it){
+			$this->_process_single_tagihan($it->tagihan_id, $time);
+			$processed_ids[] = $it->tagihan_id;
+		}
+
+		echo json_encode([
+			'status' => true,
+			'message' => 'Pembayaran berhasil dikonfirmasi',
+			'ids' => implode(',', $processed_ids)
+		]);
 	}
 
 	public function notification(){
@@ -226,6 +218,7 @@ class StudentArea extends CI_Controller {
 			$status = $this->midtransgateway->status($order_id);
 			$time = date('Y-m-d H:i:s');
 
+			$tagihan_ids = [];
 			// 1. Check custom_field1 (Our primary way for bulk payments)
 			if(isset($status['custom_field1']) && !empty($status['custom_field1'])){
 				$tagihan_ids = explode(',', $status['custom_field1']);
@@ -240,47 +233,73 @@ class StudentArea extends CI_Controller {
 					if(count($parts) >= 2){
 						$tagihan_id = $parts[1];
 						$this->_process_single_tagihan($tagihan_id, $time);
+						$tagihan_ids[] = $tagihan_id;
 					}
 				}
 			}
+			return $tagihan_ids;
 		} catch (\Throwable $th) {
-			//throw $th;
+			return [];
 		}
 	}
 
 	private function _process_single_tagihan($tagihan_id, $time){
-		$tagihan = $this->db->query("SELECT t.id_tagihan, t.nis_siswa, t.status, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal FROM tagihan_siswa t JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan WHERE t.id_tagihan = '$tagihan_id'")->row();
+		$tagihan = $this->db->query("SELECT t.id_tagihan, t.nis, t.status, s.nama_siswa AS name, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal 
+            FROM tagihan_siswa t 
+            JOIN siswa s ON t.nis = s.nis
+            JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan 
+            WHERE t.id_tagihan = '$tagihan_id'")->row();
 		if($tagihan && $tagihan->status != 'Lunas'){
+            // Insert record into pemasukan table to satisfy relational design requirements
+            $insert_pemasukan = array(
+                'tgl_pemasukan' => date('Y-m-d', strtotime($time)),
+                'ket_pemasukan' => 'Pembayaran ' . $tagihan->jenis_tagihan . ' - ' . $tagihan->name,
+                'nominal_pemasukan' => $tagihan->nominal
+            );
+            $this->db->insert('pemasukan', $insert_pemasukan);
+            $id_pemasukan = $this->db->insert_id();
+
 			// Update Tagihan
 			$this->db->where('id_tagihan', $tagihan_id);
-			$this->db->update('tagihan_siswa', ['status' => 'Lunas', 'tgl_pembayaran' => $time]);
+			$this->db->update('tagihan_siswa', ['status' => 'Lunas', 'tgl_pembayaran' => $time, 'id_pemasukan' => $id_pemasukan]);
 
 			$this->M_General->update_kas('kas_masuk', $tagihan->nominal);
 
             // Send WhatsApp Notification (Triggered for both SPP and Other Bills)
-            $this->wa_gateway->send_payment_confirmation($tagihan->nis_siswa, $tagihan->jenis_tagihan, $tagihan->nominal, 'Midtrans / Transfer Online');
+            $this->wa_gateway->send_payment_confirmation($tagihan->nis, $tagihan->jenis_tagihan, $tagihan->nominal, 'Online');
 		}
 	}
 	public function print_tagihan($id){
 		$this->load->library('pdf');
 		$this->load->helper('data');
 		
-		$tagihan = $this->db->query("
-			SELECT t.id_tagihan AS id, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, si.nama_siswa AS name, si.nis AS nis, k.nama_kelas, t.tgl_pembayaran
-			FROM tagihan_siswa t
-			JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan
-			JOIN siswa si ON t.nis_siswa = si.nis 
-			LEFT JOIN kelas k ON si.id_kelas = k.id_kelas
-			WHERE t.id_tagihan = '$id'
-		")->row();
+		if (strpos($id, ',') !== false) {
+			$tagihan = $this->db->query("
+				SELECT t.id_tagihan AS id, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, si.nama_siswa AS name, si.nis AS nis, k.nama_kelas, t.tgl_pembayaran
+				FROM tagihan_siswa t
+				JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan
+				JOIN siswa si ON t.nis = si.nis 
+				LEFT JOIN kelas k ON si.id_kelas = k.id_kelas
+				WHERE t.id_tagihan IN ($id)
+			")->result();
+		} else {
+			$tagihan = $this->db->query("
+				SELECT t.id_tagihan AS id, t.tgl_pembayaran AS waktu_bayar, j.nama_tagihan AS jenis_tagihan, j.nominal_tagihan AS nominal, si.nama_siswa AS name, si.nis AS nis, k.nama_kelas, t.tgl_pembayaran
+				FROM tagihan_siswa t
+				JOIN jenis_tagihan j ON t.kode_tagihan = j.kode_tagihan
+				JOIN siswa si ON t.nis = si.nis 
+				LEFT JOIN kelas k ON si.id_kelas = k.id_kelas
+				WHERE t.id_tagihan = '$id'
+			")->result();
+		}
 
-		if(!$tagihan) {
+		if(count($tagihan) == 0) {
 			show_error('Data pembayaran tidak ditemukan');
 			return;
 		}
 
-		$t_first = $tagihan;
-		$tagihan_list = [$tagihan];
+		$t_first = $tagihan[0];
+		$tagihan_list = $tagihan;
 
 		$pdf = new FPDF('L', 'mm', 'A5');
         $pdf->SetMargins(10, 8, 10);
@@ -400,6 +419,6 @@ class StudentArea extends CI_Controller {
         $pdf->Cell(0, 3.5, 'Catatan :', 0, 1);
         $pdf->Cell(0, 3.5, '- Disimpan sebagai bukti pembayaran yang SAH', 0, 1);
 		
-		$pdf->Output();
+		$pdf->Output('D', 'Bukti_Pembayaran_' . str_replace(' ', '_', $t_first->name) . '_' . date('d-m-Y', strtotime($t_first->tgl_pembayaran)) . '.pdf');
 	}
 }

@@ -56,7 +56,7 @@
 
 <div class="modal fade" id="modal-print">
     <div class="modal-dialog">
-        <?= form_open('Laporan/Cetak', 'class="modal-content" id="form-print" target="_blank"') ?>
+        <?= form_open('Laporan/Cetak', 'class="modal-content" id="form-print"') ?>
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -297,7 +297,7 @@
                     // Success alert using SweetAlert2
                     Swal({
                         title: 'Berhasil!',
-                        text: 'Laporan sedang dicetak dan akan terbuka di tab baru.',
+                        text: 'Laporan sedang diunduh ke perangkat Anda.',
                         type: 'success',
                         timer: 2000,
                         showConfirmButton: false

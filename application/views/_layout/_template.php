@@ -334,5 +334,42 @@ if ($masuk['role'] == 3) {
         </script>
         <?php endif; ?>
 
+        <!-- Login Success & Logout Confirmation SweetAlerts -->
+        <?php if ($this->session->flashdata('login_success')): ?>
+        <script>
+            $(document).ready(function() {
+                Swal({
+                    title: 'Login Berhasil!',
+                    text: 'Selamat datang kembali di SIM Sekolah.',
+                    type: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+        <?php endif; ?>
+        <script>
+            $(document).ready(function() {
+                $(document).on('click', '.btn-logout-confirm', function(e) {
+                    e.preventDefault();
+                    var logoutUrl = $(this).attr('href');
+                    Swal({
+                        title: 'Konfirmasi Keluar',
+                        text: 'Apakah Anda yakin ingin keluar dari sistem?',
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, Keluar!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.value) {
+                            window.location.href = logoutUrl;
+                        }
+                    });
+                });
+            });
+        </script>
+
     </body>
 </html>
